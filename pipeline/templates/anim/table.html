@@ -1,0 +1,163 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- table(比較矩陣):cols = 表頭(≤4 欄,首欄為項目名),rows ≤5 列;格子 yes(綠勾)/ no(紅叉)/ text(數字或短字,白)。
+     勾叉用 SVG 筆畫畫出(不依賴字型字形)。hi = {row:k} 或 {col:j}:金色外框,不改填色。資料由 anim_web.table_data 產生。
+     level = 已顯示的列數(表頭隨標題出現);prev -> shown 為這一段播的範圍。放不下:字級 52 -> 44、格內換行,仍超出寫入 problems。
+     暴露的 id:#title、#head、#row-k、#hi。 -->
+<style>
+.abs.cell { font-family: var(--font-bold); line-height: 1.2; color: var(--text); text-align: center; white-space: normal; display: flex; align-items: center; justify-content: center; opacity: 0; }
+.cell.name { color: var(--label); text-align: left; justify-content: flex-start; }
+.cell.hd { color: var(--text2); opacity: 1; }
+.cell.hd.name { color: var(--text2); }
+.rl { height: 2px; background: var(--line); opacity: 0; }
+.rl.hd { height: 3px; background: var(--text2); opacity: 1; }
+.hiframe { box-sizing: border-box; border: 4px solid var(--accent); border-radius: 18px; opacity: 0; }
+.cell svg { display: block; overflow: visible; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const P = d.W <= d.H;       // 直式(原生畫面窗 1080x1080):欄數 <= 3
+  const probs = [], padX = px("--pad-x"), padR = px("--pad-r"), NS = "http://www.w3.org/2000/svg";
+  const mk = (cls, txt, css, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  const C = d.cols.length, R = d.rows.length;
+  if (P && C > 3) probs.push(`直式表格最多 3 欄(目前 ${C} 欄),請減欄或改橫式`);
+
+  const title = mk("title", d.title, {left: padX + "px", top: px("--title-top") + "px"});
+  title.id = "title";
+  if (box(title).right > d.W - padR) probs.push("標題超出右邊界,請縮短");
+  const rule = mk("rule", null, {left: padX + "px", top: (box(title).bottom + 10) + "px"});
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src);
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+
+  // ---- 建格子(尺寸稍後依字級決定)
+  const mkIcon = kind => {
+    const s = document.createElementNS(NS, "svg");
+    s.setAttribute("width", 52); s.setAttribute("height", 52); s.setAttribute("viewBox", "0 0 52 52");
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", kind === "yes" ? "M7 28 L21 42 L46 10" : "M10 10 L42 42 M42 10 L10 42");
+    p.setAttribute("fill", "none"); p.setAttribute("stroke", kind === "yes" ? V("--pos") : V("--neg"));
+    p.setAttribute("stroke-width", 7); p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round");
+    p.setAttribute("pathLength", 1); p.style.strokeDasharray = 1; p.style.strokeDashoffset = 0;
+    s.appendChild(p);
+    return {s, p};
+  };
+  const hdr = [mk("cell hd name", d.corner || "")].concat(d.cols.map(c => mk("cell hd", c)));
+  const hdrRule = mk("rl hd", null, {});
+  const body = d.rows.map((r, k) => {
+    const name = mk("cell name", r.name);
+    const cells = r.cells.map(c => {
+      const e = mk("cell", c.k === "text" ? c.t : null);
+      let ic = null;
+      if (c.k !== "text") { ic = mkIcon(c.k); e.appendChild(ic.s); }
+      return {e, ic};
+    });
+    const rl = mk("rl", null, {});
+    name.id = "row-" + k;
+    return {name, cells, rl};
+  });
+
+  // ---- 版面:字級 52 -> 44;首欄寬依最寬項目名(上限 520),其餘欄均分;格內可換行;放不下才回報
+  const tableW = d.W - padX - padR, top0 = Math.max(px("--content-top"), box(rule).bottom + 28), bottom = d.src ? px("--content-bottom-src") : px("--content-bottom");
+  const avail = bottom - top0 - 8;
+  let fs = 52, nameW, colW, rowH, hdrH, total;
+  const natural = e => { const w0 = e.style.width, ws = e.style.whiteSpace; e.style.width = "auto"; e.style.whiteSpace = "nowrap"; const w = box(e).width; e.style.width = w0; e.style.whiteSpace = ws; return w; };
+  const all = [...hdr, ...body.flatMap(o => [o.name, ...o.cells.map(c => c.e)])];
+  const measure = () => {
+    all.forEach(e => { e.style.fontSize = fs + "px"; });
+    nameW = Math.min(P ? 300 : 520, Math.max(P ? 180 : 220, Math.max(...body.map(o => natural(o.name)), natural(hdr[0])) + 40));
+    colW = (tableW - nameW) / C;
+    const setW = (e, w) => { e.style.width = (w - 24) + "px"; e.style.height = "auto"; };
+    setW(hdr[0], nameW); hdr.slice(1).forEach(e => setW(e, colW));
+    body.forEach(o => { setW(o.name, nameW); o.cells.forEach(c => setW(c.e, colW)); });
+    hdrH = Math.max(Math.round(fs * 1.6), Math.max(...hdr.map(e => box(e).height)) + 28);
+    rowH = body.map(o => Math.max(Math.round(fs * 1.6), Math.max(box(o.name).height, ...o.cells.map(c => box(c.e).height)) + 28));
+    total = hdrH + rowH.reduce((a, b) => a + b, 0);
+  };
+  measure();
+  while (total > avail && fs > 44) { fs -= 4; measure(); }
+  if (total > avail) probs.push(`表格高度 ${Math.round(total)}px 超過可用 ${Math.round(avail)}px(文字太長,請縮短或拆表)`);
+  // 列數少時把列拉高,至多 1.9 倍字高
+  const maxRow = Math.round(fs * 1.9);
+  const extra = Math.max(0, Math.min((avail - total) / (R + 1), maxRow - Math.min(...rowH, hdrH)));
+  const y0 = top0 + 8 + Math.max(0, (avail - total - extra * (R + 1)) * 0.25);
+  hdrH += extra; for (let k = 0; k < R; k++) rowH[k] += extra;
+
+  // ---- 定位
+  const x0 = padX, xs = [x0 + 12].concat(Array.from({length: C}, (_, j) => x0 + nameW + colW * j + 12));
+  const place = (e, x, y, h) => Object.assign(e.style, {left: x + "px", top: y + "px", height: h + "px"});
+  hdr.forEach((e, j) => place(e, xs[j], y0, hdrH));
+  Object.assign(hdrRule.style, {left: x0 + "px", top: (y0 + hdrH - 1) + "px", width: tableW + "px"});
+  const rowY = [];
+  let y = y0 + hdrH;
+  body.forEach((o, k) => {
+    rowY.push(y);
+    place(o.name, xs[0], y, rowH[k]);
+    o.cells.forEach((c, j) => place(c.e, xs[j + 1], y, rowH[k]));
+    Object.assign(o.rl.style, {left: x0 + "px", top: (y + rowH[k] - 1) + "px", width: tableW + "px"});
+    y += rowH[k];
+  });
+  const yEnd = y;
+  if (yEnd > bottom + 1) probs.push(`表格下緣 ${Math.round(yEnd)}px 超過 ${bottom}px`);
+
+  // ---- hi 外框(金色,不改填色):列 = 整列含首欄,欄 = 表頭到最後一列
+  let hi = null, hiRow = null;
+  if (d.hi && d.hi.row != null && d.hi.row < R) {
+    hiRow = d.hi.row;
+    hi = mk("hiframe", null, {left: (x0 - 8) + "px", top: (rowY[hiRow] + 2) + "px", width: (tableW + 16) + "px", height: (rowH[hiRow] - 4) + "px"});
+  } else if (d.hi && d.hi.col != null && d.hi.col < C) {
+    hi = mk("hiframe", null, {left: (x0 + nameW + colW * d.hi.col + 4) + "px", top: (y0 - 6) + "px", width: (colW - 8) + "px", height: (yEnd - y0 + 12) + "px"});
+  } else if (d.hi) probs.push("hi 須為 {row: 0..列數-1} 或 {col: 0..欄數-1}");
+  if (hi) hi.id = "hi";
+
+  // ---- 時間軸
+  const tl = gsap.timeline({paused: true});
+  const head = [rule, src, ...hdr, hdrRule].filter(Boolean);
+  if (d.title_in) {
+    tl.from(title, {opacity: 0, y: 16, duration: 0.4, ease: "power2.out"}, 0);
+    tl.from(head, {opacity: 0, duration: 0.4, ease: "power2.out"}, 0.1);
+  }
+  let tEnd = 0;       // 最後一列出現完的時間(hi 外框接在後面)
+  body.forEach((o, k) => {
+    if (k >= d.shown) return;
+    const els = [o.name, ...o.cells.map(c => c.e), o.rl];
+    if (k < d.prev) { tl.set(els, {opacity: 1}, 0); return; }
+    const at = d.lead + d.gap * (k - d.prev);
+    tl.fromTo(els, {opacity: 0, y: 14}, {opacity: 1, y: 0, duration: 0.35, ease: "power2.out"}, at);
+    o.cells.forEach(c => { if (c.ic) tl.fromTo(c.ic.p, {strokeDashoffset: 1}, {strokeDashoffset: 0, duration: 0.3, ease: "power2.out"}, at + 0.15); });
+    tEnd = Math.max(tEnd, at + d.row_s);
+    if (k === hiRow) tEnd = at + d.row_s;
+  });
+  if (hi) {
+    const visible = hiRow != null ? hiRow < d.shown : d.shown >= R;
+    const done = hiRow != null ? hiRow < d.prev : d.prev >= R;
+    if (done) tl.set(hi, {opacity: 1}, 0);
+    else if (visible) {
+      const at = hiRow != null ? d.lead + d.gap * (hiRow - d.prev) + d.row_s - 0.1 : tEnd - 0.1;
+      tl.fromTo(hi, {opacity: 0, scale: 0.96}, {opacity: 1, scale: 1, duration: d.hi_s, ease: "back.out(1.7)"}, at);
+    }
+  }
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);     // 補到段長(之後定格)
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

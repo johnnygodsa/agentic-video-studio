@@ -1,0 +1,19 @@
+# tts_env_chattts(Python 3.10;Colab/Linux):主程式 build.py --tts-only + tts_cosy3.py 品管(聲紋 ECAPA、faster-whisper 字詞時間戳)
+# 本機 venv 混了系統套件(include-system-site-packages),只列 pipeline 配音路徑實際 import 的;版本取本機 freeze,torch 換 Linux cu124
+# 不裝:ChatTTS(舊引擎)、g2pw(G2PW 第三意見,缺了只警告)、playwright(動畫渲染,Colab 不渲染)
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0+cu124
+torchaudio==2.6.0+cu124
+numpy==2.2.6
+scipy==1.15.3
+pillow==11.2.1
+soundfile==0.13.1
+tqdm==4.67.3
+opencc-python-reimplemented==0.1.7
+pypinyin==0.55.0
+jieba==0.42.1
+speechbrain==1.1.1
+huggingface-hub==0.35.0
+faster-whisper==1.2.1
+ctranslate2==4.6.0
+edge-tts==7.2.8

@@ -1,0 +1,126 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- versus(左右對照):兩個填色面板,各有欄標題(底下短橫條)與 1..2 行內容,可帶 ✓ / ✗ 標記(mark yes / no)。
+     資料由 anim_web.versus_data 產生。level:0 = 標題 + 兩欄標題、1 = 左欄內容、2 = 右欄內容;
+     prev -> shown 為這一段播的範圍(prev 以前在 t=0 已是終態;prev == shown = 凍結)。
+     暴露的 id:#title、#panel-s、#head-s、#body-s、#mark-s(s = 0 左 / 1 右)。 -->
+<style>
+.panel { border-radius: 26px; }
+.head { font-family: var(--font-bold); line-height: 1.2; color: var(--text); }
+.hbar { height: 8px; background: var(--text2); transform-origin: 50% 50%; }
+.body { font-family: var(--font-bold); color: var(--text); text-align: center; white-space: normal; opacity: 0; }
+.body div { text-wrap: balance; }
+.mark { opacity: 0; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const probs = [], padX = px("--pad-x");
+  const mk = (cls, txt, css, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+
+  // ---- 標題、短橫條、來源
+  const title = mk("title", d.title, {left: padX + "px", top: px("--title-top") + "px"});
+  title.id = "title";
+  const rule = mk("rule", null, {left: padX + "px", top: (box(title).bottom + 10) + "px"});
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src);
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+
+  // ---- 面板與內容:內文字級 72 -> 56,放不下再換行(text-wrap balance)
+  // 直式(畫面窗 1080x1080):左右兩格改上下兩格(面板寬 = 安全框 860),欄標題在上、✓ / ✗ 在左、內容在右,字級 64 -> 44
+  const P = d.W <= d.H;
+  const PX0 = P ? padX : 96, PW = P ? d.W - padX - px("--pad-r") : d.W / 2 - PX0 - 48;       // 左欄 x 96..(中線 -48);右欄鏡射
+  const py0 = P ? Math.max(px("--content-top"), box(rule).bottom + 28) : px("--content-top"), py1 = d.src ? px("--content-bottom-src") : px("--content-bottom");
+  const PGAP = 24, PH = P ? Math.floor((py1 - py0 - PGAP) / 2) : py1 - py0;
+  const inner = PW - 90, hasMark = !!(d.left.mark || d.right.mark);
+  const MK = P ? 88 : 108, bodyW = P ? PW - 40 - (hasMark ? MK + 28 : 0) - 40 : inner;
+  const zoneTop = P ? 138 : (hasMark ? 313 : 178), zoneBot = (P ? PH : py1 - py0) - 20;      // 直式:相對面板上緣
+  const sides = [d.left, d.right].map((sd, s) => {
+    const x0 = P ? PX0 : (s === 0 ? PX0 : d.W - PX0 - PW), cx = x0 + PW / 2, ys = P ? py0 + s * (PH + PGAP) : py0;
+    const panel = mk("panel", null, {left: x0 + "px", top: ys + "px", width: PW + "px", height: PH + "px",
+                                     background: rgba(V("--panel"), 0.92)});
+    panel.id = "panel-" + s;
+    let hs = 66;
+    const head = mk("head", sd.head, {fontSize: hs + "px"});
+    while (hs > 48 && box(head).width > inner) { hs -= 2; head.style.fontSize = hs + "px"; }
+    head.id = "head-" + s;
+    const hb = box(head);
+    Object.assign(head.style, {left: (cx - hb.width / 2) + "px", top: (ys + (P ? 46 : 88) - hb.height / 2) + "px"});
+    const bar = mk("hbar", null, {left: (cx - 105) + "px", top: (ys + (P ? 98 : 142)) + "px", width: "210px"});
+    const bx = P ? x0 + 40 + (hasMark ? MK + 28 : 0) : cx - inner / 2;
+    const body = mk("body", null, {left: bx + "px", width: bodyW + "px", whiteSpace: "normal"});   // 內聯覆寫 tokens 的 .abs nowrap
+    body.id = "body-" + s;
+    sd.lines.forEach(t => { const r = document.createElement("div"); r.textContent = t; r.style.lineHeight = "1.34"; body.appendChild(r); });
+    let mark = null;
+    if (sd.mark) {
+      const yes = sd.mark === "yes", col = yes ? V("--pos") : V("--neg");
+      mark = mk("mark", null, P ? {left: (x0 + 40) + "px", top: (ys + (zoneTop + zoneBot) / 2 - MK / 2) + "px", width: MK + "px", height: MK + "px"}
+                               : {left: (cx - 54) + "px", top: (ys + 246 - 54) + "px", width: "108px", height: "108px"});
+      mark.id = "mark-" + s;
+      mark.innerHTML = `<svg width="${MK}" height="${MK}" viewBox="-54 -54 108 108"><circle r="52" fill="#fff"/><circle r="47" fill="${col}"/>` +
+        (yes ? `<polyline points="-24,2 -7,20 26,-18" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`
+             : `<path d="M-20,-20L20,20M-20,20L20,-20" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/>`) + `</svg>`;
+    }
+    return {panel, head, bar, body, mark, ys};
+  });
+  let fit = P ? 64 : 72;                                   // 兩欄共用字級:放得下的最大值
+  const fitMin = P ? 44 : 56;
+  for (; fit >= fitMin; fit -= 2) {
+    sides.forEach(o => { o.body.style.fontSize = fit + "px"; });
+    if (sides.every(o => box(o.body).height <= zoneBot - zoneTop)) break;
+  }
+  fit = Math.max(fitMin, fit);
+  sides.forEach((o, s) => {
+    o.body.style.fontSize = fit + "px";
+    const h = box(o.body).height;
+    o.body.style.top = (o.ys + (zoneTop + zoneBot) / 2 - h / 2) + "px";
+    if (h > zoneBot - zoneTop + 4) probs.push(`${P ? (s ? "下" : "上") : (s ? "右" : "左")}${P ? "格" : "欄"}內容 ${Math.round(h)}px 高,放不下 ${zoneBot - zoneTop}px`);
+  });
+
+  // ---- 時間軸
+  const tl = gsap.timeline({paused: true});
+  if (d.title_in) {
+    tl.from(title, {opacity: 0, y: 16, duration: 0.4, ease: "power2.out"}, 0);
+    tl.from([rule, src].filter(Boolean), {opacity: 0, duration: 0.4, ease: "power2.out"}, 0.1);
+    sides.forEach(o => {
+      tl.from([o.panel, o.head], {opacity: 0, y: 20, duration: 0.35, ease: "power3.out"}, 0.15);
+      tl.from(o.bar, {scaleX: 0, duration: 0.35, ease: "power3.out"}, 0.15);
+    });
+  }
+  sides.forEach((o, s) => {
+    const lvl = s + 1;
+    if (lvl > d.shown) return;
+    const body = [o.body];
+    if (lvl <= d.prev) {
+      tl.set(body, {opacity: 1}, 0);
+      if (o.mark) tl.set(o.mark, {opacity: 1}, 0);
+      return;
+    }
+    const t0 = (d.prev <= 0 ? d.head_s : d.lead) + d.step_s * (lvl - Math.max(d.prev, 0) - 1);
+    tl.fromTo(o.body, {opacity: 0, y: 18}, {opacity: 1, y: 0, duration: 0.3, ease: "power3.out"}, t0);
+    if (o.mark) tl.fromTo(o.mark, {opacity: 0, scale: 0.05}, {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.7)"}, t0 + 0.2);
+  });
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

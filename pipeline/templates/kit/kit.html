@@ -1,0 +1,221 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- 動態小件(kit;計畫 PLAN_動態小件與圖表 §3):依資料組小件,透明底,由 anim_web 逐格 seek 截圖。
+     d = {size:[w,h], vis:[x0,y0,x1,y1](頁面內成片可見區,字幕帶以上), items:[{type, rect?:[x,y,w,h], el?, t, …}],
+          base?:{url,x,y,w,h}(zoom 的來源畫面), rects?:{"#id":[x,y,w,h]}(el 目標,由 anim_web 量圖表頁)}
+     顏色只用 tokens.css;動態只用 ease-out / ease-back;禁光暈、霓虹、循環彈跳。 -->
+<style>
+svg.k { position: absolute; left: 0; top: 0; overflow: visible; }
+.kabs { position: absolute; white-space: nowrap; }
+.kpop { font-family: var(--font-bold); color: var(--accent); line-height: 1.1; paint-order: stroke fill;
+        -webkit-text-stroke: 8px rgba(14, 12, 16, 0.85); transform-origin: 50% 50%; }
+.kbadge { font-family: var(--font-bold); font-size: 56px; line-height: 80px; height: 80px; padding: 0 26px; border-radius: 16px;
+          color: var(--on-series); background: var(--accent); transform-origin: 0% 100%; box-sizing: border-box; text-align: center; }
+.klower { left: 0; bottom: 0; padding: 14px 28px 18px; background: var(--panel); border-radius: 10px; }
+.klower .m { font-family: var(--font-bold); font-size: 48px; line-height: 1.2; color: var(--text); }
+.klower .s { font-family: var(--font-reg); font-size: 36px; line-height: 1.25; color: var(--text2); }
+.klower .u { height: 4px; margin-top: 10px; background: var(--accent); transform-origin: 0% 50%; }
+.klens { border-radius: 50%; box-sizing: border-box; border: 5px solid var(--accent); background-color: var(--panel);
+         background-repeat: no-repeat; background-origin: border-box; }
+.kspot { border-radius: 18px; box-shadow: 0 0 0 6000px rgba(0, 0, 0, var(--dim)); }
+.kprog { font-family: var(--font-reg); font-size: 44px; line-height: 1.2; color: var(--text2); }
+</style></head><body><div id="stage"></div>
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const tok = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const UNDER = "rgba(14, 12, 16, 0.55)";        // 線條下的深色描邊(不模糊,不是光暈):白底截圖上也看得到金線
+function sv(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e); return e;
+}
+function div(cls, parent, text) {
+  const e = document.createElement("div"); e.className = cls;
+  if (text != null) e.textContent = text;
+  parent.appendChild(e); return e;
+}
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function center(r) { return [r[0] + r[2] / 2, r[1] + r[3] / 2]; }
+// 朝可見區中心的對角方向(箭頭出發、放大鏡滑出都往空的那一側)
+function towardCenter(d, r) {
+  const [cx, cy] = center(r), vx = (d.vis[0] + d.vis[2]) / 2, vy = (d.vis[1] + d.vis[3]) / 2;
+  const sx = cx > vx ? -1 : 1, sy = cy > vy ? -1 : 1;
+  return [0.8 * sx, 0.6 * sy];
+}
+function dirOf(name) {
+  const m = {tl: [-0.8, -0.6], tr: [0.8, -0.6], bl: [-0.8, 0.6], br: [0.8, 0.6], l: [-1, 0], r: [1, 0], t: [0, -1], b: [0, 1]};
+  return m[name];
+}
+// 讀數字:前綴 / 數字 / 後綴(「US$5.99」→ US$ + 5.99;沒有數字回傳 null)
+function parseNum(s) {
+  const m = String(s).match(/^(\D*?)(-?\d[\d,]*(?:\.\d+)?)(.*)$/);
+  if (!m) return null;
+  const raw = m[2].replace(/,/g, ""), dec = (raw.split(".")[1] || "").length;
+  return {pre: m[1], val: parseFloat(raw), dec, comma: m[2].includes(","), post: m[3]};
+}
+function fmtNum(p, v) {
+  let s = v.toFixed(p.dec);
+  if (p.comma) { const [a, b] = s.split("."); s = a.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (b ? "." + b : ""); }
+  return p.pre + s + p.post;
+}
+
+const KIT = {
+  callout(it, tl, ctx) {
+    const p = it.pad ?? 12, [x, y, w, h] = it.rect, sw = it.width ?? 3;
+    const a = {x: x - p, y: y - p, width: w + 2 * p, height: h + 2 * p, rx: 16, ry: 16, fill: "none",
+               pathLength: 1, "stroke-dasharray": 1, "stroke-dashoffset": 1};
+    const u = sv("rect", {...a, stroke: UNDER, "stroke-width": sw + 4}, ctx.svg);
+    const r = sv("rect", {...a, stroke: tok("--accent"), "stroke-width": sw}, ctx.svg);
+    tl.to([u, r], {attr: {"stroke-dashoffset": 0}, duration: 0.5, ease: "power2.out"}, it.t);   // 從左上角順時針畫出
+  },
+  arrow(it, tl, ctx) {
+    // 位置由 kit.py layout 算好(it.tip 尖端 / it.tail 箭尾 / it.u 朝外單位向量:避開障礙物);沒有時退回舊算法
+    let tx, ty, sx, sy, ux, uy;
+    if (it.tip && it.tail) {
+      [tx, ty] = it.tip; [sx, sy] = it.tail; [ux, uy] = it.u;
+    } else {
+      const r = it.rect, [cx, cy] = center(r), gap = it.gap ?? 18, len = it.len ?? 200;
+      [ux, uy] = (it.from && it.from !== "auto" && dirOf(it.from)) || towardCenter(ctx.d, r);
+      const n = Math.hypot(ux, uy); ux /= n; uy /= n;
+      const k = Math.min(ux ? (r[2] / 2 + gap) / Math.abs(ux) : 1e9, uy ? (r[3] / 2 + gap) / Math.abs(uy) : 1e9);
+      tx = cx + ux * k; ty = cy + uy * k; sx = tx + ux * len; sy = ty + uy * len;
+    }
+    const hl = 30, hw = 15, bx = tx + ux * hl, by = ty + uy * hl;   // 箭頭三角:尖端在 (tx, ty)
+    const pts = `${tx},${ty} ${bx - uy * hw},${by + ux * hw} ${bx + uy * hw},${by - ux * hw}`;
+    const g = sv("g", {}, ctx.svg);
+    const ln = {x1: sx, y1: sy, x2: bx, y2: by, "stroke-linecap": "round", pathLength: 1, "stroke-dasharray": 1, "stroke-dashoffset": 1};
+    const l0 = sv("line", {...ln, stroke: UNDER, "stroke-width": 10}, g);
+    const l1 = sv("line", {...ln, stroke: tok("--accent"), "stroke-width": 6}, g);
+    const head = sv("polygon", {points: pts, fill: tok("--accent"), stroke: UNDER, "stroke-width": 2, opacity: 0}, g);
+    tl.to([l0, l1], {attr: {"stroke-dashoffset": 0}, duration: 0.4, ease: "power2.out"}, it.t);
+    tl.to(head, {attr: {opacity: 1}, duration: 0.12, ease: "power1.out"}, it.t + 0.34);
+    if (it.wobble) {       // 箭尾沿箭身方向輕微浮動 +-wobble[0] px、週期 wobble[1] 秒(畫完後到圖層結束;正弦,起訖速度連續)
+      const [amp, per] = it.wobble, t1 = it.t + 0.5, span = Math.max(0.01, (it.hold ? it.t + it.hold : t1) - t1), o = {a: 0};
+      tl.to(o, {a: 2 * Math.PI * span / per, duration: span, ease: "none", onUpdate: () => {
+        const off = amp * Math.sin(o.a);
+        for (const l of [l0, l1]) { l.setAttribute("x1", sx + ux * off); l.setAttribute("y1", sy + uy * off); }
+      }}, t1);
+    }
+  },
+  zoom(it, tl, ctx) {
+    const d = ctx.d, b = d.base;
+    if (!b) { ctx.problems.push("zoom 沒有來源畫面(只支援圖片 / 引言 / 對比鏡頭)"); return; }
+    const r = it.rect, [cx, cy] = center(r), s = it.scale ?? 1.6, R = it.r ?? 170;
+    const [ux, uy] = towardCenter(d, r), dist = R + Math.hypot(r[2], r[3]) * 0.3 + 30;
+    const lx = clamp(cx + ux * dist, d.vis[0] + R + 24, d.vis[2] - R - 24), ly = clamp(cy + uy * dist, d.vis[1] + R + 24, d.vis[3] - R - 8);
+    const e = div("kabs klens", ctx.stage);
+    Object.assign(e.style, {left: `${lx - R}px`, top: `${ly - R}px`, width: `${2 * R}px`, height: `${2 * R}px`,
+      backgroundImage: `url("${b.url}")`, backgroundSize: `${b.w * s}px ${b.h * s}px`,
+      backgroundPosition: `${R - (cx - b.x) * s}px ${R - (cy - b.y) * s}px`});
+    tl.fromTo(e, {x: cx - lx, y: cy - ly, scale: 0.2, opacity: 0},
+              {x: 0, y: 0, scale: 1, opacity: 1, duration: 0.45, ease: "power2.out"}, it.t);
+  },
+  spotlight(it, tl, ctx) {
+    const p = it.pad ?? 16, [x, y, w, h] = it.rect, e = div("kabs kspot", ctx.stage);
+    Object.assign(e.style, {left: `${x - p}px`, top: `${y - p}px`, width: `${w + 2 * p}px`, height: `${h + 2 * p}px`, opacity: 0});
+    e.style.setProperty("--dim", it.dim ?? 0.6);
+    tl.to(e, {opacity: 1, duration: 0.3, ease: "power1.out"}, it.t);
+  },
+  pop(it, tl, ctx) {
+    const e = div("kabs kpop", ctx.stage, it.text), [cx, cy] = center(it.rect);
+    e.style.fontSize = `${it.size ?? 120}px`;
+    const w = e.offsetWidth, h = e.offsetHeight, v = ctx.d.vis;
+    if (it.pos) Object.assign(e.style, {left: `${it.pos[0] + 4}px`, top: `${it.pos[1] + 4}px`});    // kit.py layout 算好的位置(框含 8px 描邊)
+    else Object.assign(e.style, {left: `${clamp(cx - w / 2, v[0] + 96, v[2] - 96 - w)}px`, top: `${clamp(cy - h / 2, v[1] + 40, v[3] - h)}px`});
+    tl.fromTo(e, {scale: 0.4, opacity: 0}, {scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2)"}, it.t);
+  },
+  badge(it, tl, ctx) {
+    const v = ctx.d.vis, r = it.rect, num = parseNum(it.text);
+    const arrow = it.dir === "up" ? "▲ " : it.dir === "down" ? "▼ " : "";
+    const e = div("kabs kbadge", ctx.stage, arrow + it.text);
+    const tone = it.tone || (it.dir === "up" ? "pos" : it.dir === "down" ? "neg" : "accent");
+    e.style.background = tok("--" + tone);
+    if (it.size) { e.style.fontSize = `${it.size}px`; e.style.lineHeight = e.style.height = `${Math.round(it.size * 1.43)}px`; }
+    const w = e.offsetWidth, h = e.offsetHeight;
+    e.style.width = `${w}px`;                                   // 固定終值寬度,count-up 時不跳
+    let x = r[0] + r[2] + 12, y = r[1] - h * 0.35;              // 目標右上角外側
+    if (x + w > v[2] - 40) x = r[0] - 12 - w;
+    if (it.pos) { x = it.pos[0]; y = it.pos[1]; }                 // kit.py layout 算好的位置(外側、避開障礙物)
+    Object.assign(e.style, {left: `${it.pos ? x : clamp(x, v[0] + 40, v[2] - 40 - w)}px`, top: `${it.pos ? y : clamp(y, v[1] + 24, v[3] - h)}px`});
+    tl.fromTo(e, {scale: 0, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.7)"}, it.t);
+    if (num && num.val !== 0) {
+      const o = {v: 0};
+      tl.to(o, {v: num.val, duration: 0.8, ease: "power2.out", onUpdate: () => { e.textContent = arrow + fmtNum(num, o.v); }}, it.t);
+    }
+  },
+  lower(it, tl, ctx) {
+    const v = ctx.d.vis, e = div("kabs klower", ctx.stage);
+    div("m", e, it.text);
+    if (it.sub) div("s", e, it.sub);
+    const u = div("u", e);
+    const ls = it.ls ?? 1;
+    if (ls !== 1) {            // 縮小一級(layout 放不下時)
+      e.style.padding = `${14 * ls}px ${28 * ls}px ${18 * ls}px`;
+      e.querySelector(".m").style.fontSize = `${Math.round(48 * ls)}px`;
+      const sub = e.querySelector(".s"); if (sub) sub.style.fontSize = `${Math.round(36 * ls)}px`;
+    }
+    const x = it.rect ? it.rect[0] : v[0] + 96, yb = it.rect ? it.rect[1] + it.rect[3] : v[3] - 40;
+    if (it.pos) Object.assign(e.style, {left: `${it.pos[0]}px`, top: `${it.pos[1]}px`, bottom: "auto"});
+    else Object.assign(e.style, {left: `${x}px`, top: `${yb - e.offsetHeight}px`, bottom: "auto"});
+    tl.fromTo(e, {x: -80, opacity: 0}, {x: 0, opacity: 1, duration: 0.4, ease: "power2.out"}, it.t);
+    tl.fromTo(u, {scaleX: 0}, {scaleX: 1, duration: 0.35, ease: "power2.out"}, it.t + 0.25);
+  },
+  tick(it, tl, ctx) { KIT._mark(it, tl, ctx, true); },
+  cross(it, tl, ctx) { KIT._mark(it, tl, ctx, false); },
+  _mark(it, tl, ctx, ok) {
+    const r = it.rect, S = it.size ?? clamp(r[3] * 1.2, 56, 120), [cx, cy] = center(r);
+    const side = it.side ?? "right";
+    const mx = side === "left" ? r[0] - 16 - S / 2 : side === "center" ? cx : r[0] + r[2] + 16 + S / 2;
+    const o = [mx - S / 2, cy - S / 2];
+    const ds = ok ? [`M${o[0] + S * 0.1},${o[1] + S * 0.55} L${o[0] + S * 0.4},${o[1] + S * 0.85} L${o[0] + S * 0.92},${o[1] + S * 0.15}`]
+                  : [`M${o[0] + S * 0.15},${o[1] + S * 0.15} L${o[0] + S * 0.85},${o[1] + S * 0.85}`,
+                     `M${o[0] + S * 0.85},${o[1] + S * 0.15} L${o[0] + S * 0.15},${o[1] + S * 0.85}`];
+    const col = tok(ok ? "--pos" : "--neg"), sw = Math.max(8, S * 0.12);
+    ds.forEach((dd, i) => {
+      const a = {d: dd, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round", pathLength: 1, "stroke-dasharray": 1, "stroke-dashoffset": 1};
+      const p0 = sv("path", {...a, stroke: UNDER, "stroke-width": sw + 5}, ctx.svg), p1 = sv("path", {...a, stroke: col, "stroke-width": sw}, ctx.svg);
+      const dur = 0.3 / ds.length;
+      tl.to([p0, p1], {attr: {"stroke-dashoffset": 0}, duration: dur, ease: "power2.out"}, it.t + i * dur);
+    });
+  },
+  progress(it, tl, ctx) {
+    const v = ctx.d.vis, r = it.rect || [v[0] + 120, v[3] - 52, v[2] - v[0] - 240, 12];
+    let val = it.value;
+    if (typeof val === "string" && val.includes("/")) { const [a, b] = val.split("/").map(Number); val = a / b; }
+    val = clamp(Number(val), 0, 1);
+    const track = div("kabs", ctx.stage), fill = div("kabs", ctx.stage);
+    Object.assign(track.style, {left: `${r[0]}px`, top: `${r[1]}px`, width: `${r[2]}px`, height: `${r[3]}px`, borderRadius: `${r[3] / 2}px`, background: tok("--line")});
+    Object.assign(fill.style, {left: `${r[0]}px`, top: `${r[1]}px`, width: `${r[2] * val}px`, height: `${r[3]}px`, borderRadius: `${r[3] / 2}px`,
+                               background: tok("--accent"), transformOrigin: "0% 50%"});
+    if (it.label) { const l = div("kabs kprog", ctx.stage, it.label); Object.assign(l.style, {left: `${r[0]}px`, top: `${r[1] - 64}px`});
+                    tl.fromTo(l, {opacity: 0}, {opacity: 1, duration: 0.3, ease: "power1.out"}, it.t); }
+    tl.fromTo([track], {opacity: 0}, {opacity: 1, duration: 0.2, ease: "power1.out"}, it.t);
+    tl.fromTo(fill, {scaleX: 0}, {scaleX: 1, duration: 0.8, ease: "power2.out"}, it.t + 0.1);
+  },
+};
+
+window.build = function (d) {
+  const [W, H] = d.size;
+  document.body.style.width = W + "px"; document.body.style.height = H + "px";
+  const stage = document.getElementById("stage");
+  const tl = gsap.timeline({paused: true}); window.tl = tl;
+  const svg = sv("svg", {class: "k", width: W, height: H, viewBox: `0 0 ${W} ${H}`}, stage);
+  const ctx = {d, svg, stage, problems: []};
+  if (d.base) { const im = new Image(); im.src = d.base.url; im.style.cssText = "position:absolute;width:1px;height:1px;opacity:0"; document.body.appendChild(im); }
+  for (const it0 of d.items) {
+    const it = {...it0};
+    if (it.el) {
+      it.rect = (d.rects || {})[it.el];
+      if (!it.rect) { ctx.problems.push(`找不到圖表元素 ${it.el}`); continue; }
+    }
+    if (!it.rect && !["pop", "lower", "progress", "badge"].includes(it.type)) { ctx.problems.push(`${it.type} 缺目標`); continue; }
+    if (!it.rect && it.type !== "lower" && it.type !== "progress") {
+      const v = d.vis; it.rect = [(v[0] + v[2]) / 2 - 1, (v[1] + v[3]) * 0.42, 2, 2];   // pop / badge 沒給目標:可見區中上
+    }
+    if (!KIT[it.type] || it.type.startsWith("_")) { ctx.problems.push(`未知小件 ${it.type}`); continue; }
+    KIT[it.type](it, tl, ctx);
+  }
+  tl.to({}, {duration: Math.max(0.01, d.dur - tl.duration())}, tl.duration());
+  return {problems: ctx.problems, dur: tl.duration()};
+};
+</script></body></html>

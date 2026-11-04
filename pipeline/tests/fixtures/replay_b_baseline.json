@@ -1,0 +1,42 @@
+{
+ "door_load": {
+  "lint擋0": true,
+  "warn_log": false,
+  "facts_check": true,
+  "visual_check": true,
+  "標籤實檔": true,
+  "speakable硬項": true
+ },
+ "headshot_hp": {
+  "lint擋0": true,
+  "warn_log": false,
+  "facts_check": true,
+  "visual_check": true,
+  "標籤實檔": true,
+  "speakable硬項": true
+ },
+ "pbz_week1": {
+  "lint擋0": true,
+  "warn_log": false,
+  "facts_check": true,
+  "visual_check": true,
+  "標籤實檔": true,
+  "speakable硬項": true
+ },
+ "wow_realm": {
+  "lint擋0": true,
+  "warn_log": false,
+  "facts_check": true,
+  "visual_check": true,
+  "標籤實檔": true,
+  "speakable硬項": true
+ },
+ "gow_budget": {
+  "lint擋0": true,
+  "warn_log": true,
+  "facts_check": true,
+  "visual_check": true,
+  "標籤實檔": true,
+  "speakable硬項": true
+ }
+}

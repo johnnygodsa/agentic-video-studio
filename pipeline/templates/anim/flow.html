@@ -1,0 +1,135 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- flow(由左至右的流程圖):2..4 個節點面板(最後一個加金色外框),節點間箭頭由左畫出再彈出下一個節點。
+     資料由 anim_web.flow_data 產生;prev -> shown 為已顯示的節點數(prev 個在 t=0 已是終態;prev == shown = 凍結)。
+     節點字級一律相同(70px):放不下就換行,不縮字。暴露的 id:#title、#node-k、#arrow-k(k >= 1 為節點 k-1 -> k)。 -->
+<style>
+.node { box-sizing: border-box; border-radius: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        font-family: var(--font-bold); font-size: 70px; line-height: 1.28; color: var(--text);
+        padding: 0 28px; opacity: 0; }
+.node div { text-wrap: balance; white-space: normal; }
+.node.last { border: 3px solid var(--accent); }
+.shaft { background: var(--text2); height: 10px; width: 0; opacity: 0; }   /* 直式箭頭的 shaft 由 JS 以 inline 覆寫寬 10 / 高 0 */
+.head { opacity: 0; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const probs = [], padX = px("--pad-x");
+  const mk = (cls, txt, css, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+
+  // ---- 標題、短橫條、來源
+  const title = mk("title", d.title, {left: padX + "px", top: px("--title-top") + "px"});
+  title.id = "title";
+  const rule = mk("rule", null, {left: padX + "px", top: (box(title).bottom + 10) + "px"});
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src);
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+
+  // ---- 幾何:節點寬 <= 520,節點間距 120(2 個節點 200),整組水平置中、垂直置中於內容區
+  // 直式(畫面窗 1080x1080):節點由上而下排列(寬 = 安全框 860)、箭頭向下;字級 56 -> 44 自適應(橫式固定 70)
+  const P = d.W <= d.H;
+  const n = d.nodes.length, EDGE = 96;
+  let BH = 300, bw, gap, x0, cy, by, cxs, bys = null, FS = 70, ARR = 0;
+  const top0 = P ? Math.max(px("--content-top"), box(rule).bottom + 28) : px("--content-top"), bottom = d.src ? px("--content-bottom-src") : px("--content-bottom");
+  if (!P) {
+    bw = Math.floor(Math.min(520, (d.W - 2 * EDGE - (n - 1) * 120) / n)); gap = n >= 3 ? 120 : 200;
+    x0 = (d.W - (n * bw + (n - 1) * gap)) / 2;
+    cy = (top0 + bottom) / 2; by = cy - BH / 2;
+    cxs = d.nodes.map((_, k) => x0 + bw / 2 + k * (bw + gap));
+  } else {
+    bw = d.W - px("--pad-x") - px("--pad-r"); ARR = n >= 3 ? 80 : 100; FS = 56;
+    BH = Math.min(220, Math.floor((bottom - top0 - (n - 1) * ARR) / n));
+    x0 = px("--pad-x");
+    const tot = n * BH + (n - 1) * ARR, ytop = top0 + (bottom - top0 - tot) / 2;
+    bys = d.nodes.map((_, k) => ytop + k * (BH + ARR));
+    cxs = d.nodes.map(() => x0 + bw / 2);
+  }
+
+  // 箭頭先建(在 DOM 較下層,起點動畫時箭頭尖不會壓在前一個節點上)
+  const arrows = d.nodes.map((_, k) => {
+    if (!k) return null;
+    if (P) {      // 向下:軸由上往下長,箭頭尖前進
+      const ya = bys[k - 1] + BH + 10, yb = bys[k] - 10, xc = cxs[k];
+      const shaft = mk("shaft", null, {left: (xc - 5) + "px", top: ya + "px", width: "10px", height: "0px"});
+      const head = mk("head", null, {left: (xc - 28) + "px", top: (ya - 36) + "px", width: "56px", height: "36px"});
+      head.innerHTML = `<svg width="56" height="36" viewBox="0 0 56 36"><polygon points="28,36 0,0 56,0" fill="${V("--text2")}"/></svg>`;
+      shaft.id = "arrow-" + k;
+      return {shaft, head, L: yb - ya, v: true};
+    }
+    const xa = cxs[k - 1] + bw / 2 + 16, xb = cxs[k] - bw / 2 - 16;
+    const shaft = mk("shaft", null, {left: xa + "px", top: (cy - 5) + "px"});
+    const head = mk("head", null, {left: (xa - 36) + "px", top: (cy - 28) + "px", width: "36px", height: "56px"});
+    head.innerHTML = `<svg width="36" height="56" viewBox="0 0 36 56"><polygon points="36,28 0,0 0,56" fill="${V("--text2")}"/></svg>`;
+    shaft.id = "arrow-" + k;
+    return {shaft, head, L: xb - xa};
+  });
+  const fitFs = () => {
+    for (FS = 56; FS >= 44; FS -= 2) {
+      nodeEls.forEach(e => { e.style.fontSize = FS + "px"; });
+      if (nodeEls.every(e => e.scrollHeight <= e.clientHeight + 1)) break;
+    }
+    FS = Math.max(44, FS);
+    nodeEls.forEach(e => { e.style.fontSize = FS + "px"; });
+  };
+  const nodeEls = [];
+  const nodes = d.nodes.map((s, k) => {
+    const e = mk("node" + (k === n - 1 ? " last" : ""), null, {left: (cxs[k] - bw / 2) + "px", top: (P ? bys[k] : by) + "px", width: bw + "px", height: BH + "px",
+                                                            background: rgba(V("--panel"), 0.92)});
+    s.split(/\n/).forEach(t => { const r = document.createElement("div"); r.textContent = t; e.appendChild(r); });   // 每個換行段各自平衡斷行(避免殘字)
+    e.id = "node-" + k;
+    nodeEls.push(e);
+    return e;
+  });
+  if (P) fitFs();
+  nodes.forEach((e, k) => { if (e.scrollHeight > e.clientHeight + 1) probs.push(`節點 ${k + 1} 文字 ${e.scrollHeight}px 高,超出 ${BH}px(縮短或拆成兩行)`); });
+
+  // ---- 時間軸
+  const tl = gsap.timeline({paused: true});
+  if (d.title_in) {
+    tl.from(title, {opacity: 0, y: 16, duration: 0.4, ease: "power2.out"}, 0);
+    tl.from([rule, src].filter(Boolean), {opacity: 0, duration: 0.4, ease: "power2.out"}, 0.1);
+  }
+  let t = d.prev <= 0 ? d.node0_s : d.lead;
+  for (let k = 0; k < Math.min(n, d.shown); k++) {
+    const a = arrows[k];
+    if (k < d.prev) {
+      tl.set(nodes[k], {opacity: 1}, 0);
+      if (a) tl.set([a.shaft, a.head], {opacity: 1}, 0).set(a.shaft, a.v ? {height: Math.max(0, a.L - 22)} : {width: Math.max(0, a.L - 22)}, 0).set(a.head, a.v ? {y: a.L} : {x: a.L}, 0);
+      continue;
+    }
+    let tn = t;
+    if (a) {      // 箭頭由左畫出:軸變長、箭頭尖前進
+      const sz = Math.max(0, a.L - 22);
+      tl.fromTo(a.shaft, a.v ? {opacity: 0, height: 0} : {opacity: 0, width: 0}, Object.assign({opacity: 1, duration: d.arrow_s, ease: "power3.out"}, a.v ? {height: sz} : {width: sz}), t);
+      tl.fromTo(a.head, a.v ? {opacity: 0, y: 0} : {opacity: 0, x: 0}, Object.assign({opacity: 1, duration: d.arrow_s, ease: "power3.out"}, a.v ? {y: a.L} : {x: a.L}), t);
+      tn = t + d.arrow_s;
+      t = tn;
+    }
+    tl.fromTo(nodes[k], {opacity: 0, scale: 0.05}, {opacity: 1, scale: 1, duration: d.pop_s, ease: "back.out(1.7)"}, tn);
+    t += d.pop_s;
+  }
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

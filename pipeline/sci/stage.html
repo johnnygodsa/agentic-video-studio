@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+/*FONTS*/
+*{margin:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px}
+</style></head><body>
+<svg id="stage" xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+<script>/*PIGEON_JS*/</script>
+<script>/*KIT_JS*/</script>
+<script>/*CHARTS_JS*/</script>
+<script>/*PROPS_JS*/</script>
+<script>/*TPL_JS*/</script>
+<script>/*SCENE_JS*/</script>
+<script>
+// 通用舞台:render_clip.py 以 window.__PARAMS 注入 hue 與場景參數;畫面是 t 的純函式
+const PARAMS=Object.assign({hue:46},window.__PARAMS||{});
+const STAGE=document.getElementById('stage');
+function seek(t){STAGE.innerHTML=Scene.render(t,PARAMS);}
+// 同一 t 連算兩次必須得到相同字串
+function same(t){return Scene.render(t,PARAMS)===Scene.render(t,PARAMS);}
+// 量目前畫面每片紙的外框(px,含描邊半寬、不含陰影):葉節點 getBBox 四角經 getCTM 變換後取聯集
+function measure(){
+  const out=[];
+  for(const g of STAGE.querySelectorAll('[data-k]')){
+    const u=+g.dataset.u||1,pad=2*u;
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+    for(const el of g.querySelectorAll('polygon,path,rect,circle,text')){
+      const b=el.getBBox(),m=el.getCTM();
+      for(const [x,y] of [[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]]){
+        const X=m.a*x+m.c*y+m.e,Y=m.b*x+m.d*y+m.f;
+        x0=Math.min(x0,X);y0=Math.min(y0,Y);x1=Math.max(x1,X);y1=Math.max(y1,Y);
+      }
+    }
+    const e={k:g.dataset.k,id:g.dataset.id||'',enter:g.dataset.enter==='1',u,x0:x0-pad,y0:y0-pad,x1:x1+pad,y1:y1+pad};
+    if(e.k==='tile'){const r=g.querySelector('rect'),m=r.getCTM();e.side=r.width.baseVal.value*Math.hypot(m.a,m.b);}
+    out.push(e);
+  }
+  return out;
+}
+window.seek=seek;
+const ready=()=>{seek(0);window.__done=true;};
+document.fonts.load('64px "GenSen"','ChannelC?沒用的知識,快樂就好。').then(ready,ready);
+</script>
+</body></html>

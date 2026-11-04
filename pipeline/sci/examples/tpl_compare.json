@@ -1,0 +1,17 @@
+{
+ "tpl": "compare",
+ "說明": "測試與範例:sets 每組 = 一個 film.json 場景的 data 加假 lines;orient 省略 = 橫直都算。上限橫直相同(每邊 4 項、每項 ≤10 字);直式上下排、不畫鴿子。",
+ "sets": [
+  {"name": "min", "dur": 5.5,
+   "lines": [{"idx": 1, "text": "以前一杯三十五。", "start": 0.1, "end": 1.8},
+             {"idx": 2, "text": "現在一杯五十五。", "start": 2.0, "end": 3.6}],
+   "data": {"left": {"title": "以前", "items": ["一杯三十五元"]}, "right": {"title": "現在", "items": ["一杯五十五元"]}, "hi": "right"}},
+  {"name": "max", "dur": 11.5,
+   "lines": [{"idx": 1, "text": "十年前的手搖飲店長這樣。", "start": 0.1, "end": 3.0},
+             {"idx": 2, "text": "現在的店,菜單跟價錢都不一樣了。", "start": 3.2, "end": 6.4},
+             {"idx": 3, "text": "最大的差別是你根本不用排隊。", "start": 6.6, "end": 9.6}],
+   "data": {"left": {"title": "十年前", "icon": "turtle.coin", "items": ["一杯三十五元", "菜單只有十種", "現場排隊點餐", "紙杯加塑膠封膜"]},
+            "right": {"title": "現在", "at": 1, "word": "現在", "items": ["一杯五十五元", "菜單一百多種", "外送平台下單", "紙吸管加杯蓋"]},
+            "hi": "right", "pigeon": {"expr": ["normal", "think", "smug"]}}}
+ ]
+}

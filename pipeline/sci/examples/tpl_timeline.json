@@ -1,0 +1,33 @@
+{
+ "tpl": "timeline",
+ "說明": "測試與範例:sets 每組 = 一個 film.json 場景的 data 加假 lines;orient 省略 = 橫直都算,landscape/portrait = 只算該向(上限 橫 6、直 5)。",
+ "sets": [
+  {"name": "min", "dur": 5.5,
+   "lines": [{"idx": 1, "text": "珍珠奶茶一九八七年出現。", "start": 0.1, "end": 1.8},
+             {"idx": 2, "text": "二零一九年紅到全世界。", "start": 2.0, "end": 3.6}],
+   "data": {"nodes": [{"year": "1987", "label": "珍奶誕生"}, {"year": "2019", "label": "紅到全世界"}], "hi": [1]}},
+  {"name": "maxL", "orient": "landscape", "dur": 11.5,
+   "lines": [{"idx": 1, "text": "珍奶從台中一間茶館開始。", "start": 0.1, "end": 3.0},
+             {"idx": 2, "text": "九零年代連鎖店開滿全台,兩千年後開到美國跟日本。", "start": 3.2, "end": 6.4},
+             {"idx": 3, "text": "二零一九年日本排隊熱,今年漲到一杯七十五。", "start": 6.6, "end": 9.6}],
+   "data": {"title": "珍奶大事記",
+            "nodes": [{"year": "1987", "label": "台中茶館"},
+                      {"year": "1995", "label": "連鎖開滿台", "at": 1, "word": "連鎖"},
+                      {"year": "2004", "label": "開到美國", "at": 1, "word": "美國"},
+                      {"year": "2012", "label": "日本開分店", "at": 1, "word": "日本"},
+                      {"year": "2019", "label": "排隊熱", "at": 2, "word": "排隊"},
+                      {"year": "2026", "label": "一杯七十五", "at": 2, "word": "今年"}],
+            "hi": [5], "pigeon": {"expr": ["normal", "think", "smug"]}}},
+  {"name": "maxP", "orient": "portrait", "dur": 11.5,
+   "lines": [{"idx": 1, "text": "珍奶從台中一間茶館開始。", "start": 0.1, "end": 3.0},
+             {"idx": 2, "text": "九零年代連鎖店開滿全台,兩千年後開到美國。", "start": 3.2, "end": 6.4},
+             {"idx": 3, "text": "二零一九年日本排隊熱,今年漲到一杯七十五。", "start": 6.6, "end": 9.6}],
+   "data": {"title": "珍奶大事記",
+            "nodes": [{"year": "1987", "label": "台中茶館"},
+                      {"year": "1995", "label": "連鎖開滿台", "at": 1, "word": "連鎖"},
+                      {"year": "2004", "label": "開到美國", "at": 1, "word": "美國"},
+                      {"year": "2019", "label": "日本排隊熱", "at": 2, "word": "日本"},
+                      {"year": "2026", "label": "一杯七十五", "at": 2, "word": "今年"}],
+            "hi": [4], "pigeon": {"expr": "doubt"}}}
+ ]
+}

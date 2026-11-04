@@ -1,0 +1,29 @@
+# Core (pipeline, lint, build, tests)
+numpy
+scipy
+Pillow
+soundfile
+librosa
+jieba
+pypinyin
+opencc
+playwright
+pynvml
+pytest
+hypothesis
+
+# ASR verification
+faster-whisper
+
+# Optional: OCR, NLP, alternative engines (install as needed)
+rapidocr-onnxruntime
+ckip-transformers
+scikit-learn
+transformers
+huggingface_hub
+edge-tts
+
+# TTS engines are installed in their own venvs, not here:
+#   CosyVoice 3  https://github.com/FunAudioLLM/CosyVoice  (see pipeline/colab/req_cosy3.txt)
+#   torch / torchaudio per your CUDA version
+#   ChatTTS, IndexTTS, g2pW, WeTextProcessing, speechbrain, qwen-asr: optional bake-off engines (pipeline/tts_bakeoff/)

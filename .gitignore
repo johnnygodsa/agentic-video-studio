@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.hypothesis/
+
+# Models, environments, voices (bring your own)
+/tts_env_*/
+/tts_models/
+/cosy_voice/
+*.pt
+*.safetensors
+*.onnx
+
+# Per-video data and media
+/raw/
+/images/
+/anim/
+/bgm/
+/build/
+/output/
+/keep/
+/tmp/
+/fonts/
+/projects/*
+!/projects/_templates/
+!/projects/framework/
+pipeline/moe/moe_*.json
+pipeline/moe/words_moe.txt
+
+# Secrets
+.env
+*_secrets*/
+*secret*.json
+token*.json
+*.cookies
+cookies.txt
+
+pipeline/static/vendor/gsap.min.js

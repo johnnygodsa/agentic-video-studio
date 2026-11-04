@@ -1,0 +1,298 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- cols(直條):單系列 / 多系列分組(series ≤3,圖例)/ 堆疊(stack,需 series)/ 目標線(ref,水平虛線)/ 負值(以 0 為基線,負值向下、紅色系)/ x 軸為類別或年份(等距)。
+     舊 pillow cols 欄位原樣可跑:items=[[標籤, 正數, 單位?, {hi?}?]];單系列沒有任何 hi 鍵時自動強調最大值(數值全相同則不強調)。
+     資料由 anim_web.cols_data 產生。level = 已長出的組數(step k = 顯示到第 k 組);prev -> shown 為這一段播的範圍。
+     暴露的元素 id:#title、#lbl-k、#col-k-s、#val-k-s(k = 組序,s = 系列序;堆疊時整根是 #col-k-0、總和是 #val-k-0)、#ref。
+     軸暴衝(d.shock = 暴衝項序號,anim_web.shock_fields;單系列、無 stack / ref / 負值):做法同 bars.html(方向改成由下往上):先照舊比例尺長出,暴衝項長到天花板線後加速衝出框,
+     接著比例尺重縮放(暴衝項 = 滿高、其他柱等比縮短),暴衝項定格金色並此時才出數字;不開 shock 時整段程式路徑與輸出與舊版逐像素相同。 -->
+<style>
+.clbl { font-family: var(--font-bold); color: var(--label); text-align: center; line-height: 1.15; opacity: 0; text-wrap: balance; }
+.cval { font-family: var(--font-bold); color: var(--text); font-variant-numeric: tabular-nums; opacity: 0; white-space: nowrap; }
+.cval .u { margin-left: 6px; }
+.cval .u.pct { margin-left: 0; }
+.cbase { height: 2px; background: var(--line); opacity: 0; }
+.seg { position: absolute; }
+.segv { position: absolute; font-family: var(--font-bold); color: var(--on-series); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: center; }
+.refline { height: 3px; opacity: 0; background: repeating-linear-gradient(to right, var(--text) 0 12px, transparent 12px 22px); }
+.reflbl { font-family: var(--font-bold); font-size: var(--fs-legend); line-height: 1.2; color: var(--text); opacity: 0; }
+.unit { font-family: var(--font-bold); font-size: 44px; line-height: 1.2; color: var(--text2); }
+.ceil { height: 3px; background: var(--text2); opacity: 0; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const P = d.W <= d.H;       // 直式(原生畫面窗 1080x1080):最多 6 組、字級縮、圖高上限放寬
+  const probs = [], padX = px("--pad-x"), padR = px("--pad-r"), S = d.series ? d.series.length : 1, stack = !!d.stack && S > 1;
+  const mk = (cls, txt, css, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  const fmt = (v, dec) => {
+    const s = v.toFixed(dec);
+    if (Math.abs(v) < 10000) return s;
+    const [i, f] = s.split(".");
+    return i.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (f ? "." + f : "");
+  };
+  const CLIP0 = "inset(0% 0% 0% 0%)";
+  const rows = d.rows, n = rows.length;
+  const NMAX = P ? 6 : 12;
+  if (n > NMAX) probs.push(`${n} 根超過${P ? '直式' : ''} ${NMAX} 根上限(${P ? '請改寫成 bars 或' : ''}拆成兩張)`);
+
+  // ---- 標題、短橫條、圖例(多系列)、單位、來源
+  const title = mk("title", d.title, {left: padX + "px", top: px("--title-top") + "px"});
+  title.id = "title";
+  const rule = mk("rule", null, {left: padX + "px", top: (box(title).bottom + 10) + "px"});
+  const legend = [];
+  let top0 = Math.max(px("--content-top"), box(rule).bottom + 28);
+  if (S > 1) {
+    let x = padX;
+    const ly = box(rule).bottom + 22;
+    d.series.forEach((name, s) => {
+      const e = mk("legend", null, {left: x + "px", top: ly + "px"});
+      const sw = document.createElement("i");
+      sw.style.background = V("--series-" + (s + 1));
+      e.appendChild(sw); e.append(name);
+      x = box(e).right + 48;
+      legend.push(e);
+    });
+    if (d.unit) {
+      const u = mk("unit", "單位:" + d.unit, {top: (ly + 4) + "px"});
+      u.style.left = (d.W - padR - box(u).width) + "px";
+      legend.push(u);
+    }
+    top0 = Math.max(top0, ly + 53 + 28);
+  }
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src);
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+  const bottom = d.src ? px("--plot-bottom-src") : px("--plot-bottom");
+
+  // ---- 水平:槽寬、柱寬
+  let refLbl = null, refW = 0;
+  if (d.ref) { refLbl = mk("reflbl", d.ref.label); refW = box(refLbl).width + 36; }     // 目標線標籤放線的右端外側,先量寬並讓出右邊
+  const areaW = d.W - padX - padR - refW, slotMax = S === 1 || stack ? 340 : S === 2 ? 400 : 520;
+  const slot = Math.min(slotMax, areaW / n), x0 = padX + (areaW - n * slot) / 2;
+  const GAPC = 10;
+  const cw = S === 1 || stack ? Math.min(150, slot * 0.6) : Math.min(130, (slot * 0.86 - GAPC * (S - 1)) / S);
+  const groupW = S === 1 || stack ? cw : cw * S + GAPC * (S - 1);
+  const cxOf = (k, s) => x0 + slot * (k + 0.5) - groupW / 2 + (stack || S === 1 ? cw / 2 : cw / 2 + s * (cw + GAPC));
+
+  // ---- 文字:類別標籤(過長先縮字再換行)、數值字級
+  const lfs0 = n > 8 || P ? 44 : 52;
+  const lbls = rows.map((r, k) => {
+    const e = mk("clbl", r.label, {fontSize: lfs0 + "px"});
+    e.id = "lbl-" + k;
+    let w = box(e).width;
+    if (w > slot - 24) { e.style.fontSize = Math.max(px("--fs-body-min"), Math.floor(lfs0 * (slot - 24) / w)) + "px"; w = box(e).width; }
+    if (w > slot - 24) { e.style.whiteSpace = "normal"; e.style.width = (slot - 24) + "px"; }      // 縮到 44 仍放不下才換行(只在詞邊界)
+    return e;
+  });
+  const lblH = Math.max(...lbls.map(e => box(e).height));
+  let vfs = S > 1 && !stack ? 48 : P ? (n <= 3 ? 56 : 48) : n <= 7 ? 64 : n <= 9 ? 56 : 48;
+  const ufs = f => Math.max(44, Math.round(f * 0.75));
+  const mkVal = (v, dec, unit, id, hi) => {
+    const e = mk("cval", null, {fontSize: (hi && S === 1 ? vfs + 8 : vfs) + "px"});
+    e.id = id;
+    const num = document.createElement("span");
+    num.textContent = fmt(v, dec);
+    e.appendChild(num);
+    if (unit) {
+      const u = document.createElement("span");
+      u.className = "u" + (unit.startsWith("%") ? " pct" : "");
+      u.style.fontSize = ufs(vfs) + "px";
+      u.textContent = unit;
+      e.appendChild(u);
+    }
+    if (v < 0) e.style.color = V("--neg-fill");
+    if (hi) e.style.color = V("--accent");
+    return {e, num, v, dec, w: box(e).width, h: box(e).height};
+  };
+  // 數值:單系列 / 堆疊帶單位;分組多系列只標數字(單位在圖例列右側)
+  const vals = rows.map((r, k) => {
+    if (stack) {
+      const nz = r.vals.filter(v => v != null);
+      return [mkVal(nz.reduce((a, b) => a + b, 0), Math.max(...r.dec), r.unit, `val-${k}-0`, r.hi)];
+    }
+    return r.vals.map((v, s) => v == null ? null : mkVal(v, r.dec[s], S > 1 ? "" : r.unit, `val-${k}-${s}`, r.hi && s === r.vals.length - 1 - [...r.vals].reverse().findIndex(x => x != null)));
+  });
+  const flat = vals.flat().filter(Boolean);
+  if (S === 1 || stack) {
+    if (Math.max(...flat.map(o => o.w)) > slot - 8) probs.push("數值寬度超過槽寬(根數過多或數字太長)");
+  } else if (flat.some(o => o.w > cw + GAPC + 6)) probs.push("分組直條的數值比柱寬還寬,相鄰數字會互碰(減少系列或根數)");
+  const maxP0 = Math.max(0, ...flat.filter(o => o.v >= 0).map(o => o.v));
+  const maxN0 = Math.max(0, ...flat.filter(o => o.v < 0).map(o => -o.v));
+  const refV = d.ref ? d.ref.value : null;
+  const maxP = refV != null && refV > 0 ? Math.max(maxP0, refV) : maxP0;
+  const maxN = refV != null && refV < 0 ? Math.max(maxN0, -refV) : maxN0;
+  const hasNeg = maxN > 0;
+  const valH = Math.max(...flat.map(o => o.h));
+
+  // ---- 垂直:基線 y0、比例尺(圖高上限 500,基線靠下)
+  const lblTop = bottom - lblH;
+  const yTop = top0 + valH + 14, yBot = lblTop - (hasNeg ? 16 + valH + 12 : 18);
+  const Hp = Math.min(P ? 640 : 500, yBot - yTop);
+  if (Hp < 200) probs.push(`圖高只剩 ${Math.round(Hp)}px(標題 / 圖例 / 標籤佔太多)`);
+  const scaleF = Hp / ((maxP + maxN) || 1);
+  // 軸暴衝:SH = 暴衝項序號,shMode = pre(暴衝項還沒出現:舊比例尺)/ play(這段播暴衝)/ post(已播過:新比例尺 = 一般排法)
+  const SH = d.shock == null ? null : d.shock;
+  const shMode = SH == null ? null : d.shown <= SH ? "pre" : d.prev > SH ? "post" : "play";
+  let sc0 = scaleF;
+  if (SH != null) {
+    const others = Math.max(0, ...rows.map((r, k) => k === SH ? 0 : (r.vals[0] || 0)));
+    sc0 = Hp * d.shock_t.pre / (others || 1);
+  }
+  const scale = shMode === "pre" || shMode === "play" ? sc0 : scaleF;
+  const y0 = yBot - maxN * scale;
+  if (!hasNeg) lbls.forEach(e => { e.style.top = (y0 + 18) + "px"; });
+  else lbls.forEach(e => { e.style.top = lblTop + "px"; });
+  const lineL = x0 - 24, lineR = x0 + n * slot + 24;
+  const base = mk("cbase", null, {left: lineL + "px", top: (y0 - 1) + "px", width: (lineR - lineL) + "px"});
+  base.id = "base";
+  if (!hasNeg && y0 + 18 + lblH > bottom + 1) probs.push("類別標籤超出下緣");
+
+  // ---- 逐組定位
+  const rad = Math.min(10, cw / 2);
+  const cols = rows.map((r, k) => {
+    const lb = lbls[k];
+    const lw = box(lb).width;
+    lb.style.left = (x0 + slot * (k + 0.5) - lw / 2) + "px";
+    let out;
+    if (stack) {
+      const nz = r.vals.map((v, s) => ({v, s})).filter(o => o.v != null);
+      const tot = nz.reduce((a, o) => a + o.v, 0), Ht = tot * scale, cx = cxOf(k, 0);
+      const cont = mk("stk", null, {left: (cx - cw / 2) + "px", top: (y0 - Ht) + "px", width: cw + "px", height: Ht + "px", clipPath: "inset(100% 0% 0% 0%)"});
+      cont.id = `col-${k}-0`;
+      let cum = 0;
+      nz.forEach((o, i) => {
+        const h = o.v * scale, last = i === nz.length - 1;
+        const sg = document.createElement("div");
+        sg.className = "seg";
+        Object.assign(sg.style, {left: 0, top: (Ht - cum - h) + "px", width: cw + "px", height: Math.max(0, h - (last ? 0 : 3)) + "px",
+                                 background: V("--series-" + (o.s + 1)), borderRadius: last ? `${rad}px ${rad}px 0 0` : "0"});
+        cont.appendChild(sg);
+        const t = document.createElement("div");
+        t.className = "segv"; t.textContent = fmt(o.v, r.dec[o.s]);
+        t.style.fontSize = px("--fs-body-min") + "px";
+        cont.appendChild(t);
+        const tw = box(t).width, th = box(t).height;
+        if (h >= th + 10 && cw >= tw + 16) Object.assign(t.style, {left: (cw - tw) / 2 + "px", top: (Ht - cum - h / 2 - th / 2) + "px"});
+        else t.remove();
+        cum += h;
+      });
+      const vo = vals[k][0];
+      Object.assign(vo.e.style, {left: (cx - vo.w / 2) + "px", top: (y0 - Ht - 12 - vo.h) + "px"});
+      out = [{b: cont, vo, clip: true, from: "inset(100% 0% 0% 0%)"}];
+    } else {
+      out = r.vals.map((v, s) => {
+        if (v == null) return null;
+        const neg = v < 0, h = (shMode === "play" || shMode === "pre") && k === SH ? Hp : Math.abs(v) * scale, cx = cxOf(k, s);
+        const hiAll = r.hi && S === 1 && !(shMode === "play" && k === SH), ring = r.hi && S > 1 && s === r.vals.length - 1 - [...r.vals].reverse().findIndex(x => x != null);
+        let col = hiAll ? V("--accent") : S > 1 ? V("--series-" + (s + 1)) : V("--series-1");
+        if (neg && S === 1 && !hiAll) col = V("--neg-fill");
+        const from = neg ? "inset(0% 0% 100% 0%)" : "inset(100% 0% 0% 0%)";
+        const b = mk("col", null, {left: (cx - cw / 2) + "px", top: (neg ? y0 : y0 - h) + "px", width: cw + "px", height: h + "px", background: col,
+                                   borderRadius: neg ? `0 0 ${rad}px ${rad}px` : `${rad}px ${rad}px 0 0`, clipPath: from});
+        b.id = `col-${k}-${s}`;
+        if (ring) Object.assign(b.style, {boxSizing: "border-box", border: "3px solid " + V("--accent")});
+        const vo = vals[k][s];
+        Object.assign(vo.e.style, {left: (cx - vo.w / 2) + "px", top: (neg ? y0 + h + 12 : y0 - h - 12 - vo.h) + "px"});
+        return {b, vo, clip: true, from};
+      });
+    }
+    return {k, lb, out};
+  });
+
+  // ---- 軸暴衝:天花板線(舊比例尺的滿高位置;重縮放後淡出)
+  let ceil = null;
+  if (shMode === "play") {
+    ceil = mk("ceil", null, {left: lineL + "px", width: (lineR - lineL) + "px", top: (y0 - Hp - 1.5) + "px"});
+    ceil.id = "ceil";
+  }
+
+  // ---- 目標線:水平虛線,標籤靠右端上方
+  const refEls = [];
+  if (d.ref) {
+    const ry = y0 - d.ref.value * scale;
+    const ln = mk("refline", null, {left: lineL + "px", width: (lineR - lineL) + "px", top: (ry - 1.5) + "px"});
+    ln.id = "ref";
+    const lh = box(refLbl).height;
+    Object.assign(refLbl.style, {left: (lineR + 12) + "px", top: (ry - lh / 2) + "px"});
+    if (box(refLbl).right > d.W - padR + 1) probs.push("目標線標籤超出右邊界");
+    refEls.push(ln, refLbl);
+  }
+
+  // ---- 時間軸(只用 GSAP;seek(t, false) 才會觸發 count-up 的 onUpdate)
+  const tl = gsap.timeline({paused: true});
+  const head = [rule, ...legend, src].filter(Boolean);
+  if (d.title_in) {
+    tl.from(title, {opacity: 0, y: 16, duration: 0.4, ease: "power2.out"}, 0);
+    tl.from(head, {opacity: 0, duration: 0.4, ease: "power2.out"}, 0.1);
+  }
+  if (d.shown > 0) {
+    if (d.prev > 0) tl.set([base, ...refEls], {opacity: 1}, 0);
+    else tl.to([base, ...refEls], {opacity: 1, duration: 0.25, ease: "power2.out"}, d.lead);
+    if (ceil) tl.to(ceil, {opacity: 1, duration: 0.25, ease: "power2.out"}, d.lead);
+  }
+  const grow = Math.max(0.2, d.grow - 0.08 * (S - 1));
+  cols.forEach(o => {
+    if (o.k >= d.shown) return;
+    const done = o.k < d.prev, at = d.lead + d.gap * (o.k - d.prev);
+    if (done) tl.set(o.lb, {opacity: 1}, 0);
+    else tl.to(o.lb, {opacity: 1, duration: 0.25, ease: "power2.out"}, at);
+    o.out.forEach((q, s) => {
+      if (!q) return;
+      if (done) { tl.set(q.b, {clipPath: CLIP0}, 0); tl.set(q.vo.e, {opacity: 1}, 0); return; }
+      const t = at + 0.08 * s, c = {v: 0};
+      q.vo.num.textContent = fmt(0, q.vo.dec);
+      tl.fromTo(q.b, {clipPath: q.from}, {clipPath: CLIP0, duration: grow, ease: "power3.out"}, t);
+      if (shMode === "play" && o.k === SH) return;        // 暴衝項的數字等重縮放時才出現(見下)
+      tl.fromTo(q.vo.e, {opacity: 0, scale: 0.85}, {opacity: 1, scale: 1, duration: 0.28, ease: "back.out(1.7)"}, t + grow * 0.4);
+      tl.to(c, {v: q.vo.v, duration: grow, ease: "power3.out",
+                onUpdate: () => { q.vo.num.textContent = fmt(c.v, q.vo.dec); }}, t);
+    });
+  });
+  if (shMode === "play") {
+    const T = d.shock_t, R = T.rescale, EZ = "power2.inOut", sq = cols[SH].out[0], ACC = V("--accent");
+    const over = Math.max(24, Math.min(80, y0 - Hp - box(rule).bottom - 24));      // 衝出天花板的距離(不撞到標題)
+    let tEnd = 0;
+    cols.forEach(o => { if (o.k < d.shown && o.k >= d.prev) tEnd = Math.max(tEnd, d.lead + d.gap * (o.k - d.prev) + grow); });
+    const Tb = tEnd + T.pause, Tr = Tb + T.burst + T.hang, vo = sq.vo;
+    tl.to(sq.b, {height: Hp + over, top: y0 - Hp - over, duration: T.burst, ease: "power2.in"}, Tb);                 // 衝出框:越衝越快
+    tl.fromTo(sq.b, {backgroundColor: V("--series-1")}, {backgroundColor: ACC, duration: 0.12, ease: "power1.out", immediateRender: false}, Tb + T.burst * 0.6);
+    tl.fromTo(ceil, {backgroundColor: V("--text2")}, {backgroundColor: ACC, duration: 0.12, ease: "power1.out", immediateRender: false}, Tb + T.burst * 0.6);
+    cols.forEach(o => {                                                                                              // 重縮放:其他柱等比縮短,暴衝項縮回滿高
+      const q = o.out[0];
+      if (o.k >= d.shown || !q) return;
+      if (o.k === SH) { tl.fromTo(q.b, {height: Hp + over, top: y0 - Hp - over}, {height: Hp, top: y0 - Hp, duration: R, ease: EZ, immediateRender: false}, Tr); return; }
+      const v = Math.abs(q.vo.v), h0 = v * sc0, h1 = v * scaleF;
+      tl.fromTo(q.b, {height: h0, top: y0 - h0}, {height: h1, top: y0 - h1, duration: R, ease: EZ, immediateRender: false}, Tr);
+      tl.fromTo(q.vo.e, {top: y0 - h0 - 12 - q.vo.h}, {top: y0 - h1 - 12 - q.vo.h, duration: R, ease: EZ, immediateRender: false}, Tr);
+    });
+    const c = {v: 0};
+    vo.num.textContent = fmt(0, vo.dec);
+    tl.fromTo(vo.e, {top: y0 - Hp - over - 12 - vo.h}, {top: y0 - Hp - 12 - vo.h, duration: R, ease: EZ, immediateRender: false}, Tr);
+    tl.fromTo(vo.e, {opacity: 0, scale: 0.85}, {opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.7)"}, Tr);
+    tl.to(c, {v: vo.v, duration: R, ease: "power2.out", onUpdate: () => { vo.num.textContent = fmt(c.v, vo.dec); }}, Tr);
+    tl.to(ceil, {opacity: 0, duration: 0.3, ease: "power1.out"}, Tr + R * 0.5);
+  }
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);     // 補到段長(之後定格)
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

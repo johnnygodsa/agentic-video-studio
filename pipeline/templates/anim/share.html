@@ -1,0 +1,271 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- share(占比):style "bar" = 100% 堆疊條(1–4 列,每列 2–4 段)、"donut" = 甜甜圈(只限單列)。段內數值放不下 -> 移到外側並加引線。
+     舊 pillow share 欄位原樣可跑:rows=[{label, parts:[[名稱, 數值, 顏色?]…]}]、unit(預設 %)。
+     資料由 anim_web.share_data 產生(names = 依首次出現排序的段名,colors = 對應色碼或 null -> 依序取 --series-1..4;同名稱全部列同色)。
+     level = 已展開的列數(step k = 顯示到第 k 列;0 = 標題與圖例);暴露的元素 id:#title、#row-i、#seg-i-j、#ring(donut)。 -->
+<style>
+.rlbl { font-family: var(--font-bold); color: var(--label); text-align: right; line-height: 1.15; opacity: 0; }
+.sval { position: absolute; font-family: var(--font-bold); font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.1; opacity: 0; }
+.sval .u { font-size: 0.75em; }
+.sval .u.pct { margin-left: 0; }
+.srow { position: absolute; }
+.seg { position: absolute; }
+.lead { background: var(--text2); opacity: 0; }
+.nm { font-family: var(--font-bold); font-size: 52px; line-height: 1.2; color: var(--label); opacity: 0; white-space: nowrap; }
+.sw { display: inline-block; width: 36px; height: 36px; border-radius: 6px; margin-right: 16px; vertical-align: -4px; }
+svg.chart { position: absolute; left: 0; top: 0; overflow: visible; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const P = d.W <= d.H;       // 直式(原生畫面窗 1080x1080):列標籤在條上方、條滿寬;甜甜圈置中、圖例在下
+  const probs = [], padX = px("--pad-x"), padR = px("--pad-r"), NS = "http://www.w3.org/2000/svg";
+  const mk = (cls, txt, css, tag, parent) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    (parent || st).appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  const fmt = (v, dec) => v.toFixed(dec);
+  const rows = d.rows, R = rows.length, donut = d.style === "donut" && R === 1;
+  let nextAuto = 0;
+  const colors = d.colors.map(c => c || V("--series-" + ((nextAuto++ % 4) + 1)));
+  const lum = h => {
+    const c = h.startsWith("#") ? [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255) : [1, 1, 1];
+    const l = c.map(x => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4));
+    return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+  };
+  const txtOn = col => lum(col) > 0.3 ? V("--on-series") : "#ffffff";
+  const cOf = p => colors[p.ci];
+
+  // ---- 標題、短橫條、來源
+  const title = mk("title", d.title, {left: padX + "px", top: px("--title-top") + "px"});
+  title.id = "title";
+  const rule = mk("rule", null, {left: padX + "px", top: (box(title).bottom + 10) + "px"});
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src);
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+  let top0 = Math.max(px("--content-top"), box(rule).bottom + 28);
+  const bottom = d.src ? px("--content-bottom-src") : px("--content-bottom");
+  const legend = [];
+  if (!donut) {      // 條形:圖例在標題下(名稱 + 色塊);甜甜圈的圖例在右側清單
+    let x = padX;
+    const ly = box(rule).bottom + 22;
+    d.names.forEach((nm, i) => {
+      const e = mk("legend", null, {left: x + "px", top: ly + "px"});
+      const sw = document.createElement("i");
+      sw.style.background = colors[i];
+      e.appendChild(sw); e.append(nm);
+      x = box(e).right + 48;
+      legend.push(e);
+    });
+    if (x - 48 > d.W - padR) probs.push("圖例超出右邊界(縮短段名)");
+    top0 = Math.max(top0, ly + 53 + 36);
+  }
+  const mkVal = (p, fsz) => {
+    const e = mk("sval", null, {fontSize: fsz + "px"});
+    const num = document.createElement("span");
+    num.textContent = fmt(p.v, p.dec);
+    e.appendChild(num);
+    if (d.unit) {
+      const u = document.createElement("span");
+      u.className = "u" + (d.unit.startsWith("%") ? " pct" : "");
+      u.textContent = d.unit;
+      e.appendChild(u);
+    }
+    return {e, w: box(e).width, h: box(e).height};
+  };
+
+  const tl = gsap.timeline({paused: true});
+  const head = [rule, ...legend, src].filter(Boolean);
+  const rowAnim = [];       // 條形:{i, cont, fades:[…]};甜甜圈另走 ringAnim
+  let ringAnim = null;
+
+  if (!donut) {
+    // ---- 條形:列標籤欄、條厚與列距(放不下先縮)
+    const avail = bottom - top0, GAP = 4;
+    const outside = rows.map(() => []);
+    let rlf = 52;
+    const lbls = rows.map((r, i) => {
+      const e = mk("rlbl", r.label, {fontSize: rlf + "px"});
+      e.id = "row-" + i;
+      let w = box(e).width;
+      if (P) { e.style.textAlign = "left"; if (w > d.W - padX - padR) { e.style.whiteSpace = "normal"; e.style.width = (d.W - padX - padR) + "px"; w = d.W - padX - padR; } }
+      else if (w > 380) { e.style.whiteSpace = "normal"; e.style.width = "380px"; w = 380; }
+      return {e, w};
+    });
+    const lblW = Math.max(...lbls.map(o => o.w)), barL = P ? padX : padX + lblW + 28, barR = d.W - padR, barW = barR - barL;
+    const LB = P ? Math.max(...lbls.map(o => box(o.e).height)) + 8 : 0;      // 直式:標籤佔條上方一行
+    // 先量段內數值是否放得下(60 -> 44),放不下 -> 外側
+    const segInfo = rows.map((r, i) => {
+      const tot = r.parts.reduce((a, p) => a + p.v, 0), usable = barW - GAP * (r.parts.length - 1);
+      let xa = 0;
+      return r.parts.map((p, j) => {
+        const w = usable * p.v / tot, x = xa; xa += w + GAP;
+        let fsz = 60, vv = mkVal(p, fsz);
+        if (vv.w + 32 > w) { fsz = 44; vv.e.remove(); vv = mkVal(p, fsz); }
+        const inside = vv.w + 32 <= w;
+        if (!inside) outside[i].push(j);
+        return {p, x, w, vv, inside, fsz};
+      });
+    });
+    const anyOut = outside.some(o => o.length);
+    let bh = P ? 88 : 96, rg = anyOut ? 84 : 72;
+    const need = () => R * (bh + LB) + (R - 1) * rg + (anyOut ? 70 : 0);
+    while (need() > avail && bh > 56) bh -= 4;
+    while (need() > avail && rg > (anyOut ? (P ? 40 : 80) : (P ? 24 : 48))) rg -= 4;
+    if (need() > avail) probs.push(`排不下:需要 ${need()}px,可用 ${avail}px(減少列數)`);
+    let y = top0 + Math.max(0, avail - need()) / 2;
+    const rad = 10;
+    rows.forEach((r, i) => {
+      const o = lbls[i], lh = box(o.e).height;
+      Object.assign(o.e.style, P ? {left: barL + "px", top: y + "px"} : {left: (barL - 28 - o.w) + "px", top: (y + bh / 2 - lh / 2) + "px"});
+      const yb = y + LB;       // 條上緣
+      const cont = mk("srow", null, {left: barL + "px", top: yb + "px", width: barW + "px", height: bh + "px", clipPath: "inset(0% 100% 0% 0%)"});
+      const fades = [], infos = segInfo[i];
+      infos.forEach((s, j) => {
+        const last = j === infos.length - 1;
+        const sg = document.createElement("div");
+        sg.className = "seg"; sg.id = `seg-${i}-${j}`;
+        Object.assign(sg.style, {left: s.x + "px", top: 0, width: s.w + "px", height: bh + "px", background: cOf(s.p),
+                                 borderRadius: last ? `0 ${rad}px ${rad}px 0` : "0"});
+        cont.appendChild(sg);
+        const ve = s.vv.e;
+        if (s.inside) {
+          cont.appendChild(ve);        // 搬進容器:跟著 clip 展開,數值在展開後淡入
+          Object.assign(ve.style, {left: (s.x + (s.w - s.vv.w) / 2) + "px", top: (bh / 2 - s.vv.h / 2) + "px", color: txtOn(cOf(s.p))});
+          fades.push(ve);
+        } else {
+          // 外側:條下方 14px 引線 + 數值(置中於段,夾在條左右界內)
+          const cx = barL + s.x + s.w / 2, tx = Math.min(Math.max(barL, cx - s.vv.w / 2), barR - s.vv.w);
+          const ln = mk("lead", null, {left: (cx - 1) + "px", top: (yb + bh + 2) + "px", width: "2px", height: "16px"});
+          Object.assign(ve.style, {left: tx + "px", top: (yb + bh + 20) + "px", color: V("--label")});
+          fades.push(ve, ln);
+        }
+      });
+      // 外側標籤互碰檢查
+      const ob = outside[i].map(j => box(infos[j].vv.e));
+      for (let a = 1; a < ob.length; a++) if (ob[a - 1].right + 8 > ob[a].left) probs.push(`第 ${i + 1} 列外側數值互相重疊(合併小段或減少段數)`);
+      rowAnim.push({i, cont, fades});
+      y += bh + LB + rg;
+    });
+    lbls.forEach((o, i) => rowAnim[i].lbl = o.e);
+  } else {
+    // ---- 甜甜圈:左圖右清單;弧內數值放不下 -> 外側 + 引線
+    const r0 = rows[0], tot = r0.parts.reduce((a, p) => a + p.v, 0);
+    const avail = bottom - top0;
+    const nNm = d.names.length;
+    const Ro = P ? Math.min(240, (avail - 64 * nNm - 150) / 2) : Math.min(280, avail / 2 - 40), thick = Ro * 0.42, rm = Ro - thick / 2, hole = Ro - thick;
+    const nmW = Math.max(...d.names.map(nm => { const t = mk("nm", nm, {opacity: 0}); const w = box(t).width + 52; t.remove(); return w; }));
+    const cx = P ? padX + (d.W - padX - padR) / 2 : (d.W - (2 * Ro + 150 + nmW)) / 2 + Ro, cy = P ? top0 + 60 + Ro : top0 + avail / 2;
+    if (Ro < (P ? 130 : 150)) probs.push(`甜甜圈半徑只有 ${Math.round(Ro)}px(空間不足)`);
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "chart"); svg.setAttribute("width", d.W); svg.setAttribute("height", d.H);
+    st.appendChild(svg);
+    const circ = 2 * Math.PI * rm, GAPA = 3;
+    let acc = 0;
+    const arcs = r0.parts.map((p, j) => {
+      const frac = p.v / tot, a0 = acc, len = frac * circ; acc += len;
+      const c = document.createElementNS(NS, "circle");
+      for (const [k, v] of Object.entries({cx, cy, r: rm, fill: "none", stroke: cOf(p), "stroke-width": thick, id: "seg-0-" + j,
+                                           transform: `rotate(${-90 + a0 / circ * 360} ${cx} ${cy})`, "stroke-dasharray": `0 ${circ}`})) c.setAttribute(k, v);
+      svg.appendChild(c);
+      // 弧中點角度(0 = 12 點鐘,順時針)
+      const mid = (a0 + len / 2) / circ * 2 * Math.PI - Math.PI / 2;
+      // 弧內放得下:文字矩形四角都落在環內(半徑 hole+4 .. Ro-4)且角度在弧段內(留 3px 邊)
+      const fitIn = vv => {
+        const mx = cx + rm * Math.cos(mid), my = cy + rm * Math.sin(mid), hw = vv.w / 2 + 6, hh = vv.h / 2 + 2;
+        const a0r = a0 / circ * 2 * Math.PI - Math.PI / 2, a1r = a0r + len / circ * 2 * Math.PI, pad = 3 / rm;
+        return [[-hw, -hh], [hw, -hh], [-hw, hh], [hw, hh]].every(([dx, dy]) => {
+          const x = mx + dx - cx, y = my + dy - cy, r = Math.hypot(x, y);
+          let ang = Math.atan2(y, x); while (ang < a0r - 1e-9) ang += 2 * Math.PI;
+          return r >= hole + 4 && r <= Ro - 4 && ang >= a0r + pad && ang <= a1r - pad;
+        });
+      };
+      let fsz = 52, vv = mkVal(p, fsz);
+      if (!fitIn(vv)) { vv.e.remove(); fsz = 44; vv = mkVal(p, fsz); }
+      const inside = fitIn(vv);
+      const fades = [vv.e];
+      if (inside) {
+        Object.assign(vv.e.style, {left: (cx + rm * Math.cos(mid) - vv.w / 2) + "px", top: (cy + rm * Math.sin(mid) - vv.h / 2) + "px", color: txtOn(cOf(p))});
+      } else {
+        const p1 = [cx + (Ro + 4) * Math.cos(mid), cy + (Ro + 4) * Math.sin(mid)], p2 = [cx + (Ro + 34) * Math.cos(mid), cy + (Ro + 34) * Math.sin(mid)];
+        const ln = document.createElementNS(NS, "line");
+        for (const [k, v] of Object.entries({x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], stroke: V("--text2"), "stroke-width": 2, opacity: 0})) ln.setAttribute(k, v);
+        svg.appendChild(ln); fades.push(ln);
+        const right = Math.cos(mid) >= 0;
+        Object.assign(vv.e.style, {left: (right ? p2[0] + 10 : p2[0] - 10 - vv.w) + "px", top: (p2[1] - vv.h / 2) + "px", color: V("--label")});
+        const b = box(vv.e);
+        if (b.top < top0 - 20 || b.bottom > bottom + 10) probs.push(`外側數值「${p.name}」超出可用區`);
+      }
+      return {c, len: Math.max(0, len - GAPA), a0, p, fades};
+    });
+    // 洞內:列標籤
+    const hl = mk("rlbl", r0.label, {fontSize: "52px", textAlign: "center", opacity: 0});
+    hl.id = "row-0";
+    if (box(hl).width > hole * 1.7) { hl.style.whiteSpace = "normal"; hl.style.width = (hole * 1.7) + "px"; }
+    Object.assign(hl.style, {left: (cx - box(hl).width / 2) + "px", top: (cy - box(hl).height / 2) + "px"});
+    // 右側清單:色塊 + 名稱
+    const lx = P ? padX + (d.W - padX - padR - nmW + 52) / 2 : cx + Ro + 150, step = P ? 64 : 84, ly0 = P ? cy + Ro + 70 + 20 : cy - (d.names.length - 1) * step / 2;
+    const names = d.names.map((nm, i) => {
+      const e = mk("nm", null, {left: lx + "px", top: (ly0 + i * step - 31) + "px"});
+      const sw = document.createElement("span");
+      sw.className = "sw"; sw.style.background = colors[i];
+      e.appendChild(sw); e.append(nm);
+      if (box(e).right > d.W - padR) probs.push(`段名「${nm}」超出右邊界`);
+      return e;
+    });
+    ringAnim = {arcs, circ, hl, names};
+  }
+
+  // ---- 時間軸(只用 GSAP;seek(t, false) 才會觸發 onUpdate)
+  if (d.title_in) {
+    tl.from(title, {opacity: 0, y: 16, duration: 0.4, ease: "power2.out"}, 0);
+    tl.from(head, {opacity: 0, duration: 0.4, ease: "power2.out"}, 0.1);
+  }
+  const CLIP0 = "inset(0% 0% 0% 0%)";
+  if (!donut) {
+    rowAnim.forEach(o => {
+      if (o.i >= d.shown) return;
+      if (o.i < d.prev) { tl.set([o.lbl, ...o.cont.querySelectorAll(".sval"), ...o.fades], {opacity: 1}, 0); tl.set(o.cont, {clipPath: CLIP0}, 0); return; }
+      const at = d.lead + d.step * (o.i - d.prev);
+      tl.to(o.lbl, {opacity: 1, duration: 0.25, ease: "power2.out"}, at);
+      tl.fromTo(o.cont, {clipPath: "inset(0% 100% 0% 0%)"}, {clipPath: CLIP0, duration: d.step, ease: "power2.out"}, at);
+      tl.to(o.fades, {opacity: 1, duration: 0.2, ease: "power2.out"}, at + d.step * 0.6);
+    });
+  } else if (d.shown > 0) {
+    const {arcs, circ, hl, names} = ringAnim;
+    const setLen = f => arcs.forEach(a => {
+      const vis = Math.max(0, Math.min(a.len, f * circ - a.a0));
+      a.c.setAttribute("stroke-dasharray", `${vis} ${circ}`);
+    });
+    const allFades = arcs.flatMap(a => a.fades);
+    if (d.prev > 0) {
+      setLen(1);
+      tl.set([hl, ...names, ...allFades], {opacity: 1}, 0);
+    } else {
+      const c = {f: 0};
+      tl.to(c, {f: 1, duration: d.step, ease: "power2.out", onUpdate: () => setLen(c.f)}, d.lead);
+      tl.to([hl, ...names], {opacity: 1, duration: 0.3, ease: "power2.out"}, d.lead);
+      arcs.forEach(a => tl.to(a.fades, {opacity: 1, duration: 0.2, ease: "power2.out"}, d.lead + d.step * Math.min(0.8, (a.a0 / circ) + 0.35)));
+    }
+  }
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);     // 補到段長(之後定格)
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

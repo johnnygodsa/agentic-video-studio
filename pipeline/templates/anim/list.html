@@ -1,0 +1,155 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- list(編號清單):標題 + 圓點序號項目逐一彈出,可帶 note(最後一項後淡入)。資料由 anim_web.list_data 產生;
+     字型 / tokens.css / gsap.min.js 由 anim_web 注入。window.build(d) 建 window.tl(paused)並回傳 {dur, problems}。
+     逐步模式:項目 prev..shown-1 在這一段播出現動畫,前 prev 項在 t=0 已是終態(prev == shown = 凍結)。
+     暴露的 id:#title、#dot-k、#item-k、#note。 -->
+<style>
+.dot { border-radius: 50%; background: var(--accent); color: #1b1414; font-family: var(--font-bold); font-size: 44px;
+       display: flex; align-items: center; justify-content: center; line-height: 1; opacity: 0; }
+.item { font-family: var(--font-bold); color: var(--text); line-height: 1.25; text-wrap: balance; opacity: 0; }
+.note { font-family: var(--font-bold); color: var(--label); line-height: 1.25; opacity: 0; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const probs = [], padX = px("--pad-x");
+  const mk = (cls, txt, css, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+
+  // ---- 標題、短橫條、來源
+  const title = mk("title", d.title, {left: padX + "px", top: px("--title-top") + "px"});
+  title.id = "title";
+  const rule = mk("rule", null, {left: padX + "px", top: (box(title).bottom + 10) + "px"});
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src);
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+
+  // ---- 版面:字級先縮到 52,還放不下才換行;列距 <= 170,整組略偏上
+  const P = d.W <= d.H;      // 直式(畫面窗 1080x1080):單欄、字級 60 -> 44 自適應、放不下自動分頁
+  const n = d.items.length, DOT = P ? 60 : 68, tx = padX + DOT + (P ? 28 : 40), maxW = (P ? d.W - px("--pad-r") : d.W - padX) - tx;
+  const bottom = d.src ? px("--content-bottom-src") : px("--content-bottom");
+  const top0 = P ? Math.max(px("--content-top"), box(rule).bottom + 28) : px("--content-top");
+  let note = null, noteH = 0;
+  if (d.note) {
+    note = mk("note", d.note, {fontSize: "48px", left: padX + "px"});
+    note.id = "note";
+    if (P) { note.style.whiteSpace = "normal"; note.style.width = (d.W - px("--pad-r") - padX) + "px"; }
+    noteH = box(note).height;
+  }
+  const availI = bottom - top0 - (note ? noteH + 32 : 0);
+  const txt = d.items.map((s, k) => { const e = mk("item", s, {left: tx + "px"}); e.id = "item-" + k; return e; });
+  let dots, pageOf = txt.map(() => 0), pages = 1;
+  if (!P) {
+    let fs = 72;
+    const setFs = f => txt.forEach(e => { e.style.fontSize = f + "px"; });
+    const widest = () => Math.max(...txt.map(e => box(e).width));
+    setFs(fs);
+    while (fs > 52 && widest() > maxW) { fs -= 2; setFs(fs); }
+    if (widest() > maxW) txt.forEach(e => { e.style.whiteSpace = "normal"; e.style.width = maxW + "px"; });
+    const pitch = Math.min(170, availI / n), y0 = top0 + (availI - pitch * n) * 0.4;
+    dots = txt.map((e, k) => {
+      const cy = y0 + pitch * (k + 0.5), h = box(e).height;
+      e.style.top = (cy - h / 2) + "px";
+      if (h > pitch - 8) probs.push(`第 ${k + 1} 項 ${Math.round(h)}px 高,列距只有 ${Math.round(pitch)}px(項目太長或太多)`);
+      const dt = mk("dot", String(k + 1), {left: padX + "px", top: (cy - DOT / 2) + "px", width: DOT + "px", height: DOT + "px"});
+      dt.id = "dot-" + k;
+      return dt;
+    });
+    if (note) note.style.top = Math.min(bottom - noteH, y0 + pitch * n + 24) + "px";
+  } else {
+    // 直式:項目一律換行(寬 maxW);由 60 起縮到全部放進一頁,縮到 44 還放不下就依序切頁(最後一頁要留備註的位置),頁數 > 3 報 problems
+    const GAP = 28, rowsH = () => txt.map(e => Math.max(DOT, box(e).height));
+    const paginate = (lim = availI) => {
+      const hs = rowsH(), pg = [];
+      let cur = 0, used = 0;
+      hs.forEach((h, k) => {
+        if (used > 0 && used + GAP + h > lim) { cur++; used = 0; }
+        used += (used > 0 ? GAP : 0) + h; pg.push(cur);
+      });
+      return {pg, cnt: cur + 1};
+    };
+    txt.forEach(e => { e.style.whiteSpace = "normal"; e.style.width = maxW + "px"; });
+    let fs = 60, res;
+    for (; fs >= 44; fs -= 2) {
+      txt.forEach(e => { e.style.fontSize = fs + "px"; });
+      res = paginate();
+      if (res.cnt === 1) break;
+    }
+    fs = Math.max(44, fs);
+    txt.forEach(e => { e.style.fontSize = fs + "px"; });
+    if (res.cnt > 1) {           // 分頁時讓各頁高度平均(避免最後一頁只剩一項)
+      let lo = Math.max(...rowsH()), hi = availI;
+      while (hi - lo > 4) { const m = (lo + hi) / 2; if (paginate(m).cnt <= res.cnt) hi = m; else lo = m; }
+      res = paginate(hi);
+    }
+    pageOf = res.pg; pages = res.cnt;
+    if (pages > 3) probs.push(`清單太長:直式要分 ${pages} 頁(最多 3 頁;縮短項目或拆成兩張)`);
+    const hs = rowsH();
+    const lay = [];                                              // 各頁內垂直置中(略偏上)
+    for (let p = 0; p < pages; p++) {
+      const idx = txt.map((_, k) => k).filter(k => pageOf[k] === p);
+      const tot = idx.reduce((a, k) => a + hs[k], 0) + GAP * (idx.length - 1);
+      let y = top0 + (availI - tot) * 0.4;
+      idx.forEach(k => { lay[k] = y + hs[k] / 2; y += hs[k] + GAP; });
+      if (p === pages - 1 && note) note.style.top = Math.min(bottom - noteH, y - GAP + 28) + "px";
+    }
+    dots = txt.map((e, k) => {
+      const cy = lay[k], h = box(e).height;
+      e.style.top = (cy - h / 2) + "px";
+      const dt = mk("dot", String(k + 1), {left: padX + "px", top: (cy - DOT / 2) + "px", width: DOT + "px", height: DOT + "px"});
+      dt.id = "dot-" + k;
+      return dt;
+    });
+  }
+
+  // ---- 時間軸
+  const tl = gsap.timeline({paused: true});
+  if (d.title_in) {
+    tl.from(title, {opacity: 0, y: 16, duration: 0.4, ease: "power2.out"}, 0);
+    tl.from([rule, src].filter(Boolean), {opacity: 0, duration: 0.4, ease: "power2.out"}, 0.1);
+  }
+  let lastAt = 0;
+  const curPage = pageOf[Math.max(0, Math.min(n, d.shown) - 1)], prevPage = d.prev > 0 ? pageOf[d.prev - 1] : curPage;
+  for (let k = 0; k < Math.min(n, d.shown); k++) {
+    if (k < d.prev) {
+      if (pageOf[k] === curPage) tl.set([dots[k], txt[k]], {opacity: 1}, 0);
+      else if (pageOf[k] === prevPage) {       // 上一頁的項目:段頭還在,新頁第一項彈出前淡出
+        tl.set([dots[k], txt[k]], {opacity: 1}, 0);
+        tl.to([dots[k], txt[k]], {opacity: 0, duration: Math.min(0.28, d.start), ease: "power2.in"}, 0);
+      }
+      continue;
+    }
+    const at = d.start + d.gap * (k - d.prev);
+    lastAt = at;
+    if (k > 0 && pageOf[k] !== pageOf[k - 1] && k > d.prev)       // 全播模式:跨頁時先把上一頁淡出(用掉彈出前的間隔)
+      tl.to(txt.map((_, j) => j).filter(j => pageOf[j] === pageOf[k - 1]).flatMap(j => [dots[j], txt[j]]), {opacity: 0, duration: Math.min(0.28, d.gap * 0.5), ease: "power2.in"}, at - Math.min(0.3, d.gap * 0.5));
+    tl.fromTo(dots[k], {opacity: 0, scale: 0.05}, {opacity: 1, scale: 1, duration: d.pop, ease: "back.out(1.7)"}, at);
+    tl.fromTo(txt[k], {opacity: 0, y: 22}, {opacity: 1, y: 0, duration: d.pop, ease: "power3.out"}, at);
+  }
+  if (note && d.shown >= n) {
+    if (d.prev >= n) tl.set(note, {opacity: 1}, 0);
+    else tl.fromTo(note, {opacity: 0, y: 12}, {opacity: 1, y: 0, duration: d.note_s, ease: "power3.out"}, lastAt + d.pop);
+  }
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

@@ -1,0 +1,153 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- kpi(大數字並排):cells 2–4 格,每格 label / 數字(count-up,可帶 unit)/ delta(預設正綠上箭頭、負紅下箭頭、其他灰;cell.better:"down" 時顏色對調,箭頭仍照漲跌)/ note;hi = 格序號(金色外框)。
+     資料由 anim_web.kpi_data 產生(val = {num, dec, comma, pre, suf} 或 {text})。level = 已顯示的格數;prev -> shown 為這一段播的範圍。
+     各格同一水平帶對齊(標籤 / 數字 / 變化 / 註的高度取全格最大),數字字級取全格共同可放下的最大值(下限 72)。暴露的 id:#title、#cell-k、#val-k。 -->
+<style>
+.panel { background: var(--panel); border-radius: 28px; }
+.abs.klabel { font-family: var(--font-bold); font-size: 52px; line-height: 1.2; color: var(--label); text-align: center; white-space: normal; }
+.abs.knote { font-family: var(--font-bold); font-size: 44px; line-height: 1.25; color: var(--text2); text-align: center; white-space: normal; }
+.abs.kval { font-family: var(--font-bold); color: var(--text); line-height: 1; text-align: center; font-variant-numeric: tabular-nums; }
+.kval .u { margin-left: 6px; }
+.abs.kdelta { font-family: var(--font-bold); font-size: 56px; line-height: 1.1; display: flex; align-items: center; justify-content: center; gap: 12px; }
+.hiframe { box-sizing: border-box; border: 4px solid var(--accent); border-radius: 28px; }
+.portrait .abs.klabel { font-size: 48px; }
+.portrait .abs.kdelta { font-size: 52px; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const P = d.W <= d.H;       // 直式(原生畫面窗 1080x1080):2 格上下疊、3–4 格 2x2
+  const probs = [], padX = px("--pad-x"), padR = px("--pad-r"), NS = "http://www.w3.org/2000/svg";
+  const mk = (cls, txt, css, tag, parent) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    (parent || st).appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  const fmt = (v, dec, comma) => {
+    const s = v.toFixed(dec);
+    if (!comma) return s;
+    const [i, f] = s.split(".");
+    return i.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (f ? "." + f : "");
+  };
+  const n = d.cells.length;
+
+  const title = mk("title", d.title, {left: padX + "px", top: px("--title-top") + "px"});
+  title.id = "title";
+  if (box(title).right > d.W - padR) probs.push("標題超出右邊界,請縮短");
+  const rule = mk("rule", null, {left: padX + "px", top: (box(title).bottom + 10) + "px"});
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src);
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+
+  // ---- 格寬;各格內容(先放在容器外量尺寸,定位後移入各格容器)
+  const GAP = P ? 24 : 32, NC = P ? (n <= 2 ? 1 : 2) : n, NR = Math.ceil(n / NC), cw = (d.W - padX - padR - GAP * (NC - 1)) / NC, inner = cw - 48;
+  const top0 = Math.max(px("--content-top"), box(rule).bottom + 28), bottom = d.src ? px("--content-bottom-src") : px("--content-bottom");
+  const cells = d.cells.map((c, k) => {
+    const root = mk("cell", null, {width: cw + "px", opacity: 0});
+    root.id = "cell-" + k;
+    const panel = mk("panel", null, {left: 0, top: 0, width: cw + "px"}, "div", root);
+    const label = mk("klabel", c.label, {width: inner + "px", left: "24px"}, "div", root);
+    const val = mk("kval", null, {left: "24px", width: inner + "px"}, "div", root);
+    val.id = "val-" + k;
+    const num = document.createElement("span");
+    const pre = c.val.pre || "", suf = c.val.suf || "";
+    if (c.val.text != null) num.textContent = c.val.text;
+    else num.textContent = pre + fmt(c.val.num, c.val.dec, c.val.comma) + suf;
+    val.appendChild(num);
+    if (c.unit) { const u = document.createElement("span"); u.className = "u"; u.textContent = c.unit; val.appendChild(u); }
+    let delta = null, arrow = null;
+    if (c.delta) {
+      const t = c.delta.trim(), dir = /^[+＋]/.test(t) ? 1 : /^[-−–－]/.test(t) ? -1 : 0;
+      delta = mk("kdelta", null, {left: "24px", width: inner + "px"}, "div", root);
+      const good = (dir > 0) === (c.better !== "down");      // better:"down" = 數字越低越好(例:負評比例)-> 上升顯示紅、下降顯示綠;箭頭方向照實際漲跌
+      delta.style.color = dir === 0 ? V("--text2") : good ? V("--pos") : V("--neg");
+      if (dir) {
+        const s = document.createElementNS(NS, "svg");
+        s.setAttribute("width", 40); s.setAttribute("height", 36); s.setAttribute("viewBox", "0 0 40 36");
+        const p = document.createElementNS(NS, "polygon");
+        p.setAttribute("points", dir > 0 ? "20,2 38,34 2,34" : "2,2 38,2 20,34");
+        p.setAttribute("fill", "currentColor");
+        s.appendChild(p); delta.appendChild(s);
+      }
+      delta.append(t);
+    }
+    const note = c.note ? mk("knote", c.note, {left: "24px", width: inner + "px"}, "div", root) : null;
+    return {root, panel, label, val, num, delta, note, c};
+  });
+
+  // ---- 數字字級:全格共同,從大往小找放得下的(下限 72)
+  const bigFs = P ? (NC === 1 ? 120 : 92) : n <= 2 ? 160 : n === 3 ? 150 : 120;      // <= 160:GPU 文字 >162px 會走 SDF 路徑,count-up 時逐次渲染有幾個像素的隨機差
+  let fs = bigFs;
+  const fits = () => cells.every(o => { o.val.style.whiteSpace = "nowrap"; o.val.style.width = "auto"; const w = box(o.val).width; o.val.style.width = inner + "px"; return w <= inner; });
+  const setFs = f => cells.forEach(o => {
+    o.val.style.fontSize = f + "px";
+    const u = o.val.querySelector(".u"); if (u) u.style.fontSize = Math.max(44, Math.round(f * 0.45)) + "px";
+  });
+  setFs(fs);
+  while (!fits() && fs > 72) { fs -= 6; setFs(fs); }
+  if (!fits()) probs.push("數字太長放不進格子(縮到 72px 仍超出),請縮短或換 unit");
+  cells.forEach(o => { o.val.style.width = inner + "px"; });
+
+  // ---- 水平帶對齊:四個帶各取全格最大高度
+  const H = (key) => Math.max(0, ...cells.map(o => o[key] ? box(o[key]).height : 0));
+  const hL = H("label"), hV = H("val"), hD = H("delta"), hN = H("note");
+  const PADV = P ? 22 : 36, G1 = P ? 10 : 22, G2 = P ? 8 : 14;
+  const innerH = hL + G1 + hV + (hD ? G2 + hD : 0) + (hN ? G2 + hN : 0);
+  const ph = innerH + PADV * 2, avail = bottom - top0, totalH = NR * ph + (NR - 1) * GAP;
+  if (totalH > avail) probs.push(`格子高度 ${Math.round(totalH)}px 超過可用 ${Math.round(avail)}px`);
+  const py = top0 + Math.max(0, (avail - totalH) * 0.4);
+  cells.forEach((o, k) => {
+    const x = padX + (k % NC) * (cw + GAP), yk = py + Math.floor(k / NC) * (ph + GAP);
+    Object.assign(o.root.style, {left: x + "px", top: yk + "px", height: ph + "px"});
+    o.panel.style.height = ph + "px";
+    let y = PADV;
+    o.label.style.top = y + "px"; y += hL + G1;
+    o.val.style.top = y + "px"; y += hV;
+    if (o.delta) o.delta.style.top = (y + G2) + "px";
+    if (hD) y += G2 + hD;
+    if (o.note) o.note.style.top = (y + G2) + "px";
+    o.hiEl = null;
+    if (d.hi === k) {
+      o.hiEl = mk("hiframe", null, {left: 0, top: 0, width: cw + "px", height: ph + "px"}, "div", o.root);
+    }
+  });
+
+  // ---- 時間軸:每格彈入(ease-back)+ 數字 count-up
+  const tl = gsap.timeline({paused: true});
+  const head = [rule, src].filter(Boolean);
+  if (d.title_in) {
+    tl.from(title, {opacity: 0, y: 16, duration: 0.4, ease: "power2.out"}, 0);
+    tl.from(head, {opacity: 0, duration: 0.4, ease: "power2.out"}, 0.1);
+  }
+  cells.forEach((o, k) => {
+    if (k >= d.shown) return;
+    const c = o.c;
+    if (k < d.prev) { tl.set(o.root, {opacity: 1}, 0); return; }
+    const at = d.lead + d.gap * (k - d.prev), cnt = {v: 0};
+    tl.fromTo(o.root, {opacity: 0, scale: 0.9}, {opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.5)", transformOrigin: "50% 50%"}, at);
+    if (c.val.text == null) {
+      o.num.textContent = (c.val.pre || "") + fmt(0, c.val.dec, c.val.comma) + (c.val.suf || "");
+      tl.to(cnt, {v: c.val.num, duration: d.cell_s - 0.1, ease: "power2.out",
+                  onUpdate: () => { o.num.textContent = (c.val.pre || "") + fmt(cnt.v, c.val.dec, c.val.comma) + (c.val.suf || ""); }}, at + 0.1);
+    }
+  });
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);     // 補到段長(之後定格)
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

@@ -1,0 +1,283 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- line(折線 / 面積):x = 類別或日期標籤(scale:"time" 按日期比例,格式同 timeline:YYYY、YYYY/M、YYYY/M/D)、lines ≤3(多線出圖例)、
+     points 標註點(垂直虛線 + 短標籤,最後一條線畫到該 x 時彈入)、area 面積、unit 單位(圖例列右側)、hi 該線加粗 + 末點數字金色。
+     資料由 anim_web.line_data 產生。level = 已畫出的線數;prev -> shown 為這一段播的範圍(prev 以前的線在 t=0 已是終態)。
+     線由左至右以 clipPath 寬度線性展開(讓標註點能對準時間);末點數字 count-up。暴露的 id:#title、#line-k、#end-k、#note-j。 -->
+<style>
+.endv { font-family: var(--font-bold); font-size: 52px; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; opacity: 0; }
+.endv .u { font-size: 40px; margin-left: 6px; }
+.tick { font-family: var(--font-bold); font-size: 44px; line-height: 1; color: var(--text2); font-variant-numeric: tabular-nums; text-align: right; }
+.xl { font-family: var(--font-bold); font-size: 44px; line-height: 1; color: var(--text2); text-align: center; }
+.dot { border-radius: 50%; opacity: 0; }
+.note { font-family: var(--font-bold); font-size: 48px; line-height: 1.1; color: var(--accent); opacity: 0; transform-origin: 50% 100%; }
+.dash { width: 3px; opacity: 0; background: repeating-linear-gradient(to bottom, var(--accent) 0 10px, transparent 10px 20px); height: 0; }
+.unit { font-family: var(--font-bold); font-size: 44px; line-height: 1.2; color: var(--text2); }
+svg.chart { position: absolute; left: 0; top: 0; overflow: visible; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const P = d.W <= d.H;       // 直式(原生畫面窗 1080x1080)
+  const probs = [], padX = px("--pad-x"), padR = px("--pad-r"), NS = "http://www.w3.org/2000/svg";
+  const mk = (cls, txt, css, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+  let svg = null;
+  const sv = (tag, attrs, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  const fmt = (v, dec) => {
+    const s = v.toFixed(dec);
+    if (Math.abs(v) < 10000) return s;
+    const [i, f] = s.split(".");
+    return i.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (f ? "." + f : "");
+  };
+  const L = d.lines, S = L.length, N = d.x.length;
+  const colOf = s => V("--series-" + (s + 1));
+
+  // ---- 標題、短橫條、圖例列(多線或有單位才出現)、來源
+  const title = mk("title", d.title, {left: padX + "px", top: px("--title-top") + "px"});
+  title.id = "title";
+  if (box(title).right > d.W - padR) probs.push("標題超出右邊界,請縮短");
+  const rule = mk("rule", null, {left: padX + "px", top: (box(title).bottom + 10) + "px"});
+  const legend = [];
+  let top0 = Math.max(px("--content-top"), box(rule).bottom + 28);
+  if (S > 1 || d.unit) {
+    const ly = box(rule).bottom + 22;
+    let x = padX;
+    if (S > 1) L.forEach((l, s) => {
+      const e = mk("legend", null, {left: x + "px", top: ly + "px"});
+      const sw = document.createElement("i");
+      sw.style.background = colOf(s);
+      e.appendChild(sw); e.append(l.name);
+      x = box(e).right + 48;
+      legend.push(e);
+    });
+    if (d.unit) {
+      const u = mk("unit", "單位:" + d.unit, {top: (ly + 4) + "px"});
+      u.style.left = (d.W - padR - box(u).width) + "px";
+      if (S > 1 && box(u).left < x) probs.push("圖例與單位標籤重疊");
+      legend.push(u);
+    }
+    top0 = Math.max(top0, ly + 53 + 28);
+  }
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src);
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+
+  // ---- x 軸:類別(均分)或時間(按日期比例)
+  function parseDates(list) {
+    const out = []; let yr = null, lastMD = -1;
+    for (const s of list) {
+      let m = /^\s*(\d{4})(?:[\/\-.](\d{1,2}))?(?:[\/\-.](\d{1,2}))?(?!\d)/.exec(s), y, mo, da;
+      if (m) { y = +m[1]; mo = m[2] ? +m[2] : 1; da = m[3] ? +m[3] : 1; yr = y; lastMD = mo * 40 + da; }
+      else {
+        m = /^\s*(\d{1,2})\/(\d{1,2})(?!\d)/.exec(s);
+        if (!m || yr == null) return null;
+        mo = +m[1]; da = +m[2];
+        if (mo * 40 + da < lastMD) yr += 1;
+        lastMD = mo * 40 + da; y = yr;
+      }
+      if (mo < 1 || mo > 12 || da < 1 || da > 31) return null;
+      out.push(Date.UTC(y, mo - 1, da) / 86400000);
+    }
+    return out;
+  }
+  let days = null;
+  if (d.scale === "time") {
+    days = parseDates(d.x);
+    if (days) for (let i = 1; i < days.length; i++) if (days[i] <= days[i - 1]) days = null;
+    if (!days) probs.push("scale:time 但 x 日期無法解析或未遞增,改為均分");
+  }
+
+  // ---- y 軸:自動取整刻度(1、2、5 × 10^n)
+  const all = L.flatMap(l => l.data);
+  const vmin = Math.min(...all), vmax = Math.max(...all);
+  const lo = d.ymin != null ? d.ymin : ((vmin >= 0 && (d.area || vmin <= 0.6 * vmax)) ? 0 : vmin);
+  let hiV = d.ymax != null ? d.ymax : vmax;
+  if (hiV <= lo) hiV = lo + 1;
+
+  // ---- 標註點:先量標籤寬,決定上方要留的高度
+  const notes = d.points.map((p, j) => {
+    const e = mk("note", p[1]); e.id = "note-" + j;
+    return {e, w: box(e).width, h: box(e).height, x: p[0]};
+  });
+  const noteH = notes.length ? 64 : 0;
+  const bottom = d.src ? px("--plot-bottom-src") : px("--plot-bottom");     // 橫式 780 / 800(舊 752 / 800):x 軸標籤下緣離字幕安全線 72 / 52px
+  const plotTop = top0 + noteH + 16, xlH = 56, plotBottom = bottom - xlH - 14;
+  const plotH = plotBottom - plotTop;
+  if (plotH < 260) probs.push(`圖表高度只剩 ${Math.round(plotH)}px(標題 / 圖例 / 標註佔太多)`);
+  const nT = Math.max(2, Math.min(5, Math.floor(plotH / 90)));
+  const raw = (hiV - lo) / nT, mag = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / mag;
+  const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * mag;
+  const t0v = Math.floor(lo / step + 1e-9) * step, t1v = Math.ceil(hiV / step - 1e-9) * step;
+  const tdec = Math.max(0, -Math.floor(Math.log10(step) + 1e-9));      // 刻度小數位只看刻度間距(不跟資料位數)
+  const ticks = []; for (let v = t0v; v <= t1v + step * 1e-6; v += step) ticks.push(+v.toFixed(6));
+  const yMin = ticks[0], yMax = ticks[ticks.length - 1];
+  const ty = ticks.map(v => { const e = mk("tick", fmt(v, tdec)); return {e, v, w: box(e).width, h: box(e).height}; });
+
+  // ---- 末點數字(量寬)-> 繪圖區左右界
+  const ends = L.map((l, s) => {
+    const e = mk("endv", null);
+    const num = document.createElement("span");
+    num.textContent = fmt(l.data[N - 1], l.dec);
+    e.appendChild(num);
+    if (d.unit) { const u = document.createElement("span"); u.className = "u"; u.textContent = d.unit; e.appendChild(u); }
+    e.id = "end-" + s;
+    const w = box(e).width;
+    num.textContent = fmt(0, l.dec);
+    return {e, num, w, h: box(e).height};
+  });
+  const endW = Math.max(...ends.map(o => o.w));
+  const plotL = padX + Math.max(...ty.map(o => o.w)) + 28, plotR = d.W - padR - endW - 36, plotW = plotR - plotL;
+  if (plotW < (P ? 400 : 700)) probs.push(`繪圖區寬度只有 ${Math.round(plotW)}px(末點數字或刻度太寬)`);
+  const yOf = v => plotBottom - (v - yMin) / (yMax - yMin) * plotH;
+  const xAt = i => plotL + (days ? (days[i] - days[0]) / (days[N - 1] - days[0]) : i / (N - 1)) * plotW;
+
+  // ---- SVG:格線、基線、面積、折線(各線一個 clipPath,寬度由左展開)
+  svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "chart"); svg.setAttribute("width", d.W); svg.setAttribute("height", d.H);
+  st.appendChild(svg);
+  const defs = sv("defs", {});
+  const grid = [];
+  ticks.forEach((v, i) => {
+    const y = yOf(v), base = i === 0;
+    grid.push(sv("line", {x1: plotL, x2: plotR + 20, y1: y, y2: y, stroke: base ? "rgba(200,200,205,0.5)" : "rgba(200,200,205,0.14)", "stroke-width": 2}));
+    const o = ty[i];
+    Object.assign(o.e.style, {left: (plotL - 24 - o.w) + "px", top: (y - o.h / 2) + "px"});
+  });
+  const clipX = plotL - 24, clipW = plotW + 24 + 36;      // 線頭圓角與末點圓點留邊
+  const lineEls = L.map((l, s) => {
+    const col = colOf(s), pts = l.data.map((v, i) => [xAt(i), yOf(v)]);
+    const clip = sv("clipPath", {id: "clip-" + s}, defs);
+    const cr = sv("rect", {x: clipX, y: 0, width: 0, height: d.H}, clip);
+    const g = sv("g", {"clip-path": `url(#clip-${s})`});
+    if (d.area) {
+      const gr = sv("linearGradient", {id: "grad-" + s, x1: 0, y1: 0, x2: 0, y2: 1}, defs);
+      sv("stop", {offset: 0, "stop-color": col, "stop-opacity": S > 1 ? 0.28 : 0.4}, gr);
+      sv("stop", {offset: 1, "stop-color": col, "stop-opacity": 0.02}, gr);
+      sv("path", {d: "M" + pts.map(p => p.join(",")).join("L") + `L${pts[N - 1][0]},${yOf(yMin)}L${pts[0][0]},${yOf(yMin)}Z`, fill: `url(#grad-${s})`}, g);
+    }
+    const p = sv("path", {d: "M" + pts.map(q => q.join(",")).join("L"), fill: "none", stroke: col,
+                          "stroke-width": d.hi === s ? 9 : 6, "stroke-linejoin": "round", "stroke-linecap": "round"}, g);
+    p.id = "line-" + s;
+    const dot = mk("dot", null, {width: "24px", height: "24px", background: col,
+                                 left: (pts[N - 1][0] - 12) + "px", top: (pts[N - 1][1] - 12) + "px"});
+    return {cr, pts, dot, col};
+  });
+  // 末點數字:緊貼末點右側,同高度的往下推開
+  const order = ends.map((o, s) => s).sort((a, b) => lineEls[a].pts[N - 1][1] - lineEls[b].pts[N - 1][1]);
+  let prevB = -1e9;
+  order.forEach(s => {
+    const o = ends[s]; let y = lineEls[s].pts[N - 1][1] - o.h / 2;
+    if (y < prevB + 6) y = prevB + 6;
+    prevB = y + o.h;
+    Object.assign(o.e.style, {left: (plotR + 32) + "px", top: y + "px"});
+    if (d.hi === s) o.e.style.color = V("--accent");
+  });
+  if (prevB > plotBottom + 40) probs.push("末點數字往下推出繪圖區");
+
+  // ---- x 軸標籤:由左而右貪婪挑選,互不重疊(最後一個一定留)
+  const xl = d.x.map((s, i) => { const e = mk("xl", s); return {e, i, w: box(e).width}; });
+  const kept = [];
+  xl.forEach(o => {
+    const l = xAt(o.i) - o.w / 2, last = kept[kept.length - 1];
+    if (!last || l >= xAt(last.i) + last.w / 2 + (P ? 72 : 28)) kept.push(o);       // 直式標籤間距加大 = 刻度約減半
+  });
+  const lastX = xl[N - 1];
+  if (kept[kept.length - 1] !== lastX) {
+    while (kept.length > 1 && xAt(lastX.i) - lastX.w / 2 < xAt(kept[kept.length - 1].i) + kept[kept.length - 1].w / 2 + 28) kept.pop();
+    kept.push(lastX);
+  }
+  xl.forEach(o => {
+    if (!kept.includes(o)) { o.e.remove(); return; }
+    Object.assign(o.e.style, {left: (xAt(o.i) - o.w / 2) + "px", top: (plotBottom + 14) + "px"});
+  });
+
+  // ---- 標註點:x 對應(類別 = 標籤文字、時間 = 日期內插),垂直虛線 + 圓點(落在第一條線)+ 上方標籤
+  const noteEls = notes.map(n => {
+    let x = null;
+    const i0 = d.x.indexOf(n.x);
+    if (i0 >= 0) x = xAt(i0);
+    else if (days) {
+      const dd = parseDates([d.x[0], n.x]);      // 無年份的 M/D 沿用第一點的年份
+      if (dd && dd[1] >= days[0] && dd[1] <= days[N - 1]) x = plotL + (dd[1] - days[0]) / (days[N - 1] - days[0]) * plotW;
+    }
+    if (x == null) { probs.push(`標註點 x「${n.x}」對不到 x 軸標籤${days ? "或不在日期範圍內" : ""}`); return null; }
+    const ln0 = lineEls[0].pts, xs = ln0.map(p => p[0]);
+    let k = 0; while (k < N - 2 && xs[k + 1] < x) k++;
+    const t = (x - xs[k]) / (xs[k + 1] - xs[k] || 1), y = ln0[k][1] + (ln0[k + 1][1] - ln0[k][1]) * Math.min(1, Math.max(0, t));
+    const left = Math.min(Math.max(padX, x - n.w / 2), d.W - padR - n.w);
+    Object.assign(n.e.style, {left: left + "px", top: (top0 + 4) + "px"});
+    const dtop = top0 + 4 + n.h + 4;
+    const dash = mk("dash", null, {left: (x - 1.5) + "px", top: dtop + "px"});
+    const dot = mk("dot", null, {width: "22px", height: "22px", background: V("--accent"), left: (x - 11) + "px", top: (y - 11) + "px"});
+    return {x, n, dash, dh: plotBottom - dtop, dot, f: (x - clipX) / clipW};
+  }).filter(Boolean).sort((a, b) => a.x - b.x);
+  for (let j = 1; j < noteEls.length; j++) {
+    const a = noteEls[j - 1], b = noteEls[j];
+    if (box(a.n.e).right + 16 > box(b.n.e).left) probs.push(`標註「${a.n.e.textContent}」與「${b.n.e.textContent}」標籤重疊`);
+  }
+
+  // ---- 時間軸(只用 GSAP;seek(t, false) 才會觸發 count-up 的 onUpdate)
+  const tl = gsap.timeline({paused: true});
+  const head = [rule, ...legend, src].filter(Boolean);
+  if (d.title_in) {
+    tl.from(title, {opacity: 0, y: 16, duration: 0.4, ease: "power2.out"}, 0);
+    tl.from(head, {opacity: 0, duration: 0.4, ease: "power2.out"}, 0.1);
+  }
+  // 軸(格線、刻度、x 標籤):顯示過任何一條線之後都在;第一段淡入
+  const axis = [...grid, ...ty.map(o => o.e), ...xl.filter(o => kept.includes(o)).map(o => o.e)];
+  if (d.shown > 0 && d.prev > 0) tl.set(axis, {opacity: 1}, 0);
+  else { tl.set(axis, {opacity: 0}, 0); if (d.shown > 0) tl.to(axis, {opacity: 1, duration: 0.4, ease: "power2.out"}, 0.1); }
+  const full = d.shown >= S;
+  lineEls.forEach((o, s) => {
+    if (s >= d.shown) return;
+    if (s < d.prev) {
+      tl.set(o.cr, {attr: {width: clipW}}, 0);
+      tl.set([o.dot, ends[s].e], {opacity: 1}, 0);
+      ends[s].num.textContent = fmt(L[s].data[N - 1], L[s].dec);
+      return;
+    }
+    const at = d.lead + d.stag * (s - d.prev), c = {v: 0};
+    tl.to(o.cr, {attr: {width: clipW}, duration: d.draw, ease: "none"}, at);
+    tl.fromTo(ends[s].e, {opacity: 0, scale: 0.85}, {opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.7)", transformOrigin: "left center"}, at + d.draw - 0.7);
+    tl.to(c, {v: L[s].data[N - 1], duration: 0.7, ease: "power2.out",
+              onUpdate: () => { ends[s].num.textContent = fmt(c.v, L[s].dec); }}, at + d.draw - 0.7);
+    tl.fromTo(o.dot, {opacity: 0, scale: 0.3}, {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)"}, at + d.draw - 0.15);
+  });
+  // 標註點:只在最後一條線畫完的那一段(依 x 順序,隨線頭掃過而彈入);之前已畫完的段落直接是終態
+  noteEls.forEach(o => {
+    if (!full) return;
+    if (d.prev >= S) { tl.set([o.n.e, o.dot], {opacity: 1}, 0); tl.set(o.dash, {opacity: 1, height: o.dh}, 0); return; }
+    const at = Math.max(0, d.lead + d.stag * (S - 1 - d.prev) + d.draw * Math.min(1, Math.max(0, o.f)) - 0.15);
+    tl.set(o.dash, {opacity: 1}, at);
+    tl.to(o.dash, {height: o.dh, duration: 0.3, ease: "power2.out"}, at);
+    tl.fromTo(o.n.e, {opacity: 0, scale: 0.6, y: 4}, {opacity: 1, scale: 1, y: 0, duration: d.note_s, ease: "back.out(1.9)"}, at);
+    tl.fromTo(o.dot, {opacity: 0, scale: 0.3}, {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)"}, at + 0.1);
+  });
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);     // 補到段長(之後定格)
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

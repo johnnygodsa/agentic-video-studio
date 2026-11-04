@@ -1,0 +1,8271 @@
+{
+ "_doc": "語境讀音記憶(channel/_archive/plans/PLAN_C0試配與讀音記憶_2026-10-31.md §2;格式與指令見 pron_memory.py 檔頭)。tts_c0 / tts_pron_verify 自動寫入,手動登錄用 pron_memory.py add,不直接改檔。",
+ "entries": [
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "規",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|遊",
+    "規定"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[x][ì]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "她",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "她根"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/的"
+   ]
+  },
+  {
+   "char": "還",
+   "left": "生",
+   "right": "者",
+   "py": "[h][uán]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[h][uán]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "後生",
+    "者|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[h][uán]"
+   ]
+  },
+  {
+   "char": "分",
+   "left": "部",
+   "right": "的",
+   "py": "[f][èn]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[f][èn]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "大部",
+    "的時"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[f][èn]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "看",
+   "right": "到",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "實看",
+    "到艾"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/的"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "|",
+   "right": "了",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|",
+    "了貼"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[w][èi]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "貼",
+   "right": "自",
+   "py": "的",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "了貼",
+    "自然"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/的"
+   ]
+  },
+  {
+   "char": "調",
+   "left": "偷",
+   "right": "百",
+   "py": "[t][iáo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[t][iáo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "偷偷",
+    "百分"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[t][iáo]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "免",
+   "right": "一",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|免",
+    "一下"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/的"
+   ]
+  },
+  {
+   "char": "給",
+   "left": "補",
+   "right": "|",
+   "py": "[j][ǐ]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][ǐ]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "是補",
+    "|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[j][ǐ]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "補",
+   "right": "道",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "和補",
+    "道具"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[x][iě]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "的",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "接遊",
+    "的掉"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[x][ì]"
+   ]
+  },
+  {
+   "char": "給",
+   "left": "補",
+   "right": "也",
+   "py": "[j][ǐ]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][ǐ]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|補",
+    "也跟"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[j][ǐ]"
+   ]
+  },
+  {
+   "char": "調",
+   "left": "|",
+   "right": "好",
+   "py": "[t][iáo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[t][iáo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|",
+    "好之"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[t][iáo]"
+   ]
+  },
+  {
+   "char": "中",
+   "left": "打",
+   "right": "|",
+   "py": "[zh][òng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][òng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "機打",
+    "|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[zh][òng]"
+   ]
+  },
+  {
+   "char": "中",
+   "left": "打",
+   "right": "人",
+   "py": "[zh][òng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][òng]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "她打",
+    "人|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[zh][òng]"
+   ]
+  },
+  {
+   "char": "危",
+   "left": "到",
+   "right": "險",
+   "py": "[w][éi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][éi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "遇到",
+    "險|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[w][éi]"
+   ]
+  },
+  {
+   "char": "空",
+   "left": "|",
+   "right": "檔",
+   "py": "[k][òng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[k][òng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|",
+    "檔太"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[k][òng]"
+   ]
+  },
+  {
+   "char": "檔",
+   "left": "空",
+   "right": "太",
+   "py": "[d][ǎng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ǎng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|空",
+    "太明"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[d][ǎng]"
+   ]
+  },
+  {
+   "char": "空",
+   "left": "補",
+   "right": "檔",
+   "py": "[k][òng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[k][òng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "在補",
+    "檔|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[k][òng]"
+   ]
+  },
+  {
+   "char": "檔",
+   "left": "空",
+   "right": "|",
+   "py": "[d][ǎng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ǎng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "補空",
+    "|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[d][ǎng]"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "|",
+   "right": "製",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|",
+    "製版"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[ch][óng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "兩",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "就覺",
+    "兩難"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "自",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "會覺",
+    "自己"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "|",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "演覺",
+    "|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/的"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "跟",
+   "right": "你",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "定跟",
+    "你|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/着"
+   ]
+  },
+  {
+   "char": "散",
+   "left": "或",
+   "right": "開",
+   "py": "[s][àn]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][àn]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "近或",
+    "開|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[s][àn]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "有",
+   "right": "量",
+   "py": "[x][iě]",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "沒有",
+    "量條"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[x][iě]"
+   ]
+  },
+  {
+   "char": "扛",
+   "left": "人",
+   "right": "走",
+   "py": "[k][áng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[k][áng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "敵人",
+    "走|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[k][áng]"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "因",
+   "right": "她",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "會因",
+    "她的"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[w][èi]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "的",
+   "right": "量",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "她的",
+    "量|"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[x][iě]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "結",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ally_ai",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "到遊",
+    "結束"
+   ],
+   "runs": [
+    "c0:ally_ai:e5a884d450a5/[x][ì]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "月",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "月費"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/的"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "原",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "舊遊",
+    "原樣"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[x][ì]"
+   ]
+  },
+  {
+   "char": "騎",
+   "left": "聖",
+   "right": "士",
+   "py": "[q][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "當聖",
+    "士|"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[q][í]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "時",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "或遊",
+    "時間"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[x][ì]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "進",
+   "right": "去",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "就進",
+    "去|"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/的"
+   ]
+  },
+  {
+   "char": "背",
+   "left": "的",
+   "right": "包",
+   "py": "[b][ēi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[b][ēi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "用的",
+    "包造"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[b][ēi]"
+   ]
+  },
+  {
+   "char": "分",
+   "left": "部",
+   "right": "|",
+   "py": "[f][èn]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[f][èn]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "的部",
+    "|"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[f][èn]"
+   ]
+  },
+  {
+   "char": "更",
+   "left": "大",
+   "right": "新",
+   "py": "[g][ēng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[g][ēng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "說大",
+    "新的"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[g][ēng]"
+   ]
+  },
+  {
+   "char": "期",
+   "left": "段",
+   "right": "間",
+   "py": "[q][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "這段",
+    "間可"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[q][í]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "建",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "是建",
+    "色那"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "主",
+   "right": "想",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "以主",
+    "想玩"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "了",
+   "left": "不",
+   "right": "|",
+   "py": "[l][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[l][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "等不",
+    "|"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[l][iǎo]"
+   ]
+  },
+  {
+   "char": "倒",
+   "left": "在",
+   "right": "數",
+   "py": "[d][ào]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ào]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "個在",
+    "數的"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[d][ào]"
+   ]
+  },
+  {
+   "char": "數",
+   "left": "倒",
+   "right": "的",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "在倒",
+    "的是"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/"
+   ]
+  },
+  {
+   "char": "騎",
+   "left": "坐",
+   "right": "跟",
+   "py": "[q][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|坐",
+    "跟造"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[q][í]"
+   ]
+  },
+  {
+   "char": "倒",
+   "left": "型",
+   "right": "是",
+   "py": "[d][ào]",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ào]"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "造型",
+    "是兩"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[d][ào]"
+   ]
+  },
+  {
+   "char": "期",
+   "left": "到",
+   "right": "|",
+   "py": "[q][í]",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 2,
+   "n_wrong": 0,
+   "n_undetermined": 1,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "天到",
+    "|"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/[q][í]"
+   ]
+  },
+  {
+   "char": "差",
+   "left": "都",
+   "right": "#",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "邊都",
+    "#天"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "開",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "開服"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "記",
+   "right": "關",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_return",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|記",
+    "關自"
+   ],
+   "runs": [
+    "c0:wow_return:0015a84ba828/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "這",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 6,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 6,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "這筆"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "算",
+   "right": "很",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "帳算",
+    "很細"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/的"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "頭",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "到遊",
+    "頭上"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[x][ì]"
+   ]
+  },
+  {
+   "char": "質",
+   "left": "上",
+   "right": "量",
+   "py": "[zh][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "加上",
+    "量效"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[zh][í]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "主",
+   "right": "像",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|主",
+    "像約"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "卡",
+   "left": "關",
+   "right": "要",
+   "py": "[k][ǎ]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[k][ǎ]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|關",
+    "要做"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[k][ǎ]"
+   ]
+  },
+  {
+   "char": "質",
+   "left": "|",
+   "right": "量",
+   "py": "[zh][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|",
+    "量效"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[zh][í]"
+   ]
+  },
+  {
+   "char": "期",
+   "left": "前",
+   "right": "|",
+   "py": "[q][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "在前",
+    "|"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[q][í]"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "因",
+   "right": "服",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|因",
+    "服務"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[w][èi]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "這",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "型遊",
+    "這件"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[x][ì]"
+   ]
+  },
+  {
+   "char": "績",
+   "left": "成",
+   "right": "|",
+   "py": "[j][ī]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][ī]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "的成",
+    "|"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[j][ī]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "看",
+   "right": "懂",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "#看",
+    "懂的"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/的"
+   ]
+  },
+  {
+   "char": "調",
+   "left": "的",
+   "right": "整",
+   "py": "[t][iáo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[t][iáo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "年的",
+    "整才"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[t][iáo]"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "陪",
+   "right": "#",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "家陪",
+    "#等"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/着"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "掉",
+   "right": "生",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "砍掉",
+    "生娛"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[ch][óng]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "射",
+   "right": "遊",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "戰射",
+    "遊戲"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[j][í]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "|",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "擊遊",
+    "|"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[x][ì]"
+   ]
+  },
+  {
+   "char": "長",
+   "left": "行",
+   "right": "內",
+   "py": "[zh][ǎng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][ǎng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "執行",
+    "內部"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[zh][ǎng]"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "|",
+   "right": "什",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|",
+    "什麼"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[w][èi]"
+   ]
+  },
+  {
+   "char": "危",
+   "left": "較",
+   "right": "險",
+   "py": "[w][éi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][éi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "比較",
+    "險的"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[w][éi]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "收",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|遊",
+    "收掉"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[x][ì]"
+   ]
+  },
+  {
+   "char": "質",
+   "left": "的",
+   "right": "量",
+   "py": "[zh][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "遜的",
+    "量效"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[zh][í]"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "開",
+   "right": "|",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "還開",
+    "|"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/着"
+   ]
+  },
+  {
+   "char": "背",
+   "left": "|",
+   "right": "著",
+   "py": "[b][ēi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[b][ēi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|",
+    "著一"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/[b][ēi]"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "背",
+   "right": "一",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "|背",
+    "一百"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/着"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "最",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ea_me5",
+   "date": "2026-10-31",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "最難"
+   ],
+   "runs": [
+    "c0:ea_me5:ee21128b68de/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "一",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "一家"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "值",
+   "right": "你",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "正值",
+    "你看"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "放",
+   "right": "的",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "了放",
+    "的不"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/着"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "本",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "機遊",
+    "本來"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/[x][ì]"
+   ]
+  },
+  {
+   "char": "柏",
+   "left": "|",
+   "right": "德",
+   "py": "[b][ó]",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[b][ó]"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|",
+    "德之"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/[b][ó]"
+   ]
+  },
+  {
+   "char": "差",
+   "left": "是",
+   "right": "距",
+   "py": "[ch][ā]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][ā]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "只是",
+    "距小"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/[ch][ā]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "小",
+   "right": "多",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "距小",
+    "多|"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "撐",
+   "right": "住",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "不撐",
+    "住|"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "接",
+   "right": "追",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "會接",
+    "追|"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/着"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "接",
+   "right": "看",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|接",
+    "看評"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/着"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "玩",
+   "right": "下",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "還玩",
+    "下去"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "打",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "人覺",
+    "打擊"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "打",
+   "right": "感",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "得打",
+    "感只"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/[j][í]"
+   ]
+  },
+  {
+   "char": "究",
+   "left": "終",
+   "right": "沒",
+   "py": "[j][iù]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iù]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "它終",
+    "沒有"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/[j][iù]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "那",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "那三"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "吞",
+   "right": "下",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "不吞",
+    "下去"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "更",
+   "left": "的",
+   "right": "新",
+   "py": "[g][ēng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[g][ēng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "方的",
+    "新|"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/[g][ēng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "來",
+   "right": "及",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "也來",
+    "及|"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "是",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "你覺",
+    "是前"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "期",
+   "left": "前",
+   "right": "太",
+   "py": "[q][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "是前",
+    "太勸"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/[q][í]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "吹",
+   "right": "太",
+   "py": "的",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "被吹",
+    "太高"
+   ],
+   "runs": [
+    "c0:pbz_week1:719a20a9a71b/的"
+   ]
+  },
+  {
+   "char": "期",
+   "left": "前",
+   "right": "的",
+   "py": "[q][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "過前",
+    "的人"
+   ],
+   "runs": [
+    "c0:pbz_week1:ab2172bfb854/[q][í]"
+   ]
+  },
+  {
+   "char": "質",
+   "left": "品",
+   "right": "問",
+   "py": "[zh][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "跟品",
+    "問題"
+   ],
+   "runs": [
+    "c0:pbz_week1:ab2172bfb854/[zh][í]"
+   ]
+  },
+  {
+   "char": "差",
+   "left": "言",
+   "right": "不",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "語言",
+    "不多"
+   ],
+   "runs": [
+    "c0:pbz_week1:ab2172bfb854/"
+   ]
+  },
+  {
+   "char": "行",
+   "left": "一",
+   "right": "|",
+   "py": "[h][áng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[h][áng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "這一",
+    "|"
+   ],
+   "runs": [
+    "c0:pbz_week1:ab2172bfb854/[h][áng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "對",
+   "right": "上",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "也對",
+    "上繁"
+   ],
+   "runs": [
+    "c0:pbz_week1:ab2172bfb854/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "吃",
+   "right": "下",
+   "py": "的",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 2,
+   "n_wrong": 0,
+   "n_undetermined": 1,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|吃",
+    "下前"
+   ],
+   "runs": [
+    "c0:pbz_week1:ab2172bfb854/的"
+   ]
+  },
+  {
+   "char": "柏",
+   "left": "有",
+   "right": "德",
+   "py": "[b][ó]",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[b][ó]"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "還有",
+    "德之"
+   ],
+   "runs": [
+    "c0:pbz_week1:3ff267d39257/[b][ó]"
+   ]
+  },
+  {
+   "char": "柏",
+   "left": "和",
+   "right": "德",
+   "py": "[b][ó]",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[b][ó]"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "pbz_week1",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|和",
+    "德之"
+   ],
+   "runs": [
+    "c0:pbz_week1:ea03e5263fd6/[b][ó]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "讀",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "讀取"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/的"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "照",
+   "right": "做",
+   "py": "着",
+   "state": "bad",
+   "evidence": "test",
+   "wrong_as": [
+    {
+     "heard": "的",
+     "kind": "token_unstable"
+    }
+   ],
+   "fix": {
+    "type": "rewrite",
+    "value": "惡靈古堡照著做,只留一扇門、黑色背景和轉門把的聲音,本來只是要撐過那段黑畫面。"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 1,
+   "n_undetermined": 2,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "堡照",
+    "做|"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/着"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "款",
+   "right": "製",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "那款",
+    "製版"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[ch][óng]"
+   ]
+  },
+  {
+   "char": "量",
+   "left": "人",
+   "right": "過",
+   "py": "[l][iáng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[l][iáng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "有人",
+    "過|"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[l][iáng]"
+   ]
+  },
+  {
+   "char": "倒",
+   "left": "右",
+   "right": "還",
+   "py": "[d][ào]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ào]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "左右",
+    "還好"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[d][ào]"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "|",
+   "right": "玩",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|",
+    "玩的"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[ch][óng]"
+   ]
+  },
+  {
+   "char": "教",
+   "left": "偷",
+   "right": "了",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "偷偷",
+    "了你"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "因",
+   "right": "前",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "正因",
+    "前面"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[w][èi]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "嚇",
+   "right": "到",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "才嚇",
+    "到人"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/的"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "給",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "是遊",
+    "給你"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[x][ì]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "也",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|遊",
+    "也能"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[x][ì]"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "當",
+   "right": "你",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "能當",
+    "你的"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/着"
+   ]
+  },
+  {
+   "char": "微",
+   "left": "稍",
+   "right": "跟",
+   "py": "[w][éi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][éi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "會稍",
+    "跟不"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[w][éi]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "入",
+   "right": "多",
+   "py": "的",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "投入",
+    "多|"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/的"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "二",
+   "right": "製",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "堡二",
+    "製版"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[ch][óng]"
+   ]
+  },
+  {
+   "char": "檔",
+   "left": "存",
+   "right": "室",
+   "py": "[d][ǎng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ǎng]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "進存",
+    "室|"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[d][ǎng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "門",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "門留"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/的"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "替",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "是遊",
+    "替你"
+   ],
+   "runs": [
+    "c0:door_load:be38955f19ab/[x][ì]"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "想",
+   "right": "下",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|想",
+    "下一"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "的",
+   "right": "法",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "導的",
+    "法|"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "記",
+   "right": "|",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "者記",
+    "|"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/的"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "等",
+   "right": "|",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "乖等",
+    "|"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/着"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "不",
+   "right": "了",
+   "py": "[zh][áo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][áo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "用不",
+    "了|"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/[zh][áo]"
+   ]
+  },
+  {
+   "char": "樂",
+   "left": "音",
+   "right": "一",
+   "py": "[y][uè]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[y][uè]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|音",
+    "一斷"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/[y][uè]"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "偷",
+   "right": "一",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|偷",
+    "一下"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/"
+   ]
+  },
+  {
+   "char": "暴",
+   "left": "會",
+   "right": "露",
+   "py": "[p][ù]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[p][ù]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "快會",
+    "露位"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/[p][ù]"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "了",
+   "right": "製",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "到了",
+    "製版"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/[ch][óng]"
+   ]
+  },
+  {
+   "char": "空",
+   "left": "的",
+   "right": "檔",
+   "py": "[k][òng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[k][òng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "全的",
+    "檔|"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/[k][òng]"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "是",
+   "right": "了",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "說是",
+    "了讓"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/[w][èi]"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "抓",
+   "right": "門",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "要抓",
+    "門把"
+   ],
+   "runs": [
+    "c0:door_load:6a6dece13ac4/着"
+   ]
+  },
+  {
+   "char": "喪",
+   "left": "般",
+   "right": "屍",
+   "py": "[s][āng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][āng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "一般",
+    "屍|"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[s][āng]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "|",
+   "right": "量",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|",
+    "量不"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[x][iě]"
+   ]
+  },
+  {
+   "char": "喪",
+   "left": "隻",
+   "right": "屍",
+   "py": "[s][āng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][āng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "兩隻",
+    "屍打"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[s][āng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "還",
+   "right": "再",
+   "py": "[d][ěi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ěi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "能還",
+    "再補"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[d][ěi]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "等",
+   "right": "到",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "才等",
+    "到牠"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/的"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "|",
+   "right": "到",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|",
+    "到這"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "有",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "款遊",
+    "有的"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[x][ì]"
+   ]
+  },
+  {
+   "char": "喪",
+   "left": "的",
+   "right": "屍",
+   "py": "[s][āng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][āng]"
+   },
+   "seeds": 6,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 6,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "有的",
+    "屍血"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[s][āng]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "屍",
+   "right": "量",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "喪屍",
+    "量過"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[x][iě]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "滴",
+   "right": "|",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "一滴",
+    "|"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[x][iě]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "裡",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "怖遊",
+    "裡這"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[x][ì]"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "你",
+   "right": "|",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "給你",
+    "|"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "記",
+   "right": "訂",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|記",
+    "訂閱"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/的"
+   ]
+  },
+  {
+   "char": "分",
+   "left": "部",
+   "right": "手",
+   "py": "[f][èn]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[f][èn]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "大部",
+    "手槍"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[f][èn]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "暴",
+   "right": "時",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "槍暴",
+    "時打"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[j][í]"
+   ]
+  },
+  {
+   "char": "喪",
+   "left": "|",
+   "right": "屍",
+   "py": "[s][āng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][āng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|",
+    "屍就"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[s][āng]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "管",
+   "right": "量",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "不管",
+    "量多"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[x][iě]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "來",
+   "right": "就",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "本來",
+    "就很"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[x][iě]"
+   ]
+  },
+  {
+   "char": "中",
+   "left": "抽",
+   "right": "爆",
+   "py": "[zh][òng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][òng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "沒抽",
+    "爆擊"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[zh][òng]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "爆",
+   "right": "|",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "中爆",
+    "|"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[j][í]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "暴",
+   "right": "機",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "跟暴",
+    "機率"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[j][í]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "都",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|遊",
+    "都會"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[x][ì]"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "會",
+   "right": "你",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 6,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 6,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "都會",
+    "你打"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "打",
+   "right": "多",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "你打",
+    "多好"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/的"
+   ]
+  },
+  {
+   "char": "調",
+   "left": "偷",
+   "right": "整",
+   "py": "[t][iáo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[t][iáo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "偷偷",
+    "整|"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[t][iáo]"
+   ]
+  },
+  {
+   "char": "調",
+   "left": "現",
+   "right": "整",
+   "py": "[t][iáo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[t][iáo]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "表現",
+    "整雙"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[t][iáo]"
+   ]
+  },
+  {
+   "char": "彈",
+   "left": "連",
+   "right": "藥",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|連",
+    "藥箱"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "跟",
+   "right": "變",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "會跟",
+    "變|"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/着"
+   ]
+  },
+  {
+   "char": "喪",
+   "left": "把",
+   "right": "屍",
+   "py": "[s][āng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][āng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "難把",
+    "屍打"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[s][āng]"
+   ]
+  },
+  {
+   "char": "喪",
+   "left": "代",
+   "right": "屍",
+   "py": "[s][āng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][āng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "這代",
+    "屍的"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[s][āng]"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "的",
+   "right": "製",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "年的",
+    "製版"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[ch][óng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "瞄",
+   "right": "更",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "你瞄",
+    "更準"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "打",
+   "right": "斷",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "才打",
+    "斷|"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/的"
+   ]
+  },
+  {
+   "char": "喪",
+   "left": "對",
+   "right": "屍",
+   "py": "[s][āng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][āng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "次對",
+    "屍開"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[s][āng]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "衝",
+   "right": "|",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "跟衝",
+    "|"
+   ],
+   "runs": [
+    "c0:headshot_hp:d5e7c4a31e6b/[j][í]"
+   ]
+  },
+  {
+   "char": "當",
+   "left": "門",
+   "right": "笑",
+   "py": "[d][àng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][àng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "把門",
+    "笑點"
+   ],
+   "runs": [
+    "c0:door_load:c09c489b1c3f/[d][àng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "嚇",
+   "right": "最",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "你嚇",
+    "最慘"
+   ],
+   "runs": [
+    "c0:door_load:c09c489b1c3f/的"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "偷",
+   "right": "裡",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "縫偷",
+    "裡面"
+   ],
+   "runs": [
+    "c0:door_load:6637e2f53149/"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "比",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "人覺",
+    "比按"
+   ],
+   "runs": [
+    "c0:door_load:6637e2f53149/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "在",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "door_load",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "是覺",
+    "在拖"
+   ],
+   "runs": [
+    "c0:door_load:6637e2f53149/的"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "對",
+   "right": "一",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|對",
+    "一隻"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/着"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "是",
+   "right": "什",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "這是",
+    "什麼"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[w][èi]"
+   ]
+  },
+  {
+   "char": "了",
+   "left": "不",
+   "right": "全",
+   "py": "[l][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[l][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "明不",
+    "全部"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[l][iǎo]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "暴",
+   "right": "|",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "靠暴",
+    "|"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[j][í]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "暴",
+   "right": "發",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|暴",
+    "發動"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[j][í]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "暴",
+   "right": "打",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "要暴",
+    "打中"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[j][í]"
+   ]
+  },
+  {
+   "char": "中",
+   "left": "打",
+   "right": "頭",
+   "py": "[zh][òng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][òng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "擊打",
+    "頭部"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[zh][òng]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "暴",
+   "right": "要",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "是暴",
+    "要靠"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[j][í]"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "對",
+   "right": "頭",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|對",
+    "頭開"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/着"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "站",
+   "right": "|",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "樣站",
+    "|"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/着"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "條",
+   "right": "量",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "一條",
+    "量|"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[x][iě]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "暴",
+   "right": "率",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "把暴",
+    "率拉"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[j][í]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "那",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "他遊",
+    "那樣"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[x][ì]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "一",
+   "right": "斃",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "人一",
+    "斃命"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[j][í]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "一",
+   "right": "必",
+   "py": "[j][í]",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "有一",
+    "必殺"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/[j][í]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "張",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "狗覺",
+    "張力"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/的"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "賭",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "會覺",
+    "賭注"
+   ],
+   "runs": [
+    "c0:headshot_hp:de9fba1d8755/的"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "頭",
+   "right": "什",
+   "py": "[w][èi]",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 2,
+   "n_wrong": 0,
+   "n_undetermined": 1,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "爆頭",
+    "什麼"
+   ],
+   "runs": [
+    "c0:headshot_hp:b44fdfebdb2a/[w][èi]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "廢",
+   "right": "掉",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "才廢",
+    "掉牠"
+   ],
+   "runs": [
+    "c0:headshot_hp:b44fdfebdb2a/的"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "滿",
+   "right": "|",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "是滿",
+    "|"
+   ],
+   "runs": [
+    "c0:headshot_hp:b44fdfebdb2a/[x][iě]"
+   ]
+  },
+  {
+   "char": "中",
+   "left": "命",
+   "right": "頭",
+   "py": "[zh][òng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][òng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "部命",
+    "頭部"
+   ],
+   "runs": [
+    "c0:headshot_hp:b44fdfebdb2a/[zh][òng]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "暴",
+   "right": "的",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "賭暴",
+    "的話"
+   ],
+   "runs": [
+    "c0:headshot_hp:b44fdfebdb2a/[j][í]"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "以",
+   "right": "製",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "所以",
+    "製版"
+   ],
+   "runs": [
+    "c0:headshot_hp:b44fdfebdb2a/[ch][óng]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "靠",
+   "right": "量",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "是靠",
+    "量跟"
+   ],
+   "runs": [
+    "c0:headshot_hp:b44fdfebdb2a/[x][iě]"
+   ]
+  },
+  {
+   "char": "血",
+   "left": "套",
+   "right": "量",
+   "py": "[x][iě]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][iě]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "這套",
+    "量跟"
+   ],
+   "runs": [
+    "c0:headshot_hp:b44fdfebdb2a/[x][iě]"
+   ]
+  },
+  {
+   "char": "率",
+   "left": "擊",
+   "right": "拉",
+   "py": "[l][ǜ]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[l][ǜ]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "暴擊",
+    "拉到"
+   ],
+   "runs": [
+    "c0:headshot_hp:28b7d90c1f78/[l][ǜ]"
+   ]
+  },
+  {
+   "char": "率",
+   "left": "機",
+   "right": "|",
+   "py": "[l][ǜ]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[l][ǜ]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "擊機",
+    "|"
+   ],
+   "runs": [
+    "c0:headshot_hp:28b7d90c1f78/[l][ǜ]"
+   ]
+  },
+  {
+   "char": "率",
+   "left": "擊",
+   "right": "高",
+   "py": "[l][ǜ]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[l][ǜ]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "暴擊",
+    "高出"
+   ],
+   "runs": [
+    "c0:headshot_hp:28b7d90c1f78/[l][ǜ]"
+   ]
+  },
+  {
+   "char": "喪",
+   "left": "打",
+   "right": "屍",
+   "py": "[s][āng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][āng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "headshot_hp",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "槍打",
+    "屍的"
+   ],
+   "runs": [
+    "c0:headshot_hp:28b7d90c1f78/[s][āng]"
+   ]
+  },
+  {
+   "char": "微",
+   "left": "是",
+   "right": "軟",
+   "py": "[w][éi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][éi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "個是",
+    "軟自"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/[w][éi]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "#",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "#欠"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/的"
+   ]
+  },
+  {
+   "char": "微",
+   "left": "算",
+   "right": "軟",
+   "py": "[w][éi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][éi]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "在算",
+    "軟虧"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/[w][éi]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "回",
+   "right": "了",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "才回",
+    "了本"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/的"
+   ]
+  },
+  {
+   "char": "了",
+   "left": "得",
+   "right": "本",
+   "py": "[l][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[l][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "回得",
+    "本|"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/[l][iǎo]"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "因",
+   "right": "#",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|因",
+    "#估"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/[w][èi]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "正",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "候遊",
+    "正式"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/[x][ì]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "賣",
+   "right": "不",
+   "py": "的",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "為賣",
+    "不好"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/的"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "只",
+   "right": "帳",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "先只",
+    "帳|"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "人",
+   "right": "事",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "萬人",
+    "事變"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/[w][èi]"
+   ]
+  },
+  {
+   "char": "當",
+   "left": "刻",
+   "right": "對",
+   "py": "[d][àng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][àng]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "時刻",
+    "對照"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/[d][àng]"
+   ]
+  },
+  {
+   "char": "微",
+   "left": "問",
+   "right": "軟",
+   "py": "[w][éi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][éi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "去問",
+    "軟|"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/[w][éi]"
+   ]
+  },
+  {
+   "char": "微",
+   "left": "|",
+   "right": "軟",
+   "py": "[w][éi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][éi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|",
+    "軟沒"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/[w][éi]"
+   ]
+  },
+  {
+   "char": "差",
+   "left": "還",
+   "right": "得",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|還",
+    "得很"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "差",
+   "right": "很",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "還差",
+    "很遠"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/的"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "只",
+   "right": "得",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|只",
+    "得出"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "看",
+   "right": "出",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "只看",
+    "出離"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/的"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "只",
+   "right": "銷",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "不只",
+    "銷量"
+   ],
+   "runs": [
+    "c0:gow_budget:fc1096c55883/"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "隻",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "一隻",
+    "色|"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "答",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "答案"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/的"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "以",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "所以",
+    "色建"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "|",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|",
+    "色這"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "把",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "法把",
+    "色從"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "因",
+   "right": "兩",
+   "py": "",
+   "state": "bad",
+   "evidence": "ear",
+   "wrong_as": [
+    {
+     "heard": "因為後不正常停頓",
+     "kind": "token_unstable"
+    }
+   ],
+   "fix": {
+    "type": "rewrite",
+    "value": "刪因為"
+   },
+   "seeds": 0,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "wow_realm",
+   "date": "2026-11-03",
+   "note": "v1 0:47 句8 標注 [w][èi] 後停頓異常(使用者 2026-11-03 聽);刪因為改句"
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "進",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "享遊",
+    "進度"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[x][ì]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "就",
+   "right": "改",
+   "py": "[d][ěi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ěi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "筆就",
+    "改從"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[d][ěi]"
+   ]
+  },
+  {
+   "char": "期",
+   "left": "初",
+   "right": "|",
+   "py": "[q][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "線初",
+    "|"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[q][í]"
+   ]
+  },
+  {
+   "char": "興",
+   "left": "有",
+   "right": "趣",
+   "py": "[x][ìng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ìng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|有",
+    "趣可"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[x][ìng]"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "能",
+   "right": "單",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "只能",
+    "單一"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[w][èi]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "立",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "建立",
+    "色|"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "倒",
+   "left": "數",
+   "right": "是",
+   "py": "[d][ào]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ào]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "點數",
+    "是可"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[d][ào]"
+   ]
+  },
+  {
+   "char": "幾",
+   "left": "你",
+   "right": "乎",
+   "py": "[j][ī]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][ī]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|你",
+    "乎隨"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[j][ī]"
+   ]
+  },
+  {
+   "char": "擊",
+   "left": "攻",
+   "right": "的",
+   "py": "[j][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "家攻",
+    "的風"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[j][í]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "沒",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "沒有"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/的"
+   ]
+  },
+  {
+   "char": "空",
+   "left": "有",
+   "right": "練",
+   "py": "[k][òng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[k][òng]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "才有",
+    "練等"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[k][òng]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "選",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "外遊",
+    "選項"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[x][ì]"
+   ]
+  },
+  {
+   "char": "好",
+   "left": "偏",
+   "right": "|",
+   "py": "[h][ào]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[h][ào]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "言偏",
+    "|"
+   ],
+   "runs": [
+    "c0:wow_realm:0d56518326dd/[h][ào]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "的",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "服的",
+    "色練"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "寫",
+   "right": "很",
+   "py": "的",
+   "state": "ok",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 3,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "雪寫",
+    "很明"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/的"
+   ]
+  },
+  {
+   "char": "更",
+   "left": "會",
+   "right": "換",
+   "py": "[g][ēng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[g][ēng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "不會",
+    "換買"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/[g][ēng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "記",
+   "right": "從",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|記",
+    "從美"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/的"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "與",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "的遊",
+    "與訂"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/[x][ì]"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "留",
+   "right": "玩",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "都留",
+    "玩|"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/着"
+   ]
+  },
+  {
+   "char": "幾",
+   "left": "區",
+   "right": "乎",
+   "py": "[j][ī]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][ī]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "灣區",
+    "乎是"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/[j][ī]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "都",
+   "right": "等",
+   "py": "[d][ěi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ěi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "友都",
+    "等你"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/[d][ěi]"
+   ]
+  },
+  {
+   "char": "期",
+   "left": "試",
+   "right": "的",
+   "py": "[q][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "測試",
+    "的數"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/[q][í]"
+   ]
+  },
+  {
+   "char": "當",
+   "left": "難",
+   "right": "作",
+   "py": "[d][àng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][àng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "很難",
+    "作依"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/[d][àng]"
+   ]
+  },
+  {
+   "char": "沒",
+   "left": "器",
+   "right": "落",
+   "py": "[m][ò]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[m][ò]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "服器",
+    "落|"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/[m][ò]"
+   ]
+  },
+  {
+   "char": "差",
+   "left": "又",
+   "right": "一",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "遲又",
+    "一大"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/"
+   ]
+  },
+  {
+   "char": "著",
+   "left": "跟",
+   "right": "分",
+   "py": "着",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "zhe",
+    "value": "着"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "也跟",
+    "分區"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/着"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "打",
+   "right": "地",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "能打",
+    "地區"
+   ],
+   "runs": [
+    "c0:wow_realm:94014dfa7341/"
+   ]
+  },
+  {
+   "char": "微",
+   "left": "過",
+   "right": "軟",
+   "py": "[w][éi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][éi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "經過",
+    "軟證"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/[w][éi]"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "#",
+   "right": "新",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|#",
+    "新估"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/[ch][óng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "問",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "不覺",
+    "問題"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/的"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "首",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "是遊",
+    "首發"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/[x][ì]"
+   ]
+  },
+  {
+   "char": "微",
+   "left": "面",
+   "right": "軟",
+   "py": "[w][éi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][éi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "前面",
+    "軟沒"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/[w][éi]"
+   ]
+  },
+  {
+   "char": "分",
+   "left": "部",
+   "right": "對",
+   "py": "[f][èn]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[f][èn]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "是部",
+    "對手"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/[f][èn]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "算",
+   "right": "出",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|算",
+    "出來"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/的"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "要",
+   "right": "的",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "說要",
+    "的|"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "誰",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "誰都"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/的"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "好",
+   "right": "|",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "變好",
+    "|"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "光",
+   "right": "賣",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "不光",
+    "賣出"
+   ],
+   "runs": [
+    "c0:gow_budget:1b05f6a25fd0/"
+   ]
+  },
+  {
+   "char": "沒",
+   "left": "邊",
+   "right": "落",
+   "py": "[m][ò]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[m][ò]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "哪邊",
+    "落|"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/[m][ò]"
+   ]
+  },
+  {
+   "char": "差",
+   "left": "時",
+   "right": "|",
+   "py": "[ch][ā]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][ā]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "有時",
+    "|"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/[ch][ā]"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "因",
+   "right": "北",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|因",
+    "北美"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/[w][èi]"
+   ]
+  },
+  {
+   "char": "期",
+   "left": "日",
+   "right": "|",
+   "py": "[q][í]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[q][í]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "給日",
+    "|"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/[q][í]"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "區",
+   "right": "不",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "四區",
+    "不到"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/"
+   ]
+  },
+  {
+   "char": "差",
+   "left": "時",
+   "right": "優",
+   "py": "[ch][ā]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][ā]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "的時",
+    "優勢"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/[ch][ā]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "新",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "立新",
+    "色|"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "了",
+   "left": "不",
+   "right": "隊",
+   "py": "[l][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[l][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "組不",
+    "隊|"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/[l][iǎo]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "跟",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "演跟",
+    "色扮"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "為",
+   "left": "因",
+   "right": "只",
+   "py": "[w][èi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[w][èi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|因",
+    "只能"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/[w][èi]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "台",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "我覺",
+    "台灣"
+   ],
+   "runs": [
+    "c0:wow_realm:23f65645d199/的"
+   ]
+  },
+  {
+   "char": "伺",
+   "left": "型",
+   "right": "服",
+   "py": "[s][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "大型",
+    "服器"
+   ],
+   "runs": [
+    "c0:wow_realm:0928cc101680/[s][ì]"
+   ]
+  },
+  {
+   "char": "伺",
+   "left": "挑",
+   "right": "服",
+   "py": "[s][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "用挑",
+    "服器"
+   ],
+   "runs": [
+    "c0:wow_realm:0928cc101680/[s][ì]"
+   ]
+  },
+  {
+   "char": "伺",
+   "left": "的",
+   "right": "服",
+   "py": "[s][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[s][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "版的",
+    "服器"
+   ],
+   "runs": [
+    "c0:wow_realm:0928cc101680/[s][ì]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "覺",
+   "right": "人",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "你覺",
+    "人會"
+   ],
+   "runs": [
+    "c0:wow_realm:0928cc101680/的"
+   ]
+  },
+  {
+   "char": "重",
+   "left": "#",
+   "right": "估",
+   "py": "[ch][óng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][óng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "gow_budget",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|#",
+    "估|"
+   ],
+   "runs": [
+    "c0:gow_budget:a88cba51c63a/[ch][óng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "是",
+   "right": "靠",
+   "py": "[d][ěi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ěi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "還是",
+    "靠#"
+   ],
+   "runs": [
+    "c0:wow_realm:cc33c7845426/[d][ěi]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "|",
+   "right": "等",
+   "py": "[d][ěi]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][ěi]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "|",
+    "等遊"
+   ],
+   "runs": [
+    "c0:wow_realm:24c5e7176f47/[d][ěi]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "推",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "等遊",
+    "推出"
+   ],
+   "runs": [
+    "c0:wow_realm:24c5e7176f47/[x][ì]"
+   ]
+  },
+  {
+   "char": "角",
+   "left": "有",
+   "right": "色",
+   "py": "[j][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[j][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "wow_realm",
+   "date": "2026-11-01",
+   "note": "",
+   "ctx": [
+    "還有",
+    "色扮"
+   ],
+   "runs": [
+    "c0:wow_realm:cab72d95d8b0/[j][iǎo]"
+   ]
+  },
+  {
+   "char": "有",
+   "left": ",",
+   "right": "玩",
+   "py": "",
+   "state": "bad",
+   "evidence": "ear",
+   "wrong_as": [
+    {
+     "heard": "賊玩",
+     "kind": "token_unstable"
+    }
+   ],
+   "fix": {
+    "type": "rewrite",
+    "value": "論壇上有人說"
+   },
+   "seeds": 0,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 0,
+   "tag": "wow_realm",
+   "date": "2026-11-03",
+   "note": "v1 1:03 句10 有玩家說 被聽成 賊玩(使用者 2026-11-03 聽);改句"
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "到",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "|遊",
+    "到底"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[x][ì]"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "要",
+   "right": "索",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "|要",
+    "索尼"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/"
+   ]
+  },
+  {
+   "char": "當",
+   "left": "接",
+   "right": "成",
+   "py": "[d][àng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[d][àng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "直接",
+    "成笑"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[d][àng]"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "話",
+   "right": "|",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "笑話",
+    "|"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/"
+   ]
+  },
+  {
+   "char": "了",
+   "left": "不",
+   "right": "的",
+   "py": "[l][iǎo]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[l][iǎo]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "受不",
+    "的是"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[l][iǎo]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "賣",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "把遊",
+    "賣回"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[x][ì]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "店",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "體遊",
+    "店乾"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[x][ì]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "怎",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "|遊",
+    "怎麼"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[x][ì]"
+   ]
+  },
+  {
+   "char": "便",
+   "left": "變",
+   "right": "宜",
+   "py": "[p][ián]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[p][ián]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "有變",
+    "宜|"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[p][ián]"
+   ]
+  },
+  {
+   "char": "擁",
+   "left": "不",
+   "right": "有",
+   "py": "[y][ǒng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[y][ǒng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "你不",
+    "有|"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[y][ǒng]"
+   ]
+  },
+  {
+   "char": "差",
+   "left": "|",
+   "right": "別",
+   "py": "[ch][ā]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][ā]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "|",
+    "別在"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[ch][ā]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "直",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "新遊",
+    "直接"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[x][ì]"
+   ]
+  },
+  {
+   "char": "戲",
+   "left": "遊",
+   "right": "停",
+   "py": "[x][ì]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[x][ì]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "新遊",
+    "停產"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[x][ì]"
+   ]
+  },
+  {
+   "char": "長",
+   "left": "子",
+   "right": "怎",
+   "py": "[zh][ǎng]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[zh][ǎng]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "盒子",
+    "怎樣"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[zh][ǎng]"
+   ]
+  },
+  {
+   "char": "得",
+   "left": "值",
+   "right": "看",
+   "py": "的",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "的"
+   },
+   "seeds": 3,
+   "n_right": 1,
+   "n_wrong": 0,
+   "n_undetermined": 2,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "更值",
+    "看的"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/的"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "得",
+   "right": "的",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "值得",
+    "的是"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/"
+   ]
+  },
+  {
+   "char": "便",
+   "left": "卻",
+   "right": "宜",
+   "py": "[p][ián]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[p][ián]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "號卻",
+    "宜到"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[p][ián]"
+   ]
+  },
+  {
+   "char": "差",
+   "left": "|",
+   "right": "了",
+   "py": "[ch][ā]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[ch][ā]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "|",
+    "了十"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[ch][ā]"
+   ]
+  },
+  {
+   "char": "看",
+   "left": "人",
+   "right": "到",
+   "py": "",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": null,
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "有人",
+    "到的"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/"
+   ]
+  },
+  {
+   "char": "便",
+   "left": "較",
+   "right": "宜",
+   "py": "[p][ián]",
+   "state": "undetermined",
+   "evidence": "test",
+   "wrong_as": [],
+   "fix": {
+    "type": "mark",
+    "value": "[p][ián]"
+   },
+   "seeds": 3,
+   "n_right": 0,
+   "n_wrong": 0,
+   "n_undetermined": 3,
+   "tag": "ps5_own",
+   "date": "2026-11-03",
+   "note": "",
+   "ctx": [
+    "比較",
+    "宜|"
+   ],
+   "runs": [
+    "c0:ps5_own:c823e2c2c7af/[p][ián]"
+   ]
+  }
+ ]
+}

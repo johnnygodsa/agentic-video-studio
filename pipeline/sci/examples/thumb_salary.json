@@ -1,0 +1,9 @@
+{
+ "說明": "tpl_thumb 範例(salary 片題目自擬三行字)。輸出請用 --tag tpl_thumb_demo:python -X utf8 pipeline\\sci\\make_thumb.py --tag tpl_thumb_demo --data pipeline\\sci\\examples\\thumb_salary.json。lines = 主/副/補(合計 ≤13 字);hi = 黃底色帶那行(預設 2);side 預設 left(鴿子在左);prop 選填。",
+ "lines": ["年薪百萬", "沒更快樂", "低薪反笑"],
+ "hi": 2,
+ "expr": "surprised",
+ "prop": {"lib": "salary", "name": "bill", "params": {}},
+ "side": "left",
+ "hue": 135
+}

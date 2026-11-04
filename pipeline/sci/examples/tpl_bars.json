@@ -1,0 +1,33 @@
+{
+ "tpl": "bars",
+ "說明": "測試與範例:sets 每組 = 一個 film.json 場景的 data 加假 lines;orient 省略 = 橫直都算,landscape/portrait = 只算該向(上限不同)。",
+ "sets": [
+  {"name": "min", "dur": 5.5,
+   "lines": [{"idx": 1, "text": "去年一杯八十元。", "start": 0.1, "end": 1.8},
+             {"idx": 2, "text": "今年直接漲到一百。", "start": 2.0, "end": 3.6}],
+   "data": {"unit": "元", "src": "店家公告", "bars": [{"label": "去年", "value": 80}, {"label": "今年", "value": 100}], "hi": [1]}},
+  {"name": "maxL", "orient": "landscape", "dur": 11.5,
+   "lines": [{"idx": 1, "text": "六個城市的一杯珍奶價格排一排。", "start": 0.1, "end": 3.0},
+             {"idx": 2, "text": "台北最貴,台南最便宜,東京跟首爾在中間。", "start": 3.2, "end": 6.4},
+             {"idx": 3, "text": "香港沒有資料,先用灰色放著。", "start": 6.6, "end": 9.6}],
+   "data": {"title": "一杯珍奶多少錢", "unit": "元", "src": "各店菜單 2026", "hi": [0],
+            "bars": [{"label": "台北", "value": 75, "at": 1, "word": "台北", "icon": "turtle.coin"},
+                     {"label": "東京", "value": 68, "at": 1, "word": "東京"},
+                     {"label": "首爾", "value": 62, "at": 1, "word": "首爾"},
+                     {"label": "台中", "value": 55},
+                     {"label": "台南", "value": 45, "at": 1, "word": "台南"},
+                     {"label": "香港", "value": 40, "text": "無資料", "grey": true, "at": 2, "word": "香港"}],
+            "pigeon": {"expr": ["normal", "think", "smug"]}}},
+  {"name": "maxP", "orient": "portrait", "dur": 11.5,
+   "lines": [{"idx": 1, "text": "五個城市的一杯珍奶價格排一排。", "start": 0.1, "end": 3.0},
+             {"idx": 2, "text": "台北最貴,台南最便宜,東京跟首爾在中間。", "start": 3.2, "end": 6.4},
+             {"idx": 3, "text": "台中差不多就是平均。", "start": 6.6, "end": 9.6}],
+   "data": {"title": "一杯珍奶多少錢", "unit": "元", "hi": [0],
+            "bars": [{"label": "台北", "value": 75, "at": 1, "word": "台北"},
+                     {"label": "東京", "value": 68, "at": 1, "word": "東京"},
+                     {"label": "首爾", "value": 62, "at": 1, "word": "首爾"},
+                     {"label": "台中", "value": 55, "at": 2},
+                     {"label": "台南", "value": 45, "at": 1, "word": "台南"}],
+            "pigeon": {"expr": "doubt"}}}
+ ]
+}

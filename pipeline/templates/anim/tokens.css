@@ -1,0 +1,76 @@
+/* 網頁動畫模板共用 tokens(計畫 PLAN_動態小件與圖表 §5)。
+   字型 @font-face 由 anim_web.py 依 paths.FONT_BOLD / FONT_REG 注入,family 固定為 AWBold / AWReg。
+   底一律透明:星座背景或深色底由 build.py 合成。禁光暈、霓虹、循環彈跳(§9.3)。 */
+:root {
+  --font-bold: "AWBold", sans-serif;
+  --font-reg: "AWReg", sans-serif;
+
+  /* 字級 */
+  --fs-title: 72px;
+  --fs-body: 52px;          /* 內文 48–56 */
+  --fs-body-min: 44px;      /* 自動縮字下限(所有文字 >= 44,註除外) */
+  --fs-body-max: 56px;
+  --fs-group: 48px;
+  --fs-legend: 44px;
+  --fs-note: 32px;          /* 來源字 */
+
+  /* 色 */
+  --text: #ffffff;
+  --text2: #9fb0bf;         /* 次要字、來源、標題下短橫條、組標題 */
+  --label: #e7e9ea;
+  --accent: #ffd479;        /* 強調金:hi、callout、timeline 當前點 */
+  --neg: #ff2d2d;           /* hl 底線、下跌、叉 */
+  --pos: #4ade80;           /* 上漲、勾 */
+  --panel: #1c2a38;         /* 需要分區時才用(與閱讀卡同) */
+  --line: rgba(200, 200, 205, 0.4);
+  /* 系列色(2026-10-22 重配):藍 / 青綠 / 珊瑚三個不同色相,不用強調金與危險紅;單系列用 1;share 最多 4 段才用 4。
+     對底色(約 #0e0c10)對比:1 = 7.0:1、2 = 10.1:1、3 = 8.4:1、4 = 8.0:1;系列色上的深字 --on-series 對 1/2/3/4 皆 >= 6.0:1 */
+  --series-1: #4f9dff;
+  --series-2: #2fd1b4;
+  --series-3: #ff8a6b;
+  --series-4: #b794f6;
+  --neg-fill: #ff5a5f;      /* 負值長條 / 直條填色(紅色系,6.4:1);比 --neg 柔,避免與 hl 紅混淆 */
+  --on-series: #14202b;     /* 系列色底上的字 */
+
+  /* 版面(1920x1080;字幕帶以上) */
+  --pad-x: 120px;           /* 左右離邊 >= 96 */
+  --pad-r: 120px;           /* 右側離邊(直式 140:安全框右緣 x = 940) */
+  --title-top: 64px;
+  --content-top: 236px;
+  --content-bottom: 800px;
+  --content-bottom-src: 752px;
+  --src-right: 96px;        /* 來源字右緣離右邊 */
+  --src-bottom: 824px;      /* 來源字下緣 y */
+  /* 圖表類(bars / cols / line)繪圖區下緣:字幕安全線(H-240 = 840)上方 40 / 60px(2026-10-22 繪圖區拉高) */
+  --plot-bottom: 800px;
+  --plot-bottom-src: 780px;
+  --W: 1920px;              /* 畫布尺寸;anim_web.open_job 依 job size 覆寫 */
+  --H: 1080px;
+}
+
+/* 直式(--portrait 原生畫面窗 1080x1080,成片 y 260–1340;字幕在窗外,所以窗內只留左右 80 / 上下 40 的安全邊;
+   html.portrait 由 anim_web.open_job 依 job size(W <= H)加上)。標題允許換行(寬 860 = 安全框寬),內容區頂端由模板取 max(--content-top, 短橫條下緣 + 28)。 */
+:root.portrait {
+  --fs-title: 64px;
+  --pad-x: 80px;
+  --pad-r: 140px;
+  --title-top: 48px;
+  --content-top: 250px;
+  --content-bottom: 1000px;
+  --content-bottom-src: 960px;
+  --plot-bottom: 1000px;
+  --plot-bottom-src: 960px;
+  --src-right: 140px;       /* 來源字右緣 x = 940 */
+  --src-bottom: 1030px;
+}
+
+html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
+body { width: var(--W); height: var(--H); position: relative; color: var(--text); font-family: var(--font-bold); }
+.abs { position: absolute; white-space: nowrap; }
+body { word-break: keep-all; line-break: strict; }   /* 中文只在詞邊界(U+200B / <wbr>)換行;斷詞由 text_wrap 注入 */
+.title { font-family: var(--font-bold); font-size: var(--fs-title); line-height: 1.25; color: var(--text); }
+.rule { height: 4px; width: 160px; background: var(--text2); }
+.src { font-family: var(--font-reg); font-size: var(--fs-note); line-height: 1.2; color: var(--text2); }
+.legend { display: flex; align-items: center; gap: 14px; font-size: var(--fs-legend); line-height: 1.2; color: var(--text2); }
+.legend i { display: block; width: 36px; height: 36px; border-radius: 6px; }
+.portrait .abs.title { white-space: normal; width: 860px; }

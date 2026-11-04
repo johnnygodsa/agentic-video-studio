@@ -1,0 +1,520 @@
+{
+ "script": "dei_gamersdead/script.txt",
+ "tags": [
+  "gears",
+  "expo"
+ ],
+ "params": {
+  "max_per_src": 120
+ },
+ "sources": {
+  "gd_-TW2SnAipsE": [
+   {
+    "start": 3.2,
+    "end": 8.9,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   },
+   {
+    "start": 9.3,
+    "end": 15.0,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   },
+   {
+    "start": 25.0,
+    "end": 28.0,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   },
+   {
+    "start": 42.0,
+    "end": 49.1,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   },
+   {
+    "start": 49.5,
+    "end": 56.6,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   },
+   {
+    "start": 79.7,
+    "end": 84.0,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   },
+   {
+    "start": 90.0,
+    "end": 95.1,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   },
+   {
+    "start": 95.5,
+    "end": 100.7,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   },
+   {
+    "start": 102.0,
+    "end": 105.7,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   },
+   {
+    "start": 110.7,
+    "end": 113.0,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Official Story Trailer"
+   }
+  ],
+  "gd_43y-lFDlGWc": [
+   {
+    "start": 5.0,
+    "end": 9.4,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Exfil Dom"
+   },
+   {
+    "start": 9.8,
+    "end": 14.2,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Exfil Dom"
+   },
+   {
+    "start": 14.6,
+    "end": 16.9,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Exfil Dom"
+   },
+   {
+    "start": 28.3,
+    "end": 31.9,
+    "tags": [
+     "gears"
+    ],
+    "note": "Gears of War 官方 E-Day Exfil Dom"
+   }
+  ],
+  "gd_fLPTnpYWugs": [
+   {
+    "start": 16.4,
+    "end": 19.9,
+    "tags": [
+     "gears"
+    ],
+    "note": "IGN E-Day Never Fight Alone Morida Trailer"
+   },
+   {
+    "start": 23.1,
+    "end": 27.6,
+    "tags": [
+     "gears"
+    ],
+    "note": "IGN E-Day Never Fight Alone Morida Trailer"
+   }
+  ],
+  "gd_Ro7676NrlXU": [
+   {
+    "start": 33.0,
+    "end": 40.0,
+    "tags": [
+     "gears"
+    ],
+    "note": "GOWSeriesVideos E-Day Act 3 Walkthrough(無解說實機)"
+   },
+   {
+    "start": 45.0,
+    "end": 51.0,
+    "tags": [
+     "gears"
+    ],
+    "note": "GOWSeriesVideos E-Day Act 3 Walkthrough(無解說實機)"
+   },
+   {
+    "start": 54.0,
+    "end": 60.8,
+    "tags": [
+     "gears"
+    ],
+    "note": "GOWSeriesVideos E-Day Act 3 Walkthrough(無解說實機)"
+   },
+   {
+    "start": 61.2,
+    "end": 68.0,
+    "tags": [
+     "gears"
+    ],
+    "note": "GOWSeriesVideos E-Day Act 3 Walkthrough(無解說實機)"
+   },
+   {
+    "start": 87.0,
+    "end": 93.0,
+    "tags": [
+     "gears"
+    ],
+    "note": "GOWSeriesVideos E-Day Act 3 Walkthrough(無解說實機)"
+   },
+   {
+    "start": 107.0,
+    "end": 114.0,
+    "tags": [
+     "gears"
+    ],
+    "note": "GOWSeriesVideos E-Day Act 3 Walkthrough(無解說實機)"
+   }
+  ],
+  "gd_TxCkiPqh2C4": [
+   {
+    "start": 8.4,
+    "end": 10.9,
+    "tags": [
+     "expo"
+    ],
+    "note": "gamescom 2012 review"
+   },
+   {
+    "start": 234.5,
+    "end": 238.8,
+    "tags": [
+     "expo"
+    ],
+    "note": "gamescom 2012 review"
+   }
+  ],
+  "gd_NUTXXxvTJIo": [
+   {
+    "start": 43.7,
+    "end": 47.0,
+    "tags": [
+     "expo"
+    ],
+    "note": "The Behemoth PAX Prime 2014 Video Recap"
+   },
+   {
+    "start": 47.3,
+    "end": 51.0,
+    "tags": [
+     "expo"
+    ],
+    "note": "The Behemoth PAX Prime 2014 Video Recap"
+   },
+   {
+    "start": 51.5,
+    "end": 54.5,
+    "tags": [
+     "expo"
+    ],
+    "note": "The Behemoth PAX Prime 2014 Video Recap"
+   },
+   {
+    "start": 54.8,
+    "end": 61.3,
+    "tags": [
+     "expo"
+    ],
+    "note": "The Behemoth PAX Prime 2014 Video Recap"
+   }
+  ],
+  "gd_uQdOcTkFjpU": [
+   {
+    "start": 4.3,
+    "end": 7.8,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 20.1,
+    "end": 27.1,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 38.1,
+    "end": 44.6,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 93.1,
+    "end": 99.1,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 193.7,
+    "end": 197.7,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 306.8,
+    "end": 312.8,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 446.5,
+    "end": 451.0,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 457.0,
+    "end": 464.0,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 480.8,
+    "end": 487.8,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 570.4,
+    "end": 576.4,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 631.0,
+    "end": 635.0,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   },
+   {
+    "start": 748.6,
+    "end": 755.6,
+    "tags": [
+     "expo"
+    ],
+    "note": "Places To Visit PAX East 2015 Virtual tour of the expo area"
+   }
+  ],
+  "gd_YxfFGsRtwkQ": [
+   {
+    "start": 48.6,
+    "end": 53.7,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   },
+   {
+    "start": 264.0,
+    "end": 271.0,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   },
+   {
+    "start": 314.0,
+    "end": 321.0,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   },
+   {
+    "start": 359.5,
+    "end": 366.5,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   },
+   {
+    "start": 703.9,
+    "end": 710.9,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   },
+   {
+    "start": 726.4,
+    "end": 733.4,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   },
+   {
+    "start": 843.3,
+    "end": 850.3,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   },
+   {
+    "start": 1709.1,
+    "end": 1716.1,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   },
+   {
+    "start": 1816.4,
+    "end": 1819.4,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   },
+   {
+    "start": 1952.3,
+    "end": 1959.3,
+    "tags": [
+     "expo"
+    ],
+    "note": "Rescue the Princess! Inside the Tokyo Game Show 2014"
+   }
+  ],
+  "gd_SFW-3m6TPvE": [
+   {
+    "start": 22.8,
+    "end": 29.8,
+    "tags": [
+     "expo"
+    ],
+    "note": "Underrated Retro PAX East 2015 Show Floor Walk"
+   },
+   {
+    "start": 52.8,
+    "end": 59.8,
+    "tags": [
+     "expo"
+    ],
+    "note": "Underrated Retro PAX East 2015 Show Floor Walk"
+   },
+   {
+    "start": 90.2,
+    "end": 97.2,
+    "tags": [
+     "expo"
+    ],
+    "note": "Underrated Retro PAX East 2015 Show Floor Walk"
+   },
+   {
+    "start": 112.8,
+    "end": 119.8,
+    "tags": [
+     "expo"
+    ],
+    "note": "Underrated Retro PAX East 2015 Show Floor Walk"
+   },
+   {
+    "start": 165.8,
+    "end": 172.8,
+    "tags": [
+     "expo"
+    ],
+    "note": "Underrated Retro PAX East 2015 Show Floor Walk"
+   },
+   {
+    "start": 220.2,
+    "end": 227.2,
+    "tags": [
+     "expo"
+    ],
+    "note": "Underrated Retro PAX East 2015 Show Floor Walk"
+   },
+   {
+    "start": 235.2,
+    "end": 242.2,
+    "tags": [
+     "expo"
+    ],
+    "note": "Underrated Retro PAX East 2015 Show Floor Walk"
+   },
+   {
+    "start": 265.1,
+    "end": 270.7,
+    "tags": [
+     "expo"
+    ],
+    "note": "Underrated Retro PAX East 2015 Show Floor Walk"
+   },
+   {
+    "start": 278.7,
+    "end": 285.0,
+    "tags": [
+     "expo"
+    ],
+    "note": "Underrated Retro PAX East 2015 Show Floor Walk"
+   }
+  ],
+  "gd_OIfx0BT4b44": [
+   {
+    "start": 9.9,
+    "end": 16.9,
+    "tags": [
+     "expo"
+    ],
+    "note": "Type 2 Designs PAX East 2015 Walk Thru"
+   },
+   {
+    "start": 58.9,
+    "end": 65.9,
+    "tags": [
+     "expo"
+    ],
+    "note": "Type 2 Designs PAX East 2015 Walk Thru"
+   }
+  ]
+ }
+}

@@ -1,0 +1,141 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- num(數字卡):label(頂端小字,可省略)+ big 大數字(單位小、共用基線;開頭單一數字會由 0 數到目標)+ compare(比較基準,tone 帶三角)。
+     資料由 anim_web.num_data 產生(runs = AL._num_runs 拆好的數字 / 單位段)。
+     level 1 = label + big、level 2 = compare;prev -> shown 為這一段播的範圍(prev >= level 在 t=0 已是終態)。
+     暴露的 id:#label、#big、#cmp。 -->
+<style>
+.label { font-family: var(--font-bold); font-size: 72px; line-height: 1.25; color: var(--text2); opacity: 0; }
+.big { display: flex; align-items: baseline; font-family: var(--font-bold); color: var(--text); opacity: 0; transform-origin: 50% 60%; }
+.big span { display: inline-block; line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.big i { display: inline-block; width: 0; height: 0; }
+.cmp { display: flex; align-items: center; gap: 20px; font-family: var(--font-bold); font-size: 64px; line-height: 1.25; color: var(--text); opacity: 0; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const probs = [];
+  const mk = (cls, txt, css, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  const P = d.W <= d.H;      // 直式(畫面窗 1080x1080):置中於安全框 x 80–940(cx = 510)、數字寬上限 860、label / compare 可換行
+  const padL = px("--pad-x"), padR = px("--pad-r");
+  const cx = P ? (padL + d.W - padR) / 2 : d.W / 2, SW = d.W - padL - padR;
+  const maxWid = P ? SW : d.max_w, labelCy = P ? 250 : d.label_cy, bigCy = P ? 520 : d.big_cy, cmpCy = P ? 790 : d.cmp_cy;
+  const fmt = (v, dec, comma) => {
+    const s = v.toFixed(dec);
+    if (!comma) return s;
+    const [i, f] = s.split(".");
+    return i.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (f ? "." + f : "");
+  };
+
+  // ---- label / 來源
+  let label = null;
+  if (d.label && d.label.trim()) {
+    label = mk("label", d.label);
+    label.id = "label";
+    if (P) Object.assign(label.style, {whiteSpace: "normal", width: SW + "px", textAlign: "center", fontSize: "64px"});
+    const r = box(label);
+    Object.assign(label.style, {left: (cx - r.width / 2) + "px", top: (labelCy - r.height / 2) + "px"});
+  }
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src, {opacity: 0});
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+
+  // ---- big:數字 300px、單位 0.45 倍,共用基線;過寬等比縮小(下限 60)
+  const big = mk("big", null, {});
+  big.id = "big";
+  let S = d.big_fs, spans = [], total = 0;
+  const layout = () => {
+    big.innerHTML = "";
+    spans = d.runs.map((r, k) => {
+      const sp = document.createElement("span");
+      sp.textContent = r.text;
+      sp.style.fontSize = (r.kind === "num" ? S : Math.max(20, Math.round(S * d.unit_ratio))) + "px";
+      sp.style.marginLeft = (k ? r.gap : 0) + "px";
+      big.appendChild(sp);
+      return sp;
+    });
+    total = box(big).width;
+  };
+  layout();
+  for (let i = 0; i < 30 && total > maxWid && S > 60; i++) { S = Math.max(60, Math.floor(S * maxWid / total * 0.99)); layout(); }
+  if (total > maxWid) probs.push(`大數字 ${Math.round(total)}px 寬,超過 ${maxWid}px`);
+  // count-up:第一段數字定寬、靠右,避免數字變長時整行晃動
+  const first = spans[0], ftxt = d.runs[0].text;
+  const fdec = ftxt.includes(".") ? ftxt.split(".")[1].length : 0, fcomma = ftxt.includes(","), fval = parseFloat(ftxt.replace(/,/g, ""));
+  if (d.count) {
+    first.style.width = box(first).width + "px"; first.style.textAlign = "right";
+    if (d.prev < 1) first.textContent = fmt(0, fdec, fcomma);
+  }
+  // 基線:數字墨跡(不含單位)垂直中心對到 big_cy
+  const probe = document.createElement("i");
+  first.appendChild(probe);
+  const m = document.createElement("canvas").getContext("2d");
+  m.font = `${S}px AWBold`;
+  const asc = m.measureText("8").actualBoundingBoxAscent;
+  const bl = bigCy + asc / 2;
+  const bw = box(big);
+  big.style.left = (cx - bw.width / 2) + "px";
+  big.style.top = (bw.top + (bl - box(probe).bottom)) + "px";
+
+  // ---- compare(tone up / down 加三角)
+  let cmp = null;
+  if (d.compare && d.shown >= 2) {
+    cmp = mk("cmp", null, {});
+    cmp.id = "cmp";
+    if (d.tone === "up" || d.tone === "down") {
+      const up = d.tone === "up";
+      cmp.insertAdjacentHTML("beforeend", `<svg width="44" height="38" viewBox="0 0 44 38"><polygon points="${up ? "22,0 0,38 44,38" : "0,0 44,0 22,38"}" fill="${up ? V("--accent") : V("--neg")}"/></svg>`);
+    }
+    const t = document.createElement("span");
+    t.textContent = d.compare;
+    if (P) Object.assign(t.style, {whiteSpace: "normal", textAlign: "center", textWrap: "balance", maxWidth: (SW - 64) + "px"});
+    cmp.appendChild(t);
+    const r = box(cmp);
+    Object.assign(cmp.style, {left: (cx - r.width / 2) + "px", top: (cmpCy - r.height / 2) + "px"});
+  }
+
+  // ---- 時間軸
+  const tl = gsap.timeline({paused: true});
+  const headIn = d.title_in && d.prev <= 0;
+  const stuff = [label, src].filter(Boolean);
+  if (headIn) tl.fromTo(stuff, {opacity: 0, y: 14}, {opacity: 1, y: 0, duration: d.label_s, ease: "power3.out"}, 0);
+  else tl.set(stuff, {opacity: 1}, 0);
+  const durBig = d.count ? d.count_s : d.fade_s, bigEnd = d.big_t0 + durBig;
+  if (d.prev >= 1) tl.set(big, {opacity: 1}, 0);
+  else {
+    tl.fromTo(big, {opacity: 0}, {opacity: 1, duration: d.count ? 0.12 : d.fade_s, ease: "power3.out"}, d.big_t0);
+    tl.fromTo(big, {scale: 0.94}, {scale: 1, duration: 0.5, ease: "back.out(1.4)"}, d.big_t0);
+    if (d.count) {
+      const c = {v: 0};
+      tl.to(c, {v: fval, duration: d.count_s, ease: "power3.out",
+                onUpdate: () => { first.textContent = fmt(c.v, fdec, fcomma); }}, d.big_t0);
+    }
+  }
+  if (cmp) {
+    if (d.prev >= 2) tl.set(cmp, {opacity: 1}, 0);
+    else tl.fromTo(cmp, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: d.cmp_fade_s, ease: "power3.out"},
+                   d.prev <= 0 ? bigEnd + d.cmp_delay_s : d.lead);
+  }
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

@@ -1,0 +1,337 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- bars(橫條):單系列 / 多系列(series ≤3,圖例)/ 分組(groups)/ 堆疊(stack,需 series)/ 目標線(ref)/ 負值(以 0 為中線,負值向左、紅色系)/ ≤10 條。
+     資料由 anim_web.bars_data 產生;字型 @font-face、tokens.css、gsap.min.js 由 anim_web 注入(本檔不寫任何路徑)。
+     window.build(d) 建 window.tl(paused)並回傳 {dur, problems};逐步模式只播 prev -> shown 這一段(前 prev 條在 t=0 已是終態)。
+     暴露的元素 id:#title、#lbl-k、#bar-k-s、#val-k-s(k = 條序,s = 系列序;堆疊時整條是 #bar-k-0、總和是 #val-k-0)、#ref。
+     軸暴衝(d.shock = 暴衝項序號,anim_web.shock_fields;單系列、無 stack / ref / 負值):先照舊比例尺(其他項最大值只佔繪圖區 d.shock_t.pre)長出,暴衝項長到天花板線後加速衝出框,
+     接著比例尺重縮放成「暴衝項 = 滿格」、其他條等比縮短,暴衝項定格金色並在此時才出數字。段內只有暴衝項在這段長出(prev <= shock < shown)才播;之前的段落停在舊比例尺、之後停在新比例尺。
+     不開 shock 時整段程式路徑與輸出與舊版逐像素相同。 -->
+<style>
+.lbl { font-family: var(--font-bold); color: var(--label); text-align: right; line-height: 1.15; }
+.gtitle { font-family: var(--font-bold); font-size: var(--fs-group); line-height: 60px; color: var(--text2); }
+.bar { width: 0; }
+.val { font-family: var(--font-bold); color: var(--text); font-variant-numeric: tabular-nums; transform-origin: left center; opacity: 0; }
+.val.neg { transform-origin: right center; }
+.val .u { margin-left: 8px; }
+.val .u.pct { margin-left: 0; }
+.base { width: 2px; background: var(--line); }
+.icon { object-fit: contain; }
+.seg { position: absolute; }
+.segv { position: absolute; font-family: var(--font-bold); color: var(--on-series); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: center; }
+.refline { width: 3px; opacity: 0; background: repeating-linear-gradient(to bottom, var(--text) 0 12px, transparent 12px 22px); }
+.reflbl { font-family: var(--font-bold); font-size: var(--fs-legend); line-height: 1.2; color: var(--text); opacity: 0; }
+.ceil { width: 3px; background: var(--text2); opacity: 0; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const P = d.W <= d.H;       // 直式(原生畫面窗 1080x1080)
+  const probs = [], padX = px("--pad-x"), padR = px("--pad-r"), S = d.series ? d.series.length : 1, stack = !!d.stack && S > 1;
+  const mk = (cls, txt, css, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  const fmt = (v, dec) => {
+    const s = v.toFixed(dec);
+    if (Math.abs(v) < 10000) return s;
+    const [i, f] = s.split(".");
+    return i.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (f ? "." + f : "");
+  };
+  const CLIP0 = "inset(0% 0% 0% 0%)";
+
+  // ---- 標題、短橫條、圖例、來源
+  const title = mk("title", d.title, {left: padX + "px", top: px("--title-top") + "px"});
+  title.id = "title";
+  const rule = mk("rule", null, {left: padX + "px", top: (box(title).bottom + 10) + "px"});
+  const legend = [];
+  let top0 = Math.max(px("--content-top"), box(rule).bottom + 28);
+  if (d.series) {
+    let x = padX;
+    const ly = box(rule).bottom + 22;
+    d.series.forEach((name, s) => {
+      const e = mk("legend", null, {left: x + "px", top: ly + "px"});
+      const sw = document.createElement("i");
+      sw.style.background = V("--series-" + (s + 1));
+      e.appendChild(sw); e.append(name);
+      x = box(e).right + 48;
+      legend.push(e);
+    });
+    top0 = Math.max(top0, ly + 53 + 36);
+  }
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src);
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+  const refH = d.ref ? 72 : 0;          // 目標線標籤在第一條上方
+  top0 += refH;
+
+  // ---- 垂直版面:條厚與條距放不下先縮,再不行回報
+  const rows = d.rows, R = rows.length, G = d.groups.length;
+  const RMAX = P ? 12 : 10;
+  if (R > RMAX) probs.push(`${R} 條超過 ${RMAX} 條上限(拆成兩張)`);
+  const bottom = d.src ? px("--plot-bottom-src") : px("--plot-bottom");
+  const avail = bottom - top0, SGAP = 8, GT = 60, GT_GAP = 12, G_GAP = 40;
+  // 條厚 / 列距從上限開始(橫式 96 / 64、多系列 72 / 56;直式 72 / 40),放不下就等比縮小到下限;放得下就維持上限,剩餘空間留在上方(內容靠近字幕安全線上方)
+  const BHMAX = P ? (stack ? 72 : S > 1 ? 56 : 72) : (stack ? 96 : S > 1 ? 72 : 96), RGMAX = P ? 40 : (S > 1 && !stack ? 56 : 64);
+  const BHMIN = P ? 40 : 36, RGMIN = P ? 12 : 20;
+  let bh = BHMAX, rg = RGMAX;
+  const rowH = () => stack ? bh : S * bh + (S - 1) * SGAP;
+  const need = () => R * rowH() + (R - 1) * rg + G * (GT + GT_GAP) + Math.max(0, G - 1) * G_GAP;
+  while (need() > avail && bh > BHMIN) { bh = Math.max(BHMIN, bh - 2); rg = Math.max(RGMIN, Math.round(RGMAX * bh / BHMAX)); }
+  while (need() > avail && rg > RGMIN) rg -= 2;
+  if (need() > avail) probs.push(`排不下:需要 ${need()}px,可用 ${avail}px(拆成兩張或改逐步)`);
+  const fs = Math.max(px("--fs-body-min"), Math.min(px("--fs-body-max"), Math.round(rowH() * 0.82)));
+  const ufs = Math.max(40, Math.round(fs * 0.75));
+
+  // ---- 水平版面:標籤欄寬(過長先縮字再換行)、圖示欄
+  const LBL_MAX = P ? 300 : 520;
+  const lbls = rows.map((r, k) => {
+    const e = mk("lbl", r.label, {fontSize: fs + "px", opacity: 0, lineHeight: P ? "1.1" : ""});
+    e.id = "lbl-" + k;
+    let w = box(e).width;
+    if (w > LBL_MAX) {
+      const f2 = Math.max(px("--fs-body-min"), Math.floor(fs * LBL_MAX / w));
+      e.style.fontSize = f2 + "px";
+      w = box(e).width;
+      if (w > LBL_MAX) { e.style.whiteSpace = "normal"; e.style.width = LBL_MAX + "px"; w = LBL_MAX; }
+    }
+    if (box(e).height > rowH() + rg - 2) probs.push(`標籤「${r.label.replace(/​/g, "")}」換行後高度 ${Math.round(box(e).height)}px 超過列距(縮短標籤)`);
+    return {e, w};
+  });
+  const lblW = Math.max(...lbls.map(o => o.w));
+  const labelRight = padX + lblW;
+  const iconSz = Math.min(rowH(), 64), hasIcon = rows.some(r => r.icon);
+  const baseX = labelRight + 28 + (hasIcon ? iconSz + 16 : 0);
+
+  // ---- 數值元素:vals[k][s] = {e, num, v, dec, neg};堆疊時每條只有一個總和(s = 0)
+  const mkVal = (v, dec, unit, id) => {
+    const neg = v < 0, e = mk("val" + (neg ? " neg" : ""), null, {fontSize: fs + "px"});
+    e.id = id;
+    const num = document.createElement("span");
+    num.textContent = fmt(v, dec);
+    e.appendChild(num);
+    if (unit) {
+      const u = document.createElement("span");
+      u.className = "u" + (unit.startsWith("%") ? " pct" : "");
+      u.style.fontSize = ufs + "px";
+      u.textContent = unit;
+      e.appendChild(u);
+    }
+    if (neg) e.style.color = V("--neg-fill");
+    return {e, num, v, dec, neg, w: box(e).width};
+  };
+  const vals = [];
+  let valW = 0, negW = 0, maxP = 0, maxN = 0;
+  rows.forEach((r, k) => {
+    const list = stack
+      ? [(() => { const nz = r.vals.filter(v => v != null); return mkVal(nz.reduce((a, b) => a + b, 0), Math.max(...r.dec), r.unit, `val-${k}-0`); })()]
+      : r.vals.map((v, s) => v == null ? null : mkVal(v, r.dec[s], r.unit, `val-${k}-${s}`));
+    vals.push(list);
+    list.forEach(o => {
+      if (!o) return;
+      if (o.neg) { negW = Math.max(negW, o.w); maxN = Math.max(maxN, -o.v); }
+      else { valW = Math.max(valW, o.w); maxP = Math.max(maxP, o.v); }
+    });
+  });
+  const refV = d.ref ? d.ref.value : null;
+  if (refV != null) { if (refV >= 0) maxP = Math.max(maxP, refV); else maxN = Math.max(maxN, -refV); }
+  const hasNeg = maxN > 0, hasPos = maxP > 0 || !hasNeg;
+  const barsL = baseX + (hasNeg ? negW + 20 : 0);
+  const maxEnd = d.W - padR - (hasPos && valW ? valW + 20 : 0);
+  if (maxEnd - barsL < (P ? 240 : 300)) probs.push(`長條可用寬度只有 ${Math.round(maxEnd - barsL)}px(標籤或數值太長)`);
+  const scaleF = (maxEnd - barsL) / ((maxP + maxN) || 1);
+  // 軸暴衝:SH = 暴衝項序號,shMode = pre(暴衝項還沒出現:舊比例尺)/ play(這段播暴衝)/ post(已播過:新比例尺 = 一般排法)
+  const SH = d.shock == null ? null : d.shock, Lf = maxEnd - barsL;
+  const shMode = SH == null ? null : d.shown <= SH ? "pre" : d.prev > SH ? "post" : "play";
+  let sc0 = scaleF;
+  if (SH != null) {
+    const others = Math.max(0, ...rows.map((r, k) => k === SH ? 0 : (r.vals[0] || 0)));
+    sc0 = Lf * d.shock_t.pre / (others || 1);
+  }
+  const scale = shMode === "pre" || shMode === "play" ? sc0 : scaleF;
+  const zeroX = barsL + maxN * scale;
+
+  // ---- 逐條定位
+  const gts = {};
+  let y = top0 + Math.max(0, avail - need()) * 0.8, lastG = null, firstTop = null, lastBot = null;
+  const rad = Math.min(10, bh / 2);
+  const bars = rows.map((r, k) => {
+    if (r.group != null && r.group !== lastG) {
+      if (lastG != null) y += G_GAP;
+      gts[r.group] = mk("gtitle", d.groups[r.group], {left: padX + "px", top: y + "px", opacity: 0});
+      y += GT + GT_GAP;
+      lastG = r.group;
+    }
+    if (firstTop == null) firstTop = y;
+    const lb = lbls[k].e, lh = box(lb).height;
+    Object.assign(lb.style, {left: (labelRight - lbls[k].w) + "px", top: (y + rowH() / 2 - lh / 2) + "px"});
+    let icon = null;
+    if (r.icon) {
+      icon = mk("icon", null, {left: (labelRight + 16) + "px", top: (y + rowH() / 2 - iconSz / 2) + "px",
+                               width: iconSz + "px", height: iconSz + "px", opacity: 0}, "img");
+      icon.src = r.icon;
+    }
+    const lastS = r.vals.reduce((a, v, s) => v == null ? a : s, -1);
+    const placeVal = (vo, by, w, hi, neg) => {
+      const vh = box(vo.e).height;
+      Object.assign(vo.e.style, {top: (by + bh / 2 - vh / 2) + "px"});
+      vo.e.style.left = (neg ? zeroX - w - 20 - vo.w : zeroX + w + 20) + "px";
+      if (hi) vo.e.style.color = V("--accent");
+    };
+    let out;
+    if (stack) {
+      // 堆疊:一條 = 容器(clip 由左展開)+ 各系列區段;總和標在末端;區段放得下就在段內標數字(深字)
+      const nz = r.vals.map((v, s) => ({v, s})).filter(o => o.v != null);
+      const tot = nz.reduce((a, o) => a + o.v, 0), W0 = tot * scale;
+      const cont = mk("stk", null, {left: zeroX + "px", top: y + "px", width: W0 + "px", height: bh + "px", clipPath: "inset(0% 100% 0% 0%)"});
+      cont.id = `bar-${k}-0`;
+      let cum = 0;
+      nz.forEach((o, i) => {
+        const w = o.v * scale, last = i === nz.length - 1;
+        const sg = document.createElement("div");
+        sg.className = "seg";
+        Object.assign(sg.style, {left: cum + "px", top: 0, width: Math.max(0, w - (last ? 0 : 3)) + "px", height: bh + "px",
+                                 background: V("--series-" + (o.s + 1)), borderRadius: last ? `0 ${rad}px ${rad}px 0` : "0"});
+        cont.appendChild(sg);
+        const t = document.createElement("div");
+        t.className = "segv"; t.textContent = fmt(o.v, r.dec[o.s]);
+        t.style.fontSize = px("--fs-body-min") + "px";
+        cont.appendChild(t);
+        const tw = box(t).width, th = box(t).height;
+        if (w >= tw + 28 && bh >= th - 4) Object.assign(t.style, {left: (cum + (w - tw) / 2) + "px", top: (bh / 2 - th / 2) + "px"});
+        else t.remove();
+        cum += w;
+      });
+      const vo = vals[k][0];
+      placeVal(vo, y, W0, r.hi, false);
+      out = [{stack: true, b: cont, w: W0, vo, neg: false}];
+    } else {
+      out = r.vals.map((v, s) => {
+        if (v == null) return null;
+        const by = y + s * (bh + SGAP), neg = v < 0, w = shMode === "play" && k === SH ? Lf : Math.abs(v) * scale;
+        const hi = r.hi && s === lastS;
+        // 單系列:強調條填金色;多系列:填色必須維持系列色(對得上圖例),強調改成 2px 金色外框 + 數值字變金色
+        const ring = hi && S > 1;
+        let col = hi && !ring && !(shMode === "play" && k === SH) ? V("--accent") : (S > 1 ? V("--series-" + (s + 1)) : (r.color || V("--series-1")));
+        if (neg && S === 1 && !hi && !r.color) col = V("--neg-fill");
+        const b = mk("bar", null, {left: (neg ? zeroX - w : zeroX) + "px", top: by + "px", height: bh + "px", background: col,
+                                   borderRadius: neg ? `${rad}px 0 0 ${rad}px` : `0 ${rad}px ${rad}px 0`});
+        b.id = `bar-${k}-${s}`;
+        if (neg) Object.assign(b.style, {width: w + "px", clipPath: "inset(0% 0% 0% 100%)"});   // 負值:由 0 線向左展開(clip)
+        if (ring) Object.assign(b.style, {boxSizing: "border-box", border: "2px solid " + V("--accent"), opacity: 0});   // 外框含在寬度內;長出時才顯示
+        const vo = vals[k][s];
+        placeVal(vo, by, w, hi, neg);
+        return {b, w, vo, ring, neg};
+      });
+    }
+    lastBot = y + rowH();
+    y += rowH() + rg;
+    return {k, lb, icon, out, group: r.group};
+  });
+  const base = mk("base", null, {left: (zeroX - 1) + "px", top: (firstTop - 12) + "px",
+                                 height: (lastBot - firstTop + 24) + "px", opacity: 0});
+
+  // ---- 軸暴衝:天花板線(舊比例尺的滿格位置;重縮放後淡出)
+  let ceil = null;
+  if (shMode === "play") {
+    ceil = mk("ceil", null, {left: (barsL + Lf - 1.5) + "px", top: (firstTop - 14) + "px", height: (lastBot - firstTop + 28) + "px"});
+    ceil.id = "ceil";
+  }
+
+  // ---- 目標線:垂直虛線 + 上方標籤(置中於線,夾在左右邊界內)
+  const refEls = [];
+  if (d.ref) {
+    const rx = zeroX + d.ref.value * scale;
+    const ln = mk("refline", null, {left: (rx - 1.5) + "px", top: (firstTop - 14) + "px", height: (lastBot - firstTop + 28) + "px"});
+    ln.id = "ref";
+    const lb = mk("reflbl", d.ref.label);
+    const lw = box(lb).width, lh = box(lb).height;
+    Object.assign(lb.style, {left: Math.min(Math.max(padX, rx - lw / 2), d.W - padR - lw) + "px", top: (firstTop - 14 - lh - 4) + "px"});
+    if (firstTop - 14 - lh - 4 < top0 - refH) probs.push("目標線標籤超出上緣");
+    refEls.push(ln, lb);
+  }
+
+  // ---- 時間軸(只用 GSAP;seek(t, false) 才會觸發 count-up 的 onUpdate)
+  const tl = gsap.timeline({paused: true});
+  const head = [rule, ...legend, src].filter(Boolean);
+  if (d.title_in) {
+    tl.from(title, {opacity: 0, y: 16, duration: 0.4, ease: "power2.out"}, 0);
+    tl.from(head, {opacity: 0, duration: 0.4, ease: "power2.out"}, 0.1);
+  }
+  if (d.shown > 0) {
+    if (d.prev > 0) tl.set([base, ...refEls], {opacity: 1}, 0);
+    else tl.to([base, ...refEls], {opacity: 1, duration: 0.25, ease: "power2.out"}, d.lead);
+    if (ceil) tl.to(ceil, {opacity: 1, duration: 0.25, ease: "power2.out"}, d.lead);
+  }
+  const grow = Math.max(0.2, d.grow - 0.08 * (S - 1));
+  bars.forEach(o => {
+    if (o.k >= d.shown) return;
+    const done = o.k < d.prev, at = d.lead + d.gap * (o.k - d.prev);
+    const fadeIn = [o.lb, o.icon].filter(Boolean);
+    const gt = o.group != null && bars.find(q => q.group === o.group).k === o.k ? gts[o.group] : null;
+    if (gt) fadeIn.push(gt);
+    if (done) tl.set(fadeIn, {opacity: 1}, 0);
+    else tl.to(fadeIn, {opacity: 1, duration: 0.25, ease: "power2.out"}, at);
+    o.out.forEach((q, s) => {
+      if (!q) return;
+      const clipped = q.neg || q.stack;
+      if (done) {
+        tl.set(q.b, clipped ? {clipPath: CLIP0, opacity: 1} : {width: q.w, opacity: 1}, 0);
+        tl.set(q.vo.e, {opacity: 1}, 0);
+        return;
+      }
+      const t = at + 0.08 * s, c = {v: 0};
+      if (q.ring) tl.set(q.b, {opacity: 1}, t);
+      q.vo.num.textContent = fmt(0, q.vo.dec);
+      if (clipped) tl.to(q.b, {clipPath: CLIP0, duration: grow, ease: "power3.out"}, t);
+      else tl.to(q.b, {width: q.w, duration: grow, ease: "power3.out"}, t);
+      if (shMode === "play" && o.k === SH) return;        // 暴衝項的數字等重縮放時才出現(見下)
+      tl.fromTo(q.vo.e, {opacity: 0, scale: 0.85}, {opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.7)"}, t + 0.1);
+      tl.to(c, {v: q.vo.v, duration: grow, ease: "power3.out",
+                onUpdate: () => { q.vo.num.textContent = fmt(c.v, q.vo.dec); }}, t);
+    });
+  });
+  if (shMode === "play") {
+    const T = d.shock_t, R = T.rescale, EZ = "power2.inOut", sq = bars[SH].out[0], ACC = V("--accent");
+    const over = Math.max(40, Math.min(200, valW + 20 + padR - 48));      // 衝出天花板的距離(條尾仍在畫面安全邊內)
+    let tEnd = 0;
+    bars.forEach(o => { if (o.k < d.shown && o.k >= d.prev) tEnd = Math.max(tEnd, d.lead + d.gap * (o.k - d.prev) + grow); });
+    const Tb = tEnd + T.pause, Tr = Tb + T.burst + T.hang;
+    tl.to(sq.b, {width: Lf + over, duration: T.burst, ease: "power2.in"}, Tb);                   // 衝出框:越衝越快
+    tl.fromTo(sq.b, {backgroundColor: rows[SH].color || V("--series-1")}, {backgroundColor: ACC, duration: 0.12, ease: "power1.out", immediateRender: false}, Tb + T.burst * 0.6);
+    tl.fromTo(ceil, {backgroundColor: V("--text2")}, {backgroundColor: ACC, duration: 0.12, ease: "power1.out", immediateRender: false}, Tb + T.burst * 0.6);
+    bars.forEach(o => {                                                                          // 重縮放:其他條等比縮短,暴衝項縮回滿格(= 新比例尺的 100%)
+      const q = o.out[0];
+      if (o.k >= d.shown || !q) return;
+      if (o.k === SH) { tl.fromTo(q.b, {width: Lf + over}, {width: Lf, duration: R, ease: EZ, immediateRender: false}, Tr); return; }
+      const v = Math.abs(q.vo.v);
+      tl.fromTo(q.b, {width: v * sc0}, {width: v * scaleF, duration: R, ease: EZ, immediateRender: false}, Tr);
+      tl.fromTo(q.vo.e, {left: zeroX + v * sc0 + 20}, {left: zeroX + v * scaleF + 20, duration: R, ease: EZ, immediateRender: false}, Tr);
+    });
+    const c = {v: 0}, vo = sq.vo;
+    vo.num.textContent = fmt(0, vo.dec);
+    tl.fromTo(vo.e, {left: zeroX + Lf + over + 20}, {left: zeroX + Lf + 20, duration: R, ease: EZ, immediateRender: false}, Tr);
+    tl.fromTo(vo.e, {opacity: 0, scale: 0.85}, {opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.7)"}, Tr);
+    tl.to(c, {v: vo.v, duration: R, ease: "power2.out", onUpdate: () => { vo.num.textContent = fmt(c.v, vo.dec); }}, Tr);
+    tl.to(ceil, {opacity: 0, duration: 0.3, ease: "power1.out"}, Tr + R * 0.5);
+  }
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);     // 補到段長(之後定格)
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

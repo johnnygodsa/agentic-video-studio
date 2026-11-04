@@ -1,0 +1,15 @@
+{
+ "tpl": "number",
+ "說明": "測試與範例:sets 每組 = 一個 film.json 場景的 data 加假 lines;render 時 params = {tpl, lines, data}。orient 省略 = 橫直都算。",
+ "sets": [
+  {"name": "min", "dur": 3.5,
+   "lines": [{"idx": 1, "text": "一杯手搖飲現在要一百元。", "start": 0.1, "end": 2.0}],
+   "data": {"num": "100", "unit": "元"}},
+  {"name": "max", "dur": 7.5,
+   "lines": [{"idx": 1, "text": "一杯手搖飲原本八十元。", "start": 0.1, "end": 2.4},
+             {"idx": 2, "text": "現在一杯要一百元,比去年多了整整三成。", "start": 2.6, "end": 5.8}],
+   "data": {"flip": {"from": 80, "to": 100, "at": 1, "word": "一百"}, "unit": "元",
+            "note": "比去年多了整整三成,而且還一直漲", "src": "假資料 · 範例用",
+            "pigeon": {"expr": ["normal", "surprised"], "clip": "idle"}}}
+ ]
+}

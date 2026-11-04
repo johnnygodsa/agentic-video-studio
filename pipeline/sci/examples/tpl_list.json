@@ -1,0 +1,33 @@
+{
+ "tpl": "list",
+ "說明": "測試與範例:sets 每組 = 一個 film.json 場景的 data 加假 lines;orient 省略 = 橫直都算,landscape/portrait = 只算該向(上限不同)。",
+ "sets": [
+  {"name": "min", "dur": 5.5,
+   "lines": [{"idx": 1, "text": "店家只講了兩個理由。", "start": 0.1, "end": 2.0},
+             {"idx": 2, "text": "原料跟房租。", "start": 2.2, "end": 3.6}],
+   "data": {"style": "check", "items": [{"text": "原料變貴"}, {"text": "房租變貴"}], "hi": [1]}},
+  {"name": "maxL", "orient": "landscape", "dur": 11.5,
+   "lines": [{"idx": 1, "text": "手搖飲漲價的理由店家列了一大串。", "start": 0.1, "end": 3.0},
+             {"idx": 2, "text": "原料變貴,房租也變貴,工讀生時薪也調了。", "start": 3.2, "end": 6.4},
+             {"idx": 3, "text": "可是有六成的人照樣每天喝一杯。", "start": 6.6, "end": 9.6}],
+   "data": {"title": "漲價理由", "style": "num", "hi": [5],
+            "items": [{"text": "原料變貴", "at": 1, "word": "原料", "icon": "turtle.coin"},
+                      {"text": "房租變貴", "at": 1, "word": "房租"},
+                      {"text": "時薪調漲", "at": 1, "word": "時薪"},
+                      {"text": "外送平台抽成"},
+                      {"text": "杯子跟吸管換材質"},
+                      {"text": "每天喝一杯含糖飲料的人變多了", "at": 2, "word": "每天"}],
+            "pigeon": {"expr": ["normal", "think", "smug"]}}},
+  {"name": "maxP", "orient": "portrait", "dur": 11.5,
+   "lines": [{"idx": 1, "text": "手搖飲漲價的理由店家列了一大串。", "start": 0.1, "end": 3.0},
+             {"idx": 2, "text": "原料變貴,房租也變貴,工讀生時薪也調了。", "start": 3.2, "end": 6.4},
+             {"idx": 3, "text": "可是有六成的人照樣每天喝一杯。", "start": 6.6, "end": 9.6}],
+   "data": {"title": "漲價理由", "style": "dot", "hi": [2],
+            "items": [{"text": "原料變貴", "at": 1, "word": "原料"},
+                      {"text": "房租變貴", "at": 1, "word": "房租"},
+                      {"text": "時薪調漲", "at": 1, "word": "時薪"},
+                      {"text": "外送平台抽成"},
+                      {"text": "杯子跟吸管全換材質"}],
+            "pigeon": {"expr": "doubt"}}}
+ ]
+}

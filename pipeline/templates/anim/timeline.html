@@ -1,0 +1,690 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- timeline(時間軸):舊欄位 points:[[日期,說明]…]、question_between、step 原樣可跑;新增 scale:"time"(依日期比例 + 斷軸)、
+     tracks(2–3 軌 swim-lane,點的第 3 欄 {track:索引或名稱})、>8 點或放不下自動上下交錯。字型 @font-face、tokens.css、gsap 由 anim_web 注入。
+     資料(Python 端 timeline_data 產生):
+       points   [[日期, 說明, {track?}]…](第 3 欄若是字串色碼 = 舊版顏色欄位,忽略;說明內可含 U+200B = 共用斷詞點)
+       scale    "even"(預設)| "time"        tracks [{name, color?}]≤3        question_between [i,j]
+       src      出處小字                      W,H 畫面尺寸
+       prev,shown  本段動畫要播的節點範圍 [prev, shown)(< prev 的節點在 t=0 已是終態);省略 = 一次全播
+       q        true = 問號段(此時 prev = shown = 節點數)    gap 節點間距秒(預設 1.2)  lead 起點秒(預設 0)  dur 段長秒
+     window.build(d) 建 window.tl(paused)並回傳 {dur, problems, layout};元素 id:#axis-k、#node-k、#year-k、#desc-k、#stem-k、#q。 -->
+<style>
+.node { width: 30px; height: 30px; border-radius: 50%; opacity: 0; }
+.year, .desc { text-align: center; line-height: 1.25; opacity: 0; }
+.desc { font-family: var(--font-bold); color: var(--text); }
+.axseg { overflow: hidden; width: 0; height: 40px; }
+.axseg > i { position: absolute; display: block; }
+.axseg .ln { height: 6px; top: 17px; background: var(--label); border-radius: 3px; }
+.axseg .brk { width: 5px; height: 34px; top: 3px; background: var(--label); transform: skewX(-22deg); }
+.vaxs { position: absolute; width: 6px; height: 0; background: var(--label); border-radius: 3px; }
+.stem { width: 3px; background: var(--line); opacity: 0; transform-origin: center; }
+.lane { height: 3px; width: 0; border-radius: 2px; }
+.lname { font-family: var(--font-bold); font-size: 44px; line-height: 1.2; opacity: 0; }
+.tick { width: 5px; height: 22px; border-radius: 2px; opacity: 0; }
+#q { font-family: var(--font-bold); font-size: 250px; line-height: 1; color: var(--neg); opacity: 0; transform-origin: center; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const W = d.W, probs = [], EDGE = 96, GAP = 24;
+  const ACC = V("--accent"), TXT = V("--text");
+  const mk = (cls, css, txt, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+
+  // ---------------------------------------------------------------- 資料整理
+  const raw = d.points, N = raw.length;
+  const trkDefs = (d.tracks || []).slice(0, 3);
+  const T = trkDefs.length;
+  const TCOL = ["#7ac8ff", "#ff9a8a", "#9ccc65"];
+  const trkColor = (c, i) => (typeof c === "string" && /^#[0-9a-f]{3,8}$/i.test(c)) ? c : TCOL[i];
+  const trks = trkDefs.map((t, i) => ({name: typeof t === "string" ? t : (t.name || ""), color: trkColor(t.color, i)}));
+  const ZW = "​", BR = {};      // 注入的斷詞點(text_wrap.zwsp):desc 存去掉 U+200B 的純文字,斷點記在 BR[純文字],wrap 優先用它
+  const pts = raw.map((p, i) => {
+    const o = (p.length > 2 && p[2] && typeof p[2] === "object") ? p[2] : {};
+    let tr = 0;
+    if (T) {
+      if (typeof o.track === "number") tr = Math.max(0, Math.min(T - 1, o.track));
+      else if (typeof o.track === "string") { const k = trks.findIndex(t => t.name === o.track); tr = k >= 0 ? k : 0; }
+    }
+    const ds = String(p[1]), dp = ds.replace(/​/g, ""); if (ds.includes(ZW)) BR[dp] = ds.split(ZW);
+    return {date: String(p[0]), desc: dp, track: tr, color: T ? trks[tr].color : TXT};
+  });
+  const prev = d.prev == null ? 0 : d.prev, shown = d.shown == null ? N : d.shown, isQ = !!d.q;
+  const qb = d.question_between && d.question_between.length === 2 ? d.question_between : null;
+  const limitY = d.src ? px("--content-bottom-src") : px("--content-bottom");
+
+  // ---------------------------------------------------------------- 日期解析(YYYY、YYYY/M、YYYY/M/D;無年份的 M/D 沿用前一點的年份,倒退則進一年)
+  function parseDates() {
+    const out = []; let yr = null, lastMD = -1;
+    for (const p of pts) {
+      let m = /^\s*(\d{4})(?:[\/\-.](\d{1,2}))?(?:[\/\-.](\d{1,2}))?(?!\d)/.exec(p.date);
+      let y, mo, da;
+      if (m) { y = +m[1]; mo = m[2] ? +m[2] : 1; da = m[3] ? +m[3] : 1; yr = y; lastMD = mo * 40 + da; }
+      else {
+        m = /^\s*(\d{1,2})\/(\d{1,2})(?!\d)/.exec(p.date);
+        if (!m || yr == null) return null;
+        mo = +m[1]; da = +m[2];
+        if (mo * 40 + da < lastMD) yr += 1;
+        lastMD = mo * 40 + da; y = yr;
+      }
+      if (mo < 1 || mo > 12 || da < 1 || da > 31) return null;
+      out.push(Date.UTC(y, mo - 1, da) / 86400000);
+    }
+    for (let i = 1; i < out.length; i++) if (out[i] < out[i - 1]) return null;
+    return out;
+  }
+  let days = null, wantTime = d.scale === "time";
+  if (wantTime) {
+    days = N > 1 ? parseDates() : null;
+    if (!days && N > 1) { probs.push("scale:time 但日期無法解析或未遞增,退回均分"); wantTime = false; }
+  }
+
+  // ---------------------------------------------------------------- 文字量測與換行(只在詞與詞之間斷;優先用注入的斷點 BR,沒有才用 Intl.Segmenter)
+  const ctx2d = document.createElement("canvas").getContext("2d");
+  const wcache = {};
+  const tw = (s, fs) => { const k = fs + "|" + s; return wcache[k] ?? (wcache[k] = (ctx2d.font = fs + "px AWBold", ctx2d.measureText(s).width)); };
+  let seg = null; try { seg = new Intl.Segmenter("zh-TW", {granularity: "word"}); } catch (e) { /* 退回逐字 */ }
+  const NO_START = "，。、；：？！）」』》〉】〕…‧·,.;:?!)]}%", NO_END = "（「『《〈【〔([{";
+  const isAl = c => /[A-Za-z0-9]/.test(c);
+  const toks = s => BR[s] || (seg ? [...seg.segment(s)].map(x => x.segment) : [...s]);
+  const lcache = {};
+  function wrap(text, fs, maxW, maxLines) {
+    const key = [text, fs, Math.round(maxW), maxLines].join("|");
+    if (key in lcache) return lcache[key];
+    return lcache[key] = wrapRaw(text, fs, maxW, maxLines);
+  }
+  function wrapRaw(text, fs, maxW, maxLines) {
+    const t = toks(text), m = t.length;
+    if (tw(text, fs) <= maxW) return [text];
+    if (t.some(x => !x.trim() ? false : tw(x, fs) > maxW)) return null;       // 單一詞比欄寬還寬
+    const lineOk = (i, j, first, last) => {
+      const s = t.slice(i, j).join("").trim();
+      if (!s) return null;
+      const w = tw(s, fs);
+      if (w > maxW) return null;
+      if ([...s].length < 2 || (!first && NO_START.includes(s[0])) || (!last && NO_END.includes(s[s.length - 1]))) return null;
+      let pen = 0;
+      if (j < m) {
+        const nx = t.slice(j).find(x => x.trim()) || "", l = s[s.length - 1], f = nx[0] || "";
+        if (isAl(l) && isAl(f)) pen = 300;                       // 英文詞組 / 數字中間不斷
+        else if (/[0-9%+.,]/.test(l) && f && !/[\x00-\x7f]/.test(f)) pen = 80;   // 數字與單位
+        else if (isAl(l) && f && !/[\x00-\x7f]/.test(f)) pen = 80;
+      }
+      return w + pen;
+    };
+    // 先用貪心估最少行數 n0,再在 n0..n0+2 行裡找「最長行最短」
+    let n0 = 1, acc = 0;
+    for (const x of t) { const w = tw(x, fs); if (acc + w > maxW && acc > 0) { n0++; acc = w; } else acc += w; }
+    for (let n = n0; n <= Math.min(maxLines, n0 + 2); n++) {
+      const INF = [Infinity, 0];
+      const best = Array.from({length: n + 1}, () => Array(m + 1).fill(INF)), prv = Array.from({length: n + 1}, () => Array(m + 1).fill(-1));
+      best[0][0] = [0, 0];
+      for (let k = 1; k <= n; k++) for (let j = k; j <= m; j++) for (let i = k - 1; i < j; i++) {
+        if (best[k - 1][i][0] === Infinity) continue;
+        const w = lineOk(i, j, k === 1, k === n && j === m);
+        if (w == null) continue;
+        const c = [Math.max(best[k - 1][i][0], w), best[k - 1][i][1] + w * w];
+        if (c[0] < best[k][j][0] || (c[0] === best[k][j][0] && c[1] < best[k][j][1])) { best[k][j] = c; prv[k][j] = i; }
+      }
+      if (best[n][m][0] < Infinity) {
+        const cuts = []; let j = m;
+        for (let k = n; k > 0; k--) { const i = prv[k][j]; cuts.push([i, j]); j = i; }
+        return cuts.reverse().map(([i, j]) => t.slice(i, j).join("").trim());
+      }
+    }
+    return null;
+  }
+
+  if (d.W <= d.H) return buildPortrait();      // 直式:縱向時間軸(函式在檔尾)
+
+  // ---------------------------------------------------------------- 節點 x 位置
+  const xRange = T ? [0, 1690] : (N <= 5 ? [300, 1620] : [240, 1680]);
+  const lnameW = T ? Math.max(...trks.map(t => tw(t.name, 44))) : 0;
+  if (T) xRange[0] = Math.max(340, EDGE + lnameW + 70);
+  function evenXs() {
+    return pts.map((_, i) => N > 1 ? xRange[0] + i * (xRange[1] - xRange[0]) / (N - 1) : (T ? (xRange[0] + xRange[1]) / 2 : W / 2));
+  }
+  // 時間比例:最大間隔先壓成上限 C(超過的標斷軸),從不壓縮開始往下試,直到版面放得下
+  function timeXs(C) {
+    const g = [], brk = [];
+    for (let i = 0; i < N - 1; i++) { const gap = days[i + 1] - days[i]; brk.push(gap > C); g.push(Math.min(gap, C)); }
+    const FL = 150;                        // 相鄰節點最小像素間距(標籤至少放得下 ~5 個字)
+    const fixed = g.map(() => false);
+    let px_ = g.slice();
+    for (let it = 0; it < 12; it++) {
+      const nf = fixed.filter(Boolean).length, sum = g.reduce((a, v, i) => a + (fixed[i] ? 0 : v), 0);
+      const s = sum > 0 ? (xRange[1] - xRange[0] - nf * FL) / sum : 0;
+      let ch = false;
+      g.forEach((v, i) => { if (!fixed[i] && v * s < FL) { fixed[i] = true; ch = true; } });
+      px_ = g.map((v, i) => fixed[i] ? FL : v * s);
+      if (!ch) break;
+    }
+    const xs = [xRange[0]];
+    px_.forEach(v => xs.push(xs[xs.length - 1] + v));
+    const k = (xRange[1] - xRange[0]) / (xs[N - 1] - xs[0] || 1);
+    const sum = g.reduce((a, v, i) => a + (fixed[i] ? 0 : v), 0), nf = fixed.filter(Boolean).length;
+    const s = sum > 0 ? (xRange[1] - xRange[0] - nf * FL) / sum : 0;
+    // 被墊高到下限的間隔若比例失真太大(自然寬 < 30px)又不是「幾乎同一時間」(< 中位間隔的 10%),這個 C 不合格
+    const pos = g.map(v => v).filter(v => v > 0).sort((a, b) => a - b), med = pos.length ? pos[pos.length >> 1] : 0;
+    const bad = g.some((v, i) => fixed[i] && v >= 0.1 * med && v * s < 30);
+    return {xs: xs.map(x => xRange[0] + (x - xRange[0]) * k), brk, bad, timed: true};
+  }
+  // 斷軸最多 2 個:cap 候選只留「超過 cap 的間隔 ≤ 2」者;都放不下就退回均分(null)並取消斷軸
+  const MAXBRK = 2;
+  const capPhases = [];
+  if (wantTime) {
+    const gapsAll = days.slice(1).map((v, i) => v - days[i]);
+    const gs = [...new Set(gapsAll.filter(v => v > 0))].sort((a, b) => b - a);
+    capPhases.push([Infinity, ...gs.slice(1)].filter(C => gapsAll.filter(v => v > C).length <= MAXBRK), [null]);
+  } else capPhases.push([null]);
+  const posFor = C => C == null ? {xs: evenXs(), brk: Array(Math.max(0, N - 1)).fill(false)} : timeXs(C);
+
+  // ---------------------------------------------------------------- 版面嘗試(模式 × 位置 × 字級,取第一個放得下的)
+  const dbg = (...a) => { (window.__dbg = window.__dbg || []).push(a.join(" ")); };
+  const FS = [56, 54, 52, 50, 48, 46, 44];
+  const slotW = (xs, i, step, wmax) => {          // (僅最後手段用)同側相鄰標籤的可用寬度
+    let w = Math.min(wmax, 2 * (xs[i] - EDGE), 2 * (W - EDGE - xs[i]));
+    for (const j of [i - step, i + step]) if (j >= 0 && j < N) w = Math.min(w, Math.abs(xs[j] - xs[i]) - GAP);
+    return w;
+  };
+  // 標籤框配置:每個標籤要求「一行的自然寬」req;相鄰(nbr)標籤之間用「各取所需、不夠才對分」分配間距(自然寬較小的鄰居不佔滿一半),
+  // 邊緣標籤的框往內平移到安全線內(不再硬限寬),回傳 {w: 框寬, bl: 框左緣}
+  function boxes(xs, nbr, req, wmax) {
+    const half = req.map(v => Math.min(v, wmax) / 2), cap = (W - 2 * EDGE) / 2;
+    let c = xs.slice(), h = half.map(v => Math.min(v, cap));
+    for (let it = 0; it < 4; it++) {
+      h = half.map((v, i) => {
+        let m = Math.min(v, cap);
+        for (const j of nbr(i)) { const room = Math.abs(c[j] - c[i]) - GAP; m = Math.min(m, Math.max(room / 2, room - half[j])); }
+        return m;
+      });
+      c = xs.map((x, i) => Math.min(Math.max(x, EDGE + h[i]), W - EDGE - h[i]));
+    }
+    return {w: h.map(v => 2 * v), bl: c.map((v, i) => v - h[i])};
+  }
+  function tryTop(mode, pos, minFs) {
+    const xs = pos.xs, step = mode === "single" ? 1 : 2;
+    const nbr = i => [i - step, i + step].filter(j => j >= 0 && j < N);
+    const maxL = 3;
+    for (const ysz of (mode === "single" ? [112, 104, 96, 88, 80, 72, 64, 56, 48] : [72, 64, 56, 48]))
+    for (const fs of FS) {
+      if (fs < minFs) break;
+      const bx = boxes(xs, nbr, pts.map(p => Math.max(tw(p.desc, fs), tw(p.date, ysz)) + 6), 620);
+      const ws = bx.w;
+      if (Math.min(...ws) < 120 || !pts.every((p, i) => tw(p.date, ysz) <= ws[i])) continue;
+      const lines = pts.map((p, i) => wrap(p.desc, fs, ws[i], maxL));
+      if (lines.some(l => !l)) continue;
+      const pitch = Math.round(fs * 1.3), yh = Math.round(ysz * 1.25);
+      let ha, hb, sides;
+      if (mode === "single") {
+        sides = pts.map(() => 0);
+        ha = yh; hb = Math.max(...lines.map(l => l.length)) * pitch;
+      } else {
+        sides = pts.map((_, i) => i % 2);                                       // 0 = 軸上方、1 = 軸下方
+        const h = i => yh + lines[i].length * pitch + 6;
+        ha = Math.max(0, ...pts.map((_, i) => sides[i] === 0 ? h(i) : 0));
+        hb = Math.max(0, ...pts.map((_, i) => sides[i] === 1 ? h(i) : 0));
+      }
+      const PAD = 44, top = 130;
+      if (ha + hb + 2 * PAD > limitY - top) continue;
+      const lineY = Math.round(top + (limitY - top - (ha + hb + 2 * PAD)) / 2 + ha + PAD);
+      return {mode, pos, xs, ws, bl: bx.bl, ysz, fs, pitch, yh, lines, sides, ha, hb, PAD, lineY};
+    }
+    return null;
+  }
+  function tryTracks(pos, minFs) {
+    const xs = pos.xs;
+    const nbr = i => {                                                        // 同軌相鄰點
+      const same = pts.map((q, j) => j).filter(j => pts[j].track === pts[i].track), k = same.indexOf(i);
+      return [same[k - 1], same[k + 1]].filter(j => j != null);
+    };
+    const top = 70, axisY = limitY - 20, laneH = (axisY - 40 - top) / T;
+    for (const fs of [48, 46, 44]) {
+      if (fs < minFs) break;
+      const bx = boxes(xs, nbr, pts.map(p => Math.max(tw(p.desc, fs), tw(p.date, 44)) + 6), 520), wsl = bx.w;
+      if (Math.min(...wsl) < 120) { dbg("tracks:slot<120", fs, Math.min(...wsl)); continue; }
+      const lines = pts.map((p, i) => wrap(p.desc, fs, wsl[i], 3));
+      if (lines.some(l => !l) || pts.some((p, i) => tw(p.date, 44) > wsl[i])) { dbg("tracks:wrap/date", fs, lines.map(l => l ? l.length : 0).join(), wsl.map(Math.round).join()); continue; }
+      const pitch = Math.round(fs * 1.2), yh = 50;
+      const need = Math.max(...lines.map(l => yh + l.length * pitch)) + 26 + 8 + 6;
+      if (need > laneH) { dbg("tracks:need", need, laneH); continue; }
+      return {mode: "tracks", pos, xs, ws: wsl, bl: bx.bl, fs, pitch, yh, lines, laneH, top, axisY};
+    }
+    return null;
+  }
+  let L = null;
+  const minFsList = N > 8 || T ? [48, 44] : [52, 44];
+  outer:
+  for (const phase of capPhases) for (const minFs of minFsList) {
+    const modes = T ? ["tracks"] : (N > 8 ? ["stagger"] : ["single", "stagger"]);
+    for (const C of phase) for (const mode of modes) {
+      const pos = posFor(C);
+      if (pos.bad && C !== null) continue;
+      L = mode === "tracks" ? tryTracks(pos, minFs) : tryTop(mode, pos, minFs);
+      if (L) break outer;
+    }
+  }
+  if (!L) {   // 全部失敗:用最後手段(均分、最小字級)並回報
+    const pos = posFor(null);
+    probs.push("時間軸放不下(標籤太長或事件太多):拆成兩張或縮短說明");
+    const ws = pos.xs.map((_, i) => slotW(pos.xs, i, 1, 620));
+    const fs = 44, lines = pts.map((p, i) => wrap(p.desc, fs, Math.max(160, ws[i]), 4) || [p.desc]);
+    L = T ? null : {mode: "single", pos, xs: pos.xs, ws, bl: pos.xs.map((x, i) => x - ws[i] / 2), ysz: 56, fs, pitch: 57, yh: 70, lines, sides: pts.map(() => 0),
+                    ha: 70, hb: 57 * Math.max(...lines.map(l => l.length)), PAD: 44, lineY: 400};
+    if (!L) { L = {mode: "tracks", pos, xs: pos.xs, ws: pos.xs.map(() => 300), bl: pos.xs.map(x => x - 150), fs: 44, pitch: 55, yh: 55,
+                    lines: pts.map(p => [p.desc]), laneH: (limitY - 20 - 40 - 70) / T, top: 70, axisY: limitY - 20}; }
+  }
+  if (wantTime && !L.pos.timed) probs.push("資訊:時間比例需要超過 2 個斷軸才放得下,已改為均分並取消斷軸");
+  const xs = L.xs, brk = L.pos.brk;
+  const settled = i => pts[i].color;
+
+  // ---------------------------------------------------------------- 建元素
+  const els = [];     // 每個事件 {node, year, desc, stem, tick}
+  const lineY = L.mode === "tracks" ? L.axisY : L.lineY;
+  const LANE_X0 = xRange[0] - 40, LANE_X1 = xRange[1] + 90;   // 多軌:各軌基線與底部共用軸同一個 x 範圍
+  const xA = L.mode === "tracks" ? LANE_X0 : Math.max(EDGE, xs[0] - 180);
+  const mkLines = (lines) => lines.join("<br>");
+  const laneBase = t => L.top + (t + 1) * L.laneH - 8;      // 各軌基線 y
+  const lanes = [];
+  if (L.mode === "tracks") {
+    trks.forEach((t, k) => {
+      const nm = mk("lname", {left: EDGE + "px", top: (laneBase(k) - 26) + "px", color: t.color, opacity: 0}, t.name);
+      const ln = mk("lane", {left: LANE_X0 + "px", top: (laneBase(k) - 1.5) + "px", background: t.color, opacity: 0.55, width: "0px"});
+      lanes.push({nm, ln, w: LANE_X1 - LANE_X0});
+    });
+  }
+  pts.forEach((p, i) => {
+    const x = xs[i], w = L.ws[i], bl = L.bl[i];
+    let ny, ynode;
+    const e = {};
+    if (L.mode === "tracks") {
+      ynode = laneBase(p.track);
+      e.node = mk("node", {left: (x - 15) + "px", top: (ynode - 15) + "px", background: p.color}); e.node.id = "node-" + i;
+      const bottom = ynode - 26;
+      const hh = L.yh + L.lines[i].length * L.pitch;
+      e.year = mk("year", {left: bl + "px", width: w + "px", top: (bottom - hh) + "px", fontSize: "44px", fontFamily: "var(--font-bold)", color: p.color}, p.date);
+      e.desc = mk("desc", {left: bl + "px", width: w + "px", top: (bottom - hh + L.yh) + "px", fontSize: L.fs + "px"}); e.desc.innerHTML = mkLines(L.lines[i]);
+      e.tick = mk("tick", {left: (x - 2.5) + "px", top: (L.axisY - 11) + "px", background: p.color});
+    } else {
+      e.node = mk("node", {left: (x - 15) + "px", top: (lineY - 15) + "px", background: TXT}); e.node.id = "node-" + i;
+      const yf = L.ysz + "px", side = L.sides[i], descH = L.lines[i].length * L.pitch;
+      if (L.mode === "single") {
+        e.year = mk("year", {left: bl + "px", width: w + "px", top: (lineY - L.PAD - L.yh) + "px", fontSize: yf, fontFamily: "var(--font-bold)", color: TXT}, p.date);
+        e.desc = mk("desc", {left: bl + "px", width: w + "px", top: (lineY + L.PAD + 18) + "px", fontSize: L.fs + "px"});
+      } else if (side === 0) {      // 上方:說明在上、年份貼近軸
+        e.year = mk("year", {left: bl + "px", width: w + "px", top: (lineY - L.PAD - L.yh) + "px", fontSize: yf, fontFamily: "var(--font-bold)", color: TXT}, p.date);
+        e.desc = mk("desc", {left: bl + "px", width: w + "px", top: (lineY - L.PAD - L.yh - 6 - descH) + "px", fontSize: L.fs + "px"});
+      } else {                      // 下方:年份貼近軸、說明在下
+        e.year = mk("year", {left: bl + "px", width: w + "px", top: (lineY + L.PAD) + "px", fontSize: yf, fontFamily: "var(--font-bold)", color: TXT}, p.date);
+        e.desc = mk("desc", {left: bl + "px", width: w + "px", top: (lineY + L.PAD + L.yh + 6) + "px", fontSize: L.fs + "px"});
+      }
+      e.desc.innerHTML = mkLines(L.lines[i]);
+      if (L.mode === "stagger") {
+        const y0 = side === 0 ? lineY - L.PAD : lineY + 15;
+        e.stem = mk("stem", {left: (x - 1.5) + "px", top: y0 + "px", height: (L.PAD - 15) + "px"}); e.stem.id = "stem-" + i;
+      }
+    }
+    e.year.id = "year-" + i; e.desc.id = "desc-" + i;
+    els.push(e);
+  });
+
+  // 軸線分段:第 i 段 = 前一個節點(第 0 段從 xA)到節點 i;斷軸處中間斷開並畫 //;多軌時最後一段延伸到與各軌基線同寬
+  const axSegs = pts.map((_, i) => {
+    const a = i === 0 ? xA : xs[i - 1], gapLen = xs[i] - a;
+    const tail = (L.mode === "tracks" && i === N - 1) ? Math.max(0, LANE_X1 - xs[i]) : 0, len = gapLen + tail;
+    const s = mk("axseg", {left: a + "px", top: (lineY - 20) + "px", width: "0px"});
+    s.id = "axis-" + i;
+    if (i > 0 && brk[i - 1]) {
+      const mid = gapLen / 2;
+      s.appendChild(Object.assign(document.createElement("i"), {className: "ln"})).style.cssText = `left:0;width:${mid - 18}px`;
+      [-5, 7].forEach(o => { const k = document.createElement("i"); k.className = "brk"; k.style.left = (mid + o - 2.5) + "px"; s.appendChild(k); });
+      s.appendChild(Object.assign(document.createElement("i"), {className: "ln"})).style.cssText = `left:${mid + 18}px;width:${len - mid - 18}px`;
+    } else {
+      s.appendChild(Object.assign(document.createElement("i"), {className: "ln"})).style.cssText = `left:0;width:${len}px`;
+    }
+    return {s, len};
+  });
+
+  let src = null;
+  if (d.src) {
+    src = mk("src", {opacity: 0}, d.src);
+    const r = src.getBoundingClientRect();
+    src.style.left = (W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+  let qEl = null;
+  if (qb) {
+    qEl = mk("", {}, "?"); qEl.id = "q";
+    const qx = (xs[qb[0]] + xs[qb[1]]) / 2;
+    const qy0 = L.mode === "tracks" ? (L.top + L.axisY) / 2 - 20 : lineY - 150;
+    // 障礙物:所有標籤墨跡框、節點、軸線(多軌再加各軌基線)
+    const inkOf = el => { const r = document.createRange(); r.selectNodeContents(el); return [...r.getClientRects()].filter(q => q.width > 1); };
+    const obst = [];
+    els.forEach((e, i) => [e.year, e.desc].forEach(el => inkOf(el).forEach(q => obst.push({n: `第 ${i + 1} 個標籤`, l: q.left, r: q.right, t: q.top, b: q.bottom}))));
+    xs.forEach((x, i) => obst.push({n: `第 ${i + 1} 個節點`, l: x - 15, r: x + 15, t: (L.mode === "tracks" ? laneBase(pts[i].track) : lineY) - 15, b: (L.mode === "tracks" ? laneBase(pts[i].track) : lineY) + 15}));
+    obst.push({n: "軸線", l: xA, r: xs[N - 1] + (L.mode === "tracks" ? LANE_X1 - xs[N - 1] : 0), t: lineY - 6, b: lineY + 6});
+    if (L.mode === "tracks") trks.forEach((_, k) => obst.push({n: "軌道線", l: LANE_X0, r: LANE_X1, t: laneBase(k) - 3, b: laneBase(k) + 3}));
+    const M = 12;
+    const hitsAt = (fs, w, cy) => { const ih = fs * 0.8; return obst.filter(o => qx - w / 2 - M < o.r && qx + w / 2 + M > o.l && cy - ih / 2 - M < o.b && cy + ih / 2 + M > o.t); };
+    const names = hs => [...new Set(hs.map(o => o.n))].slice(0, 3).join("、");
+    let pick = null, firstHit = null;
+    for (const fs of [250, 210, 175, 145, 120]) {
+      qEl.style.fontSize = fs + "px";
+      const w = qEl.getBoundingClientRect().width, ih = fs * 0.8;
+      for (let k = 0; k <= 16 && !pick; k++) for (const sg of (k ? [-1, 1] : [0])) {
+        const cy = qy0 + sg * k * 12;
+        if (cy - ih / 2 < 30 || cy + ih / 2 > limitY) continue;
+        const hs = hitsAt(fs, w, cy);
+        if (fs === 250 && k === 0) firstHit = hs;
+        if (!hs.length) { pick = {fs, w, cy}; break; }
+      }
+      if (pick) break;
+    }
+    if (firstHit && firstHit.length) {
+      probs.push(pick ? `「?」原位置與${names(firstHit)}重疊,已${pick.fs < 250 ? "縮小到 " + pick.fs + "px 並" : ""}移到 y=${Math.round(pick.cy)}` : `「?」與${names(firstHit)}重疊且找不到不重疊的位置`);
+    }
+    if (!pick) { qEl.style.fontSize = "120px"; pick = {fs: 120, w: qEl.getBoundingClientRect().width, cy: qy0}; }
+    qEl.style.fontSize = pick.fs + "px";
+    Object.assign(qEl.style, {left: (qx - pick.w / 2) + "px", top: (pick.cy - pick.fs / 2) + "px"});
+  }
+
+  // ---------------------------------------------------------------- 時間軸(只用 GSAP;無 requestAnimationFrame / Date.now)
+  const tl = gsap.timeline({paused: true});
+  const first = prev === 0 && !isQ;
+  const nNew = Math.max(0, shown - prev);
+  const gapT = d.gap != null ? d.gap : 1.2, lead = d.lead || 0;
+  const gap = nNew > 1 && d.dur ? Math.min(gapT, (d.dur - lead - 1.0) / (nNew - 1)) : gapT;
+  const done = [];
+  for (let i = 0; i < Math.min(prev, N); i++) done.push(i);
+  // 終態
+  done.forEach(i => {
+    const e = els[i];
+    tl.set(axSegs[i].s, {width: axSegs[i].len}, 0);
+    tl.set([e.node, e.year, e.desc, e.stem, e.tick].filter(Boolean), {opacity: 1}, 0);
+  });
+  if (src) tl.set(src, {opacity: first ? 0 : 1}, 0);
+  if (first && src) tl.to(src, {opacity: 1, duration: 0.4, ease: "power2.out"}, lead);
+  if (L.mode === "tracks") {
+    lanes.forEach((o, k) => {
+      if (first) {
+        tl.fromTo(o.ln, {width: 0}, {width: o.w, duration: 0.6, ease: "power2.inOut"}, lead + 0.1 * k);
+        tl.fromTo(o.nm, {opacity: 0, y: 12}, {opacity: 1, y: 0, duration: 0.35, ease: "power2.out"}, lead + 0.1 * k);
+      } else { tl.set(o.ln, {width: o.w}, 0); tl.set(o.nm, {opacity: 1}, 0); }
+    });
+  }
+  // 上一個節點若是金色,先退回原色(跨段延續;q 段也一樣)
+  if (prev > 0 && prev <= N && (nNew > 0 || isQ)) {
+    const e = els[prev - 1], c = settled(prev - 1);
+    tl.fromTo(e.node, {backgroundColor: ACC}, {backgroundColor: c, duration: 0.3, ease: "none"}, 0);
+    tl.fromTo(e.year, {color: ACC}, {color: c, duration: 0.3, ease: "none"}, 0);
+  }
+  for (let i = prev; i < shown && i < N; i++) {
+    const t0 = lead + gap * (i - prev), e = els[i], c = settled(i);
+    // 線由左向右長到節點
+    tl.fromTo(axSegs[i].s, {width: 0}, {width: axSegs[i].len, duration: 0.5, ease: "power3.inOut"}, t0);
+    tl.fromTo(e.node, {opacity: 1, scale: 0.02, backgroundColor: ACC}, {scale: 1, duration: 0.3, ease: "back.out(2)"}, t0 + 0.42);
+    tl.fromTo(e.year, {opacity: 0, y: 22, color: ACC}, {opacity: 1, y: 0, duration: 0.3, ease: "power3.out"}, t0 + 0.5);
+    tl.fromTo(e.desc, {opacity: 0, y: 22}, {opacity: 1, y: 0, duration: 0.35, ease: "power3.out"}, t0 + 0.65);
+    if (e.stem) tl.fromTo(e.stem, {opacity: 0, scaleY: 0.1}, {opacity: 1, scaleY: 1, duration: 0.3, ease: "power2.out"}, t0 + 0.5);
+    if (e.tick) tl.fromTo(e.tick, {opacity: 0, scaleY: 0.1}, {opacity: 1, scaleY: 1, duration: 0.3, ease: "back.out(2)"}, t0 + 0.45);
+    if (i + 1 < shown) {      // 下一個節點出現時,這個退回原色
+      tl.to(e.node, {backgroundColor: c, duration: 0.3, ease: "none"}, t0 + gap);
+      tl.to(e.year, {color: c, duration: 0.3, ease: "none"}, t0 + gap);
+    }
+  }
+  if (qEl) {
+    if (isQ) {      // 彈入後慢慢上浮 3px 再回位(不循環)
+      tl.fromTo(qEl, {opacity: 0, scale: 0.02}, {opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)"}, lead);
+      tl.to(qEl, {y: -3, duration: 0.8, ease: "sine.inOut", snap: {y: 1}}, lead + 0.4);
+      tl.to(qEl, {y: 0, duration: 0.8, ease: "sine.inOut", snap: {y: 1}}, lead + 1.2);
+    } else tl.set(qEl, {opacity: 0}, 0);
+  }
+  const dur = d.dur || tl.duration();
+  if (tl.duration() > dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${dur.toFixed(2)} 秒`);
+  tl.set({}, {}, dur);
+  window.tl = tl;
+  // 最終狀態版面檢查:所有標籤的墨跡框不可互相重疊、不可出左右安全線
+  tl.seek(tl.duration(), false);
+  const rects = els.flatMap((e, i) => [e.year, e.desc].map(el => {
+    const r = document.createRange(); r.selectNodeContents(el);
+    const rs = [...r.getClientRects()].filter(q => q.width > 1);
+    return {i, rs};
+  }));
+  const hit = (a, b) => a.left < b.right - 2 && b.left < a.right - 2 && a.top < b.bottom - 2 && b.top < a.bottom - 2;
+  const outs = new Set();
+  for (const o of rects) for (const q of o.rs) if (q.left < EDGE - 2 || q.right > W - EDGE + 2) outs.add(o.i + 1);
+  outs.forEach(k => probs.push(`第 ${k} 個標籤超出左右安全線`));
+  const seen = new Set();
+  for (let a = 0; a < rects.length; a++) for (let b = a + 1; b < rects.length; b++) {
+    if (rects[a].i === rects[b].i) continue;
+    const key = rects[a].i + "-" + rects[b].i;
+    if (!seen.has(key) && rects[a].rs.some(p1 => rects[b].rs.some(p2 => hit(p1, p2)))) { seen.add(key); probs.push(`第 ${rects[a].i + 1} 與第 ${rects[b].i + 1} 個標籤重疊`); }
+  }
+  tl.seek(0, false);
+  return {dur: tl.duration(), problems: probs, layout: {mode: L.mode, fs: L.fs, timed: !!L.pos.timed, xs: xs.map(Math.round), breaks: brk.map((b, i) => b ? i : -1).filter(i => i >= 0), lines: L.lines}};
+  // ---------------------------------------------------------------- 直式(畫面窗 1080x1080,安全框 x 80–940、y 上 40 / 下 limitY):縱向時間軸
+  // 單軌:軸在左、年份靠軸左側(右對齊)、說明在軸右側;多軌:軌道並排成直欄(欄名在上,節點在各欄的縱線上,年份在上、說明在下);
+  // 一律均分順序(不做時間比例 / 斷軸);放不下時字級 56 -> 44,再不行依序切頁(上一頁在新頁第一個節點出現時淡出,最多 3 頁)
+  function buildPortrait() {
+    const SX0 = px("--pad-x"), SX1 = W - px("--pad-r"), TOP = 60, BOT = limitY, NODE = 30;
+    const QG = 150;                                                  // 「?」前後兩點之間預留的空白(單軌)
+    const qi = qb && qb[0] >= 0 && qb[0] < N - 1 ? qb[0] : -1;
+    const GAPM = 30, avail = BOT - TOP;
+    let LY = null;
+    const pageSplit = (hs, gapExtra, lim = avail) => {                             // hs = 各列高;gapExtra[i] = 第 i 列之後額外間距;回傳 {pg, cnt}
+      const pg = []; let cur = 0, used = 0;
+      hs.forEach((h, i) => {
+        const g = used > 0 ? GAPM + (gapExtra[i - 1] || 0) : 0;
+        if (used > 0 && used + g + h > lim) { cur++; used = 0; }
+        used += (used > 0 ? GAPM + (gapExtra[i - 1] || 0) : 0) + h; pg.push(cur);
+      });
+      return {pg, cnt: cur + 1};
+    };
+    if (!T) {
+      for (const fs of [56, 52, 50, 48, 46, 44]) {
+        const ysz = Math.min(60, fs + 4), yearW = Math.ceil(Math.max(...pts.map(p => tw(p.date, ysz)))) + 6;
+        const AX = SX0 + yearW + 44, descX = AX + 44, descW = SX1 - descX;
+        if (descW < 260 && fs > 44) continue;
+        const lines = pts.map(p => wrap(p.desc, fs, descW, 4));
+        if (lines.some(l => !l) && fs > 44) continue;
+        const ls = lines.map((l, i) => l || [pts[i].desc]);
+        const pitch = Math.round(fs * 1.3), yh = Math.round(ysz * 1.25);
+        const hs = ls.map(l => Math.max(l.length * pitch, yh)), ge = ls.map((_, i) => i === qi ? QG : 0);
+        let ps = pageSplit(hs, ge);
+        if (ps.cnt > 1) {            // 分頁時讓各頁高度平均
+          let lo = Math.max(...hs), hi = avail;
+          while (hi - lo > 4) { const m = (lo + hi) / 2; if (pageSplit(hs, ge, m).cnt <= ps.cnt) hi = m; else lo = m; }
+          ps = pageSplit(hs, ge, hi);
+        }
+        LY = {mode: "vertical", fs, ysz, yearW, AX, descX, descW, lines: ls, pitch, yh, hs, ge, pg: ps.pg, pages: ps.cnt, bad: lines.some(l => !l)};
+        if (ps.cnt === 1) break;
+      }
+      if (LY.bad) probs.push("時間軸有單一詞比說明欄還寬(縮短說明)");
+    } else {
+      const colGap = 16, colW = (SX1 - SX0 - (T - 1) * colGap) / T;
+      for (const fs of [48, 46, 44]) {
+        const laneOff = 16, textOff = 42, textW = colW - textOff - 2;
+        const lines = pts.map(p => wrap(p.desc, fs, textW, 4));
+        if ((lines.some(l => !l) || pts.some(p => tw(p.date, 44) > textW)) && fs > 44) continue;
+        const ls = lines.map((l, i) => l || [pts[i].desc]);
+        const pitch = Math.round(fs * 1.2), yh = 50, y0 = TOP + 70;
+        const hh = ls.map(l => yh + l.length * pitch);
+        // 掃描:依序往下排,同欄不重疊;放不下就開新頁(lim = 本頁下緣上限;分頁時二分搜尋讓各頁高度平均)
+        const sweep = lim => {
+          const ys = [], pg = []; let page = 0, prevY = y0 - 40; const colB = Array(T).fill(y0);
+          pts.forEach((p, i) => {
+            let y = Math.max(prevY + 40, colB[p.track] + 28);
+            if (y + hh[i] > lim && y > y0) { page++; colB.fill(y0); y = y0; }
+            ys.push(y); pg.push(page); prevY = y; colB[p.track] = y + hh[i];
+          });
+          return {ys, pg, page};
+        };
+        let sw = sweep(BOT);
+        if (sw.page > 0) {
+          let lo = y0 + Math.max(...hh), hi = BOT;
+          while (hi - lo > 4) { const m = (lo + hi) / 2; if (sweep(m).page <= sw.page) hi = m; else lo = m; }
+          sw = sweep(hi);
+        }
+        const ys = sw.ys, pg = sw.pg, page = sw.page;
+        LY = {mode: "vtracks", fs, ysz: 44, colW, colGap, laneOff, textOff, textW, lines: ls, pitch, yh, hh, ys, pg, pages: page + 1, y0, bad: lines.some(l => !l)};
+        if (page === 0) break;
+      }
+      if (LY.bad) probs.push("時間軸有單一詞比說明欄還寬(縮短說明)");
+    }
+    if (LY.pages > 3) probs.push(`時間軸太長:直式要分 ${LY.pages} 頁(最多 3 頁;拆成兩張或縮短說明)`);
+    const pg = LY.pg, pages = LY.pages;
+    const curPage = pg[Math.max(0, Math.min(N, shown) - 1)], prevPage = prev > 0 ? pg[prev - 1] : curPage;
+    if (qi >= 0 && isQ && pg[qi] !== curPage) probs.push("「?」所在的頁不是最後一頁,畫面上看不到");
+
+    // ---- 位置(單軌:各頁置中略偏上)
+    const cy = [], rowTop = [];
+    if (LY.mode === "vertical") {
+      for (let p = 0; p < pages; p++) {
+        const idx = pts.map((_, i) => i).filter(i => pg[i] === p);
+        const tot = idx.reduce((a, i, k) => a + LY.hs[i] + (k ? GAPM + LY.ge[idx[k - 1]] : 0), 0);
+        let y = TOP + (avail - tot) * 0.45;
+        idx.forEach((i, k) => { if (k) y += GAPM + LY.ge[idx[k - 1]]; rowTop[i] = y; cy[i] = y + Math.max(LY.yh, LY.pitch) / 2; y += LY.hs[i]; });
+      }
+    } else pts.forEach((_, i) => { rowTop[i] = LY.ys[i]; cy[i] = LY.ys[i] + LY.yh / 2; });
+
+    // ---- 元素
+    const els = [], lanes = [], axs = [];
+    const ndX = i => LY.mode === "vertical" ? LY.AX : SX0 + pts[i].track * (LY.colW + LY.colGap) + LY.laneOff;
+    if (LY.mode === "vtracks") {
+      trks.forEach((t, k) => {
+        const cx0 = SX0 + k * (LY.colW + LY.colGap);
+        const nm = mk("lname", {left: cx0 + "px", top: TOP + "px", color: t.color, opacity: 0}, t.name);
+        const ln = mk("lane", {left: (cx0 + LY.laneOff - 1.5) + "px", top: (LY.y0 - 12) + "px", width: "3px", height: "0px", background: t.color, opacity: 0.55});
+        lanes.push({nm, ln, h: BOT - (LY.y0 - 12) - 6});
+      });
+    }
+    pts.forEach((p, i) => {
+      const e = {}, x = ndX(i);
+      e.node = mk("node", {left: (x - NODE / 2) + "px", top: (cy[i] - NODE / 2) + "px", background: p.color}); e.node.id = "node-" + i;
+      if (LY.mode === "vertical") {
+        e.year = mk("year", {left: (LY.AX - 44 - LY.yearW) + "px", width: LY.yearW + "px", top: (cy[i] - LY.yh / 2) + "px", fontSize: LY.ysz + "px", fontFamily: "var(--font-bold)", color: p.color, textAlign: "right"}, p.date);
+        e.desc = mk("desc", {left: LY.descX + "px", width: LY.descW + "px", top: (cy[i] - LY.pitch / 2) + "px", fontSize: LY.fs + "px", textAlign: "left"});
+      } else {
+        const tx = x - LY.laneOff + LY.textOff;
+        e.year = mk("year", {left: tx + "px", width: LY.textW + "px", top: rowTop[i] + "px", fontSize: "44px", fontFamily: "var(--font-bold)", color: p.color, textAlign: "left"}, p.date);
+        e.desc = mk("desc", {left: tx + "px", width: LY.textW + "px", top: (rowTop[i] + LY.yh) + "px", fontSize: LY.fs + "px", textAlign: "left"});
+      }
+      e.desc.innerHTML = LY.lines[i].join("<br>");
+      e.year.id = "year-" + i; e.desc.id = "desc-" + i;
+      els.push(e);
+      if (LY.mode === "vertical") {      // 軸線分段:前一個節點(同頁)到這個節點;頁首的第一段從節點上方 70px 起
+        const a = i > 0 && pg[i - 1] === pg[i] ? cy[i - 1] : Math.max(TOP, cy[i] - 70);
+        const s = mk("vaxs", {left: (LY.AX - 3) + "px", top: a + "px", height: "0px"}); s.id = "axis-" + i;
+        axs.push({s, len: cy[i] - a});
+      } else axs.push({s: null, len: 0});
+    });
+    let src = null;
+    if (d.src) {
+      src = mk("src", {opacity: 0}, d.src);
+      const r = src.getBoundingClientRect();
+      src.style.left = (W - px("--src-right") - r.width) + "px";
+      src.style.top = (px("--src-bottom") - r.height) + "px";
+    }
+    let qEl = null;
+    if (qb) {
+      qEl = mk("", {}, "?"); qEl.id = "q";
+      const qa = qb[0], qbb = qb[1], mid = qi >= 0 && qbb === qa + 1 && pg[qa] === pg[qbb] ? (cy[qa] + cy[qbb]) / 2 : (cy[qa] + cy[Math.min(N - 1, qa + 1)]) / 2;
+      const qx = LY.mode === "vertical" ? (LY.descX + SX1) / 2 : (SX0 + SX1) / 2;
+      const inkOf = el => { const r = document.createRange(); r.selectNodeContents(el); return [...r.getClientRects()].filter(q => q.width > 1); };
+      const obst = [];
+      els.forEach((e, i) => { if (pg[i] !== curPage) return; [e.year, e.desc].forEach(el => inkOf(el).forEach(q => obst.push({n: `第 ${i + 1} 個標籤`, l: q.left, r: q.right, t: q.top, b: q.bottom}))); obst.push({n: `第 ${i + 1} 個節點`, l: ndX(i) - 15, r: ndX(i) + 15, t: cy[i] - 15, b: cy[i] + 15}); });
+      const M = 12, hitsAt = (fs, w, c) => { const ih = fs * 0.8; return obst.filter(o => qx - w / 2 - M < o.r && qx + w / 2 + M > o.l && c - ih / 2 - M < o.b && c + ih / 2 + M > o.t); };
+      let pick = null, firstHit = null;
+      for (const fs of [150, 130, 120]) {
+        qEl.style.fontSize = fs + "px";
+        const w = qEl.getBoundingClientRect().width, ih = fs * 0.8;
+        for (let k = 0; k <= 30 && !pick; k++) for (const sg of (k ? [-1, 1] : [0])) {
+          const c = mid + sg * k * 12;
+          if (c - ih / 2 < 40 || c + ih / 2 > BOT) continue;
+          const hs = hitsAt(fs, w, c);
+          if (fs === 150 && k === 0) firstHit = hs;
+          if (!hs.length) { pick = {fs, w, c}; break; }
+        }
+        if (pick) break;
+      }
+      if (firstHit && firstHit.length) probs.push(pick ? `「?」原位置有重疊,已${pick.fs < 150 ? "縮小到 " + pick.fs + "px 並" : ""}移到 y=${Math.round(pick.c)}` : "「?」找不到不重疊的位置");
+      if (!pick) { qEl.style.fontSize = "120px"; pick = {fs: 120, w: qEl.getBoundingClientRect().width, c: mid}; }
+      qEl.style.fontSize = pick.fs + "px";
+      Object.assign(qEl.style, {left: (qx - pick.w / 2) + "px", top: (pick.c - pick.fs / 2) + "px"});
+    }
+
+    // ---- 時間軸
+    const tl = gsap.timeline({paused: true});
+    const first = prev === 0 && !isQ, nNew = Math.max(0, shown - prev);
+    const gapT = d.gap != null ? d.gap : 1.2, lead = d.lead || 0;
+    const gap = nNew > 1 && d.dur ? Math.min(gapT, (d.dur - lead - 1.0) / (nNew - 1)) : gapT;
+    const pageEls = p => pts.map((_, i) => i).filter(i => pg[i] === p).flatMap(i => [els[i].node, els[i].year, els[i].desc, axs[i].s].filter(Boolean));
+    for (let i = 0; i < Math.min(prev, N); i++) {
+      const e = els[i];
+      if (pg[i] === curPage || pg[i] === prevPage) {          // 本頁終態;上一頁:段頭還在,新頁第一個節點出現時淡出
+        if (axs[i].s) tl.set(axs[i].s, {height: axs[i].len}, 0);
+        tl.set([e.node, e.year, e.desc], {opacity: 1}, 0);
+      }
+    }
+    if (prevPage !== curPage) tl.to(pageEls(prevPage), {opacity: 0, duration: 0.25, ease: "power2.in"}, lead);
+    if (src) tl.set(src, {opacity: first ? 0 : 1}, 0);
+    if (first && src) tl.to(src, {opacity: 1, duration: 0.4, ease: "power2.out"}, lead);
+    lanes.forEach((o, k) => {
+      if (first) {
+        tl.fromTo(o.ln, {height: 0}, {height: o.h, duration: 0.6, ease: "power2.inOut"}, lead + 0.1 * k);
+        tl.fromTo(o.nm, {opacity: 0, y: 12}, {opacity: 1, y: 0, duration: 0.35, ease: "power2.out"}, lead + 0.1 * k);
+      } else { tl.set(o.ln, {height: o.h}, 0); tl.set(o.nm, {opacity: 1}, 0); }
+    });
+    if (prev > 0 && prev <= N && (nNew > 0 || isQ) && pg[prev - 1] === curPage) {
+      const e = els[prev - 1], c = pts[prev - 1].color;
+      tl.fromTo(e.node, {backgroundColor: ACC}, {backgroundColor: c, duration: 0.3, ease: "none"}, 0);
+      tl.fromTo(e.year, {color: ACC}, {color: c, duration: 0.3, ease: "none"}, 0);
+    }
+    for (let i = prev; i < shown && i < N; i++) {
+      const t0 = lead + gap * (i - prev), e = els[i], c = pts[i].color;
+      if (i > prev && pg[i] !== pg[i - 1]) tl.to(pageEls(pg[i - 1]), {opacity: 0, duration: 0.25, ease: "power2.in"}, t0);
+      if (axs[i].s) tl.fromTo(axs[i].s, {height: 0}, {height: axs[i].len, duration: 0.5, ease: "power3.inOut"}, t0);
+      tl.fromTo(e.node, {opacity: 1, scale: 0.02, backgroundColor: ACC}, {scale: 1, duration: 0.3, ease: "back.out(2)"}, t0 + 0.42);
+      tl.fromTo(e.year, {opacity: 0, y: 22, color: ACC}, {opacity: 1, y: 0, duration: 0.3, ease: "power3.out"}, t0 + 0.5);
+      tl.fromTo(e.desc, {opacity: 0, y: 22}, {opacity: 1, y: 0, duration: 0.35, ease: "power3.out"}, t0 + 0.65);
+      if (i + 1 < shown) {
+        tl.to(e.node, {backgroundColor: c, duration: 0.3, ease: "none"}, t0 + gap);
+        tl.to(e.year, {color: c, duration: 0.3, ease: "none"}, t0 + gap);
+      }
+    }
+    if (qEl) {
+      if (isQ) {
+        tl.fromTo(qEl, {opacity: 0, scale: 0.02}, {opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)"}, lead);
+        tl.to(qEl, {y: -3, duration: 0.8, ease: "sine.inOut", snap: {y: 1}}, lead + 0.4);
+        tl.to(qEl, {y: 0, duration: 0.8, ease: "sine.inOut", snap: {y: 1}}, lead + 1.2);
+      } else tl.set(qEl, {opacity: 0}, 0);
+    }
+    const dur = d.dur || tl.duration();
+    if (tl.duration() > dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${dur.toFixed(2)} 秒`);
+    tl.set({}, {}, dur);
+    window.tl = tl;
+    // 最終狀態版面檢查(只看最後一頁):標籤不可互相重疊、不可出左右安全線
+    tl.seek(tl.duration(), false);
+    const rects = els.map((e, i) => ({i, rs: [e.year, e.desc].flatMap(el => { const r = document.createRange(); r.selectNodeContents(el); return [...r.getClientRects()].filter(q => q.width > 1); })}))
+                     .filter(o => pg[o.i] === curPage);
+    const hit = (a, b) => a.left < b.right - 2 && b.left < a.right - 2 && a.top < b.bottom - 2 && b.top < a.bottom - 2;
+    rects.forEach(o => { if (o.rs.some(q => q.left < SX0 - 2 || q.right > SX1 + 2)) probs.push(`第 ${o.i + 1} 個標籤超出左右安全線`); });
+    for (let a = 0; a < rects.length; a++) for (let b = a + 1; b < rects.length; b++)
+      if (rects[a].rs.some(p1 => rects[b].rs.some(p2 => hit(p1, p2)))) probs.push(`第 ${rects[a].i + 1} 與第 ${rects[b].i + 1} 個標籤重疊`);
+    tl.seek(0, false);
+    return {dur: tl.duration(), problems: probs, layout: {mode: LY.mode, fs: LY.fs, pages, timed: false, xs: [], breaks: [], lines: LY.lines}};
+  }
+};
+</script></body></html>

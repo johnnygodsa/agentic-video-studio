@@ -1,0 +1,211 @@
+{
+ "schema_version": 1,
+ "videos": [
+  {
+   "video_id": "AAAAAAAAAAA",
+   "slot": "",
+   "channel": "ChannelA",
+   "tag": "fb_new",
+   "ver": "v1",
+   "title": "新欄位片",
+   "published_at": "2026-10-14T04:49:25Z",
+   "duration_s": 200,
+   "is_self": 1,
+   "age_hours": 100.0,
+   "publish_mode": "scheduled",
+   "latest": {
+    "views": 2000.0,
+    "impressions": 10000.0,
+    "ctr_pct": 6.0,
+    "avg_view_pct": 55.0,
+    "subs_net": 4.0
+   },
+   "windows": {
+    "48h": {
+     "views": 1000,
+     "impressions": 5000,
+     "ctr_pct": 5.5,
+     "avg_view_pct": 50,
+     "subs_net": 2,
+     "browse_pct": 80,
+     "basis": "approx",
+     "period": "since_publish",
+     "captured_at": "x",
+     "age_hours": 50.0
+    },
+    "72h": {
+     "views": 1500,
+     "impressions": 7000,
+     "ctr_pct": 5.8,
+     "avg_view_pct": 52,
+     "subs_net": 3,
+     "browse_pct": 82,
+     "basis": "approx",
+     "period": "since_publish",
+     "captured_at": "x",
+     "age_hours": 50.0
+    },
+    "7d": {
+     "views": null,
+     "impressions": null,
+     "ctr_pct": null,
+     "avg_view_pct": null,
+     "subs_net": null,
+     "browse_pct": null,
+     "basis": "pending",
+     "period": null,
+     "captured_at": null,
+     "age_hours": null
+    },
+    "28d": {
+     "views": null,
+     "impressions": null,
+     "ctr_pct": null,
+     "avg_view_pct": null,
+     "subs_net": null,
+     "browse_pct": null,
+     "basis": "pending",
+     "period": null,
+     "captured_at": null,
+     "age_hours": null
+    }
+   },
+   "traffic_source": {
+    "SUBSCRIBER": 70.0,
+    "YT_SEARCH": 30.0
+   },
+   "retention": [
+    [
+     0.0,
+     100.0
+    ],
+    [
+     10.0,
+     80.0
+    ],
+    [
+     20.0,
+     60.0
+    ],
+    [
+     50.0,
+     40.0
+    ],
+    [
+     100.0,
+     20.0
+    ]
+   ],
+   "comments": {
+    "flags": [
+     "quote_mismatch"
+    ],
+    "n": 12
+   }
+  },
+  {
+   "video_id": "BBBBBBBBBBB",
+   "slot": "c",
+   "channel": "ChannelB",
+   "tag": "fb_old",
+   "title": "舊結構片",
+   "published_at": "2026-10-10T20:00:00Z",
+   "duration_s": null,
+   "is_self": 1,
+   "age_hours": 200.0,
+   "latest": null,
+   "windows": {
+    "48h": {
+     "views": 500,
+     "impressions": 3000,
+     "ctr_pct": 4.0,
+     "avg_view_pct": 45,
+     "subs_net": 1,
+     "browse_pct": 60,
+     "basis": "approx",
+     "period": "since_publish",
+     "captured_at": "x",
+     "age_hours": 50.0
+    },
+    "7d": {
+     "views": 900,
+     "impressions": 5000,
+     "ctr_pct": 4.2,
+     "avg_view_pct": 47,
+     "subs_net": 2,
+     "browse_pct": 61,
+     "basis": "approx",
+     "period": "since_publish",
+     "captured_at": "x",
+     "age_hours": 50.0
+    },
+    "28d": {
+     "views": null,
+     "impressions": null,
+     "ctr_pct": null,
+     "avg_view_pct": null,
+     "subs_net": null,
+     "browse_pct": null,
+     "basis": "pending",
+     "period": null,
+     "captured_at": null,
+     "age_hours": null
+    }
+   },
+   "traffic_source": {},
+   "retention": []
+  },
+  {
+   "video_id": "CCCCCCCCCCC",
+   "slot": "",
+   "channel": "ChannelA",
+   "tag": "fb_other",
+   "title": "非自製",
+   "published_at": "2026-10-12T00:00:00Z",
+   "duration_s": 300,
+   "is_self": 0,
+   "age_hours": 150.0,
+   "latest": null,
+   "windows": {
+    "48h": {
+     "views": null,
+     "impressions": null,
+     "ctr_pct": null,
+     "avg_view_pct": null,
+     "subs_net": null,
+     "browse_pct": null,
+     "basis": "pending",
+     "period": null,
+     "captured_at": null,
+     "age_hours": null
+    },
+    "7d": {
+     "views": null,
+     "impressions": null,
+     "ctr_pct": null,
+     "avg_view_pct": null,
+     "subs_net": null,
+     "browse_pct": null,
+     "basis": "pending",
+     "period": null,
+     "captured_at": null,
+     "age_hours": null
+    },
+    "28d": {
+     "views": null,
+     "impressions": null,
+     "ctr_pct": null,
+     "avg_view_pct": null,
+     "subs_net": null,
+     "browse_pct": null,
+     "basis": "pending",
+     "period": null,
+     "captured_at": null,
+     "age_hours": null
+    }
+   },
+   "traffic_source": {},
+   "retention": []
+  }
+ ]
+}

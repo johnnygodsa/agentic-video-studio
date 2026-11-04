@@ -1,0 +1,67 @@
+{
+ "schema": "writer_brief/1",
+ "generated_at": "2026-10-26T10:00:00+08:00",
+ "slot": "main",
+ "channel": "ChannelA",
+ "event": {
+  "id": "evt_20261022_wowstress",
+  "name": "魔獸永恆壓力測試亞洲場",
+  "confidence": "high",
+  "confidence_basis": {"official": 1, "media_domains": 4, "social": 2},
+  "first_seen": "2026-10-20T09:00:00+08:00",
+  "earliest_item_at": "2026-10-19T22:00:00+08:00",
+  "last_item_at": "2026-10-25T12:00:00+08:00",
+  "type": "test",
+  "heat": 3.2,
+  "heat_note": "媒體標題數對數 × 平台數",
+  "summary_lines": ["台灣場 10/22 05:00 開始", "官方未寫結束時間"],
+  "tw_why": "亞服開服前唯一一次壓測",
+  "angles": ["測的方式測不出開服那天"],
+  "open_questions": ["台韓是否同區"],
+  "links": [
+   {"tier": "media", "title": "Beta lag issues", "url": "https://example.com/a", "published_at": "2026-09-18", "source": "warcrafttavern"},
+   {"tier": "official", "title": "Stress Test Schedule", "url": "https://example.com/b", "published_at": "2026-10-20", "source": "news.blizzard.com"}
+  ],
+  "pack_path": "data/intel/out/latest/events/evt_20261022_wowstress.md"
+ },
+ "demand": {
+  "competitor_videos_7d": 5,
+  "competitor_videos_14d": 7,
+  "top_competitor_videos": [
+   {"channel": "谷阿莫直播", "title": "壓測", "published_at": "2026-10-22", "views_per_day": 8000, "multiple": 2.1, "duration_s": 900, "video_id": "AAAAAAAAAAA"}
+  ],
+  "bili_top": [],
+  "angle_words": ["壓測", "亞服"],
+  "note": "views/日 以抓取時計"
+ },
+ "saturation": {
+  "own_same_event_7d": 2,
+  "own_same_event_14d": 3,
+  "own_reposts_same_event_7d": 1,
+  "sibling_same_event_7d": 1,
+  "last_own_video": {"video_id": "OWNvid00001", "title": "魔獸永恆收7金被封", "published_at": "2026-10-16", "views_latest": 4326}
+ },
+ "own_history": {
+  "comparables": [
+   {"video_id": "OWNvid00001", "tag": "wow_ban", "title": "魔獸永恆收7金被封", "published_at": "2026-10-16", "publish_mode": "scheduled", "duration_s": 420, "is_self": true, "views_latest": 4326, "impressions": 60000, "ctr_pct": 5.1, "avg_view_pct": 52.1, "subs_net": 12, "retention_30s_pct": 71, "retention_max_drop": {"pos_pct": 1, "drop": 7.2}, "match_reason": "同 IP"}
+  ],
+  "topic_class_stats": {"n": 1, "median_multiple_14d": null, "note": "資料不足"},
+  "lessons": ["資料不足"]
+ },
+ "audience": {
+  "period_days": 28,
+  "as_of": "2026-10-25",
+  "age_gender_top": [["male_25-34", 41.2]],
+  "geo_top": [["TW", 78.0]],
+  "device": {"mobile": 61},
+  "loyalty": null,
+  "traffic": {"SUBSCRIBER": 80},
+  "new_viewer_pct": 22,
+  "subscriber_watch_time_pct": 77,
+  "peak_hours_taipei": [21, 22],
+  "search_terms_top": ["魔獸永恆"],
+  "suggested_sources_top": []
+ },
+ "flags": [{"level": "warn", "text": "own 資料落後 1 天"}],
+ "files": {}
+}

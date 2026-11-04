@@ -1,0 +1,26 @@
+{
+ "tpl": "pigeon_talk",
+ "說明": "測試與範例:sets 每組 = 一個 film.json 場景的 data 加假 lines;orient 省略 = 橫直都算。lib 寫 window 上的圖解庫名(PropsSalary,或簡寫 salary)。",
+ "sets": [
+  {"name": "min", "dur": 5.0,
+   "lines": [{"idx": 1, "text": "你一年賺多少?", "start": 0.1, "end": 1.6},
+             {"idx": 2, "text": "先在心裡偷偷想一下。", "start": 1.8, "end": 3.4}],
+   "data": {"expr": ["normal", "smug"], "bubbles": [{"text": "你一年賺多少?", "at": 0}]}},
+  {"name": "max", "dur": 15.0,
+   "lines": [{"idx": 1, "text": "有人說年薪一百萬根本不用考慮。", "start": 0.1, "end": 2.2},
+             {"idx": 2, "text": "發文的人說他也願意做。", "start": 2.4, "end": 4.2},
+             {"idx": 3, "text": "結果被同學笑家裡很有錢。", "start": 4.4, "end": 6.4},
+             {"idx": 4, "text": "可是台灣的薪水中位數其實不到一半。", "start": 6.6, "end": 9.0},
+             {"idx": 5, "text": "換算成千元鈔,一年也就幾百張。", "start": 9.2, "end": 11.2},
+             {"idx": 6, "text": "所以到底誰才是有錢人?", "start": 11.4, "end": 13.0}],
+   "data": {"expr": ["normal", "talkA", "surprised", "think", "doubt", "smug"], "clip": "talk",
+            "bubbles": [{"text": "年薪一百萬\n不用考慮", "at": 0},
+                        {"text": "我也願意做", "at": 1},
+                        {"text": "家裡很有錢\n才講得出來", "at": 2, "dashed": true},
+                        {"text": "中位數\n不到一半", "at": 3, "word": "中位數"},
+                        {"text": "一年幾百張", "at": 4, "word": "一年"},
+                        {"text": "誰才是\n有錢人", "at": 5}],
+            "props": [{"lib": "PropsSalary", "name": "scale", "params": {"tilt": 0.6}, "at": 3, "word": "薪水"},
+                      {"lib": "salary", "name": "bill", "params": {}, "at": 4, "word": "千元鈔"}]}}
+ ]
+}

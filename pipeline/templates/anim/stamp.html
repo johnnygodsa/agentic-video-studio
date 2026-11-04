@@ -1,0 +1,94 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- stamp(紅色印章):放大落下(2.3 倍 -> 1,0.16 秒 ease-in)-> 衰減震動 -> 定住,動畫 0.6 秒,之後定格。
+     雙層圓角外框 + 順時針傾斜 8 度 + 斑駁(SVG feTurbulence,seed 由文字雜湊,固定可重現)+ 淡陰影。
+     資料由 anim_web.stamp_data 產生;印章中心在整張畫布的 (cx, cy)。無標題、無出處。暴露的 id:#stamp。 -->
+<style>
+#holder { position: absolute; left: 0; top: 0; }
+.inner { position: absolute; box-sizing: border-box; display: flex; align-items: center; justify-content: center; }
+.inner .t { font-family: var(--font-bold); line-height: 1.2; white-space: nowrap; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const probs = [];
+  const col = d.color;
+  const ns = "http://www.w3.org/2000/svg";
+  // 斑駁濾鏡:fractalNoise 的紅色通道 -> alpha = clamp((n - 0.30) * 12),乘到印章上(約 7% 缺口)
+  st.insertAdjacentHTML("beforeend", `<svg width="0" height="0" style="position:absolute"><filter id="rough" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.16" numOctaves="2" seed="${d.seed}" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  12 0 0 0 -3.6" result="m"/>
+    <feComposite in="SourceGraphic" in2="m" operator="in"/></filter></svg>`);
+
+  // ---- 量字:170px 起,太寬每次 -6 縮到 <= 1100(下限 60)
+  // 直式(畫面窗 1080x1080):印章置中於安全框(510, 520),寬上限 800(傾斜 8 度後仍在 x 80–940 內),字級 170 起縮到放得下(下限 60)
+  const P = d.W <= d.H, MAXW = P ? 724 : 1100;
+  const cs = getComputedStyle(document.documentElement);
+  const cxs = P ? (parseFloat(cs.getPropertyValue("--pad-x")) + d.W - parseFloat(cs.getPropertyValue("--pad-r"))) / 2 : d.cx, cys = P ? 520 : d.cy;
+  const setLines = (el, lines) => { el.textContent = ""; lines.forEach((l, i) => { if (i) el.appendChild(document.createElement("br")); el.appendChild(document.createTextNode(l)); }); };
+  const fit = lines => {
+    const probe = document.createElement("span");
+    probe.className = "t"; setLines(probe, lines);
+    probe.style.cssText = "position:absolute;visibility:hidden;font-family:var(--font-bold)";
+    st.appendChild(probe);
+    let size = 170;
+    probe.style.fontSize = size + "px";
+    while (size > 60 && probe.getBoundingClientRect().width > MAXW) { size -= 6; probe.style.fontSize = size + "px"; }
+    const r = probe.getBoundingClientRect();
+    probe.remove();
+    return {size, tw: r.width, th: r.height};
+  };
+  let lines = [d.text], F = fit(lines);
+  const size = F.size, tw = F.tw, th = F.th;
+  const pad = 38, bw = Math.round(tw + 2 * pad), bh = Math.round(th + 2 * pad - 20);
+
+  // holder:定位 + 縮放 + 震動;rot:傾斜;濾鏡與陰影在 rot 內層
+  const holder = document.createElement("div");
+  holder.id = "stamp";
+  Object.assign(holder.style, {position: "absolute", left: (cxs - bw / 2) + "px", top: (cys - bh / 2) + "px", width: bw + "px", height: bh + "px"});
+  const rot = document.createElement("div");
+  Object.assign(rot.style, {position: "absolute", inset: "0", transform: "rotate(8deg)", filter: "drop-shadow(7px 8px 5px rgba(0,0,0,0.35))"});
+  const face = document.createElement("div");
+  face.style.cssText = "position:absolute;inset:0;filter:url(#rough)";
+  const o1 = document.createElement("div");
+  o1.className = "inner";
+  o1.style.cssText += `inset:0;border:11px solid ${col};border-radius:26px`;
+  const o2 = document.createElement("div");
+  o2.className = "inner";
+  o2.style.cssText += `inset:22px;border:4px solid ${col};border-radius:14px`;
+  const t = document.createElement("div");
+  t.className = "inner";
+  t.style.cssText += "inset:0;top:-6px";
+  t.innerHTML = `<span class="t" style="font-size:${size}px;color:${col}"></span>`;
+  setLines(t.firstChild, lines);
+  face.append(o1, o2, t);
+  rot.appendChild(face);
+  holder.appendChild(rot);
+  st.appendChild(holder);
+  if (bw > (P ? 800 : d.W - 192)) probs.push(`印章 ${bw}px 寬,超過安全區`);
+
+  // ---- 動作:一個 0 -> 0.6 秒的代理值,onUpdate 算縮放 / 震動 / 透明度(與 AL.make_stamp 同一組公式)
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const apply = tt => {
+    let s, a, ox = 0, oy = 0;
+    if (tt < 0.16) { const u = tt / 0.16; s = 2.3 + (1 - 2.3) * u * u; a = clamp(tt / 0.07); }
+    else {
+      const k = tt - 0.16; a = 1;
+      const amp = 15 * Math.exp(-k * 9);
+      ox = amp * Math.sin(k * 70); oy = amp * 0.7 * Math.cos(k * 62);
+      s = 1 - 0.05 * Math.exp(-k * 16) * Math.sin(Math.PI * clamp(k / 0.12));
+    }
+    holder.style.transform = `translate(${ox}px, ${oy}px) scale(${s})`;
+    holder.style.opacity = a;
+  };
+  apply(0);
+  const tl = gsap.timeline({paused: true});
+  const c = {t: 0};
+  tl.to(c, {t: d.dur, duration: d.dur, ease: "none", onUpdate: () => apply(c.t)}, 0);
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>

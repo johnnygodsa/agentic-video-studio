@@ -1,0 +1,121 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- span(時間跨度):橫軸 from -> to,中間 ticks 個刻度由左至右依序亮起,大字 big 的數字同步由 0 數到目標,最後 caption 淡入。
+     資料由 anim_web.span_data 產生(numparts = [前綴, 數字, 後綴] 或 null)。無標題;大字置中。
+     暴露的 id:#big、#cap、#lab-from、#lab-to。 -->
+<style>
+.lab { font-family: var(--font-bold); line-height: 1.2; color: var(--text); opacity: 0; }
+.big { font-family: var(--font-bold); line-height: 1.1; color: var(--text); text-align: left; font-variant-numeric: tabular-nums; opacity: 0; }
+.cap { font-family: var(--font-bold); line-height: 1.2; color: #e1e1e1; opacity: 0; }
+.axis { background: #5a5a66; }
+.prog { background: var(--accent); width: 0; }
+.nd { border-radius: 50%; box-sizing: border-box; }
+.nd.off { background: #5a5a66; border: 3px solid #82828e; }
+.nd.tk.off { background: #3c3c46; border: 4px solid #787884; }
+.nd.on { background: var(--accent); opacity: 0; }
+</style></head>
+<body><div id="stage"></div>
+<script>
+window.build = function (d) {
+  const cs = getComputedStyle(document.documentElement);
+  const V = n => cs.getPropertyValue(n).trim(), px = n => parseFloat(V(n));
+  const st = document.getElementById("stage");
+  st.innerHTML = "";
+  document.body.style.width = d.W + "px"; document.body.style.height = d.H + "px";
+  const probs = [];
+  const mk = (cls, txt, css, tag) => {
+    const e = document.createElement(tag || "div");
+    e.className = "abs " + cls;
+    if (txt != null) e.textContent = txt;
+    Object.assign(e.style, css || {});
+    st.appendChild(e);
+    return e;
+  };
+  const box = e => e.getBoundingClientRect();
+  // 直式(畫面窗 1080x1080):維持橫向軸但縮短(x 130–890),大字在上、軸居中、兩端標籤在軸下、說明在最下並可換行;全部落在安全框 x 80–940
+  const P = d.W <= d.H, padL = px("--pad-x"), padR = px("--pad-r");
+  const cx = P ? (padL + d.W - padR) / 2 : d.W / 2, EDGE = P ? padL : 96, RIGHT = P ? d.W - padR : d.W - EDGE, SW = RIGHT - EDGE;
+  const X0 = P ? 130 : 300, X1 = P ? 890 : 1620, AY = P ? 560 : 520, BIGY = P ? 230 : 285, CAPY = P ? (d.src ? 800 : 830) : (d.src ? 700 : 740), T_ON = 0.3, T_LEN = 1.6;
+
+  // ---- 來源
+  let src = null;
+  if (d.src) {
+    src = mk("src", d.src, {opacity: 0});
+    const r = box(src);
+    src.style.left = (d.W - px("--src-right") - r.width) + "px";
+    src.style.top = (px("--src-bottom") - r.height) + "px";
+  }
+
+  // ---- 兩端標籤:字級 80 起,太長先把中心往內夾到離邊 96px,兩標籤互碰再縮字(下限 56)
+  const LS0 = P ? 64 : 80, LMIN = P ? 44 : 56;
+  const labF = mk("lab", d.frm, {fontSize: LS0 + "px"}), labT = mk("lab", d.to, {fontSize: LS0 + "px"});
+  labF.id = "lab-from"; labT.id = "lab-to";
+  let lsz = LS0, cl, cr, wf, wt;
+  for (;;) {
+    labF.style.fontSize = labT.style.fontSize = lsz + "px";
+    wf = box(labF).width; wt = box(labT).width;
+    cl = Math.max(X0, EDGE + wf / 2); cr = Math.min(X1, RIGHT - wt / 2);
+    if (cl + wf / 2 + 48 <= cr - wt / 2 || lsz <= LMIN) break;
+    lsz -= 2;
+  }
+  const placeLab = (e, c) => { const r = box(e); Object.assign(e.style, {left: (c - r.width / 2) + "px", top: (AY + 100 - r.height / 2) + "px"}); };
+  placeLab(labF, cl); placeLab(labT, cr);
+
+  // ---- 大字(210 起縮到 <= W-192,下限 120)與說明(62 起縮到 <= W-192,下限 50)
+  const big = mk("big", d.numparts ? d.numparts[0] + d.numparts[1] + d.numparts[2] : d.big, {fontSize: "210px"});
+  big.id = "big";
+  let bsz = 210;
+  while (bsz > 120 && box(big).width > (P ? SW : d.W - 2 * EDGE)) { bsz -= 2; big.style.fontSize = bsz + "px"; }
+  const bb = box(big);
+  Object.assign(big.style, {left: (cx - bb.width / 2) + "px", top: (BIGY - bb.height / 2) + "px", width: bb.width + "px"});
+  let cap = null;
+  if (d.caption) {
+    cap = mk("cap", d.caption, {fontSize: P ? "56px" : "62px"});
+    cap.id = "cap";
+    if (P) Object.assign(cap.style, {whiteSpace: "normal", width: SW + "px", textAlign: "center", textWrap: "balance"});
+    let csz = P ? 56 : 62;
+    while (csz > (P ? 44 : 50) && box(cap).width > (P ? SW + 1 : d.W - 2 * EDGE)) { csz -= 2; cap.style.fontSize = csz + "px"; }
+    const r = box(cap);
+    Object.assign(cap.style, {left: (cx - r.width / 2) + "px", top: (CAPY - r.height / 2) + "px"});
+    if (box(cap).bottom > (P ? (d.src ? 960 : 1000) : (d.src ? 768 : 800))) probs.push("說明字下緣超出字幕帶");
+  }
+
+  // ---- 軸、進度、節點 / 刻度
+  mk("axis", null, {left: X0 + "px", top: (AY - 4) + "px", width: (X1 - X0) + "px", height: "8px"});
+  const prog = mk("prog", null, {left: X0 + "px", top: (AY - 6) + "px", height: "12px"});
+  const dot = (x, r, tk) => {
+    const off = mk("nd off" + (tk ? " tk" : ""), null, {left: (x - r) + "px", top: (AY - r) + "px", width: 2 * r + "px", height: 2 * r + "px"});
+    const on = mk("nd on", null, {left: (x - r) + "px", top: (AY - r) + "px", width: 2 * r + "px", height: 2 * r + "px"});
+    return on;
+  };
+  const lit = [[dot(X0, 26, false), 0]];
+  for (let i = 0; i < d.ticks; i++) {
+    const f = (i + 1) / (d.ticks + 1);
+    lit.push([dot(X0 + (X1 - X0) * f, 15, true), T_ON + T_LEN * f]);
+  }
+  lit.push([dot(X1, 26, false), T_ON + T_LEN]);
+
+  // ---- 時間軸
+  const tl = gsap.timeline({paused: true});
+  if (src) tl.to(src, {opacity: 1, duration: 0.35, ease: "power3.out"}, 0);
+  tl.to(prog, {width: X1 - X0, duration: T_LEN, ease: "none"}, T_ON);
+  lit.forEach(([e, t]) => {
+    tl.fromTo(e, {opacity: 0}, {opacity: 1, duration: 0.05, ease: "none"}, t);
+    tl.fromTo(e, {scale: 0.05}, {scale: 1, duration: 0.22, ease: "back.out(1.7)"}, t);
+  });
+  tl.to([labF, labT], {opacity: 1, duration: 0.35, ease: "power3.out"}, 0);
+  if (d.numparts) {
+    const [pre, num, suf] = d.numparts, c = {v: 0};
+    big.textContent = pre + "0" + suf;
+    tl.to(big, {opacity: 1, duration: 0.25, ease: "power3.out"}, 0);
+    tl.to(c, {v: num, duration: T_LEN, ease: "none", onUpdate: () => { big.textContent = pre + Math.round(c.v) + suf; }}, T_ON);
+  } else {
+    tl.to(big, {opacity: 1, duration: 0.4, ease: "power3.out"}, 0);
+  }
+  if (cap) tl.fromTo(cap, {opacity: 0, y: 16}, {opacity: 1, y: 0, duration: 0.45, ease: "power3.out"}, T_ON + T_LEN + 0.05);
+  if (tl.duration() > d.dur + 1e-6) probs.push(`動畫 ${tl.duration().toFixed(2)} 秒超過段長 ${d.dur.toFixed(2)} 秒`);
+  tl.set({}, {}, d.dur);
+  window.tl = tl;
+  return {dur: tl.duration(), problems: probs};
+};
+</script></body></html>
