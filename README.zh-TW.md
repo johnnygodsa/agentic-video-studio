@@ -1,10 +1,33 @@
 # agentic-video-studio
 
+[![CI](https://github.com/johnnygodsa/agentic-video-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/johnnygodsa/agentic-video-studio/actions/workflows/ci.yml)
+
 以代理協作驅動的長片製作管線:查證過的評論影片(繁體中文配音,遊戲/科普題材)。
 每支片由一支 director 程序依段推進,每段有硬性 gate;Claude Code 子代理負責查證、寫稿與審稿;本機 Python 工具鏈負責配音、讀音品管、動畫、字幕與渲染。
 
 本庫是從實際運作的私人工作室抽出的**框架**:pipeline 程式、各段 gate、代理提示詞與製作規則。
 **不含**模型、音色、素材、各片資料、頻道數據與任何憑證(見〈不含的內容〉)。
+
+## 快速體驗:離線示範(不需 GPU、模型或 Claude)
+
+把 `pipeline/demo/sample_script.txt` 走過正式產線模組,產出約 28 秒的示範片:
+文案解析(`script_txt2json`)、文案 lint(`script_lint`)、讀音標注(`tts_cosy_text.apply_pron`)、
+字幕切段(無標點、不拆詞;`build.split_phrases`、`text_wrap`)、gate 檢查(`director._item`,同 `pipeline/gates/`)、
+Pillow 畫的標題卡/長條圖/文字卡、ffmpeg 合成與 QA 總覽圖(`qa_sheet.grab`)。
+
+```bash
+# Python 3.10 以上、ffmpeg 在 PATH;Linux 需 apt install fonts-noto-cjk(Windows 用微軟正黑體)
+pip install -r requirements-ci.txt
+python -X utf8 pipeline/demo/run_demo.py --tts none --out demo_out
+# 選用 CPU 配音:pip install piper-tts 後改 --tts piper(聲音下載到 demo_out/cache;失敗自動退回靜音軌)
+```
+
+產出在 `demo_out/`:`demo.mp4`(字幕燒進畫面)、`demo.srt`、`contact_sheet.png`,另有 `pron.txt`(讀音標注結果)與 `script.json`。
+每一步印一行 `[stage] ...`;gate 任一項不過就停在渲染前。
+CI 每次 push 都會跑同一支示範(成品在該次 run 的 `demo` artifact)與 `.github/ci_tests.txt` 列的離線測試。
+
+![示範畫面](docs/img/demo_frame.png)
+![示範總覽圖](docs/img/demo_contact_sheet.png)
 
 ## 功能
 

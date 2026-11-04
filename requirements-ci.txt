@@ -1,0 +1,8 @@
+# Minimal dependencies for CI (tests in .github/ci_tests.txt + offline demo).
+# No GPU, no TTS/ASR models, no browser. Full stack: requirements.txt
+numpy
+Pillow
+jieba
+pypinyin
+opencc-python-reimplemented
+pytest

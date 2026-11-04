@@ -1,5 +1,7 @@
 # agentic-video-studio
 
+[![CI](https://github.com/johnnygodsa/agentic-video-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/johnnygodsa/agentic-video-studio/actions/workflows/ci.yml)
+
 An agent-orchestrated production pipeline for long-form, fact-checked commentary videos (Traditional Chinese narration, gaming / pop-science topics).
 A lead "director" process drives each video through gated stages; Claude Code sub-agents do research, writing and review; a local Python toolchain does TTS, pronunciation QA, animation, subtitles and rendering.
 
@@ -7,6 +9,27 @@ This repository is the **framework** extracted from a working private studio: pi
 It deliberately contains **no models, voices, footage, per-video data, channel analytics or credentials** (see [What is not included](#what-is-not-included)).
 
 > Language note: code comments, rule files (`channel/規則/`) and agent prompts (`.claude/agents/`) are written in Traditional Chinese, as they are used in production. This README and `docs/ARCHITECTURE.md` are in English. 中文說明見 [README.zh-TW.md](README.zh-TW.md).
+
+## Quickstart: offline demo (no GPU, no models, no Claude)
+
+Renders a ~28-second sample video from `pipeline/demo/sample_script.txt` by running it through the real pipeline modules:
+script parser (`script_txt2json`), script lint (`script_lint`), pronunciation annotation (`tts_cosy_text.apply_pron`),
+subtitle splitting with no punctuation and no broken words (`build.split_phrases`, `text_wrap`), a stage-gate check (`director._item`, as in `pipeline/gates/`),
+Pillow-drawn title card / bar chart / text cards, ffmpeg encoding and a QA contact sheet (`qa_sheet.grab`).
+
+```bash
+# Python 3.10+, ffmpeg on PATH; Linux: apt install fonts-noto-cjk (Windows uses Microsoft JhengHei)
+pip install -r requirements-ci.txt
+python -X utf8 pipeline/demo/run_demo.py --tts none --out demo_out
+# optional CPU voice: pip install piper-tts, then --tts piper (voice downloads to demo_out/cache; falls back to silence on failure)
+```
+
+Output in `demo_out/`: `demo.mp4` (burned-in subtitles), `demo.srt`, `contact_sheet.png`, plus `pron.txt` (annotated readings) and `script.json`.
+Each step logs a short `[stage] ...` line; the gate stops before rendering if any check fails.
+CI runs the same demo on every push (download it from the run's `demo` artifact) together with the offline test list in `.github/ci_tests.txt`.
+
+![Demo frame](docs/img/demo_frame.png)
+![Demo contact sheet](docs/img/demo_contact_sheet.png)
 
 ## What it does
 

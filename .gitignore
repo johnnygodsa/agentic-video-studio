@@ -37,3 +37,6 @@ token*.json
 cookies.txt
 
 pipeline/static/vendor/gsap.min.js
+
+# Offline demo output
+/demo_out/
