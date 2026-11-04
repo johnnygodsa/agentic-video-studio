@@ -1,7 +1,6 @@
 # CI 測試名單(Linux、無 GPU、無外部後端、無大型模型可過);一行一檔,相對 pipeline/tests/,# 開頭為註解
 test_assets_v3.py
 test_audience_model.py
-test_bars_layout.py
 test_board_stage_gate.py
 test_c_loop_retransform.py
 test_clip_cuts.py
@@ -10,7 +9,6 @@ test_colab_run.py
 test_context_pack.py
 test_cosy_pron_cache.py
 test_decide_list.py
-test_deliver_sidecar.py
 test_director.py
 test_director_ab.py
 test_director_run.py
@@ -36,7 +34,6 @@ test_llm.py
 test_look_list.py
 test_make_version_bgm.py
 test_make_version_warns.py
-test_new_anim_layout.py
 test_pace_unify.py
 test_pron_memory.py
 test_pron_v3.py
@@ -51,7 +48,6 @@ test_spec_title_segments.py
 test_stats.py
 test_terms_check.py
 test_text_clip.py
-test_timeline_points.py
 test_timing_only.py
 test_topic_scout.py
 test_tts_bakeoff.py
@@ -75,3 +71,4 @@ test_visual_estimate.py
 test_visual_opening.py
 test_yt_schedule.py
 test_zhe_regress.py
+# excluded on Linux CI: test_bars_layout.py (needs repo fonts/ (not shipped)); test_new_anim_layout.py (needs repo fonts/ (not shipped)); test_timeline_points.py (needs repo fonts/ (not shipped)); test_deliver_sidecar.py (parses Windows drive paths)
