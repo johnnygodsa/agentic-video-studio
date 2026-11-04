@@ -5,5 +5,4 @@ Pillow
 jieba
 pypinyin
 opencc-python-reimplemented
-soundfile
 pytest

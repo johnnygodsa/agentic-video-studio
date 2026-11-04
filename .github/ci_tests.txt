@@ -70,5 +70,4 @@ test_video_cost.py
 test_visual_estimate.py
 test_visual_opening.py
 test_yt_schedule.py
-test_zhe_regress.py
-# excluded on Linux CI: test_bars_layout.py (needs repo fonts/ (not shipped)); test_new_anim_layout.py (needs repo fonts/ (not shipped)); test_timeline_points.py (needs repo fonts/ (not shipped)); test_deliver_sidecar.py (parses Windows drive paths)
+# excluded on Linux CI: test_bars_layout.py (needs repo fonts/ (not shipped)); test_new_anim_layout.py (needs repo fonts/ (not shipped)); test_timeline_points.py (needs repo fonts/ (not shipped)); test_deliver_sidecar.py (parses Windows drive paths); test_zhe_regress.py (QC path imports soundfile + torch)
