@@ -31,7 +31,9 @@ jobs:
         run: python -X utf8 .github/run_ci_tests.py
 
       - name: Offline demo
-        run: python -X utf8 pipeline/demo/run_demo.py --tts none --out demo_out
+        run: |
+          python -X utf8 pipeline/demo/run_demo.py --tts none --out demo_out
+          for t in paper neon bold; do python -X utf8 pipeline/demo/run_demo.py --tts none --theme $t --out demo_$t; done
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -41,4 +43,5 @@ jobs:
             demo_out/demo.mp4
             demo_out/demo.srt
             demo_out/contact_sheet.png
+            demo_*/contact_sheet.png
           if-no-files-found: warn

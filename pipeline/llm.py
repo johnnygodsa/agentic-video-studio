@@ -3,6 +3,7 @@ r"""LLM 函式層:用 `claude -p` 當函式呼叫(走 Max 訂閱)。規格:pipel
 
 call(tag, fn, prompt, ...) 跑一次;call_escalating 同模型失敗 2 次改 Opus,Opus 再失敗回 ok=False;用量上限不重試。
 每次呼叫(含失敗)寫 director.log_call;原始輸出存 tmp\llm\<tag>\<時間>_<fn>.json(除錯用,不進 git)。
+後端:環境變數 STUDIO_LLM 或 studio.json {"llm": {"backend": "codex"}} 改走 `codex exec`(無 --agent 以代理內文前置代替、usage 不計);預設 claude。
 """
 import json
 import os
@@ -11,10 +12,12 @@ import shutil
 import subprocess
 import sys
 import time
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import locale_cfg  # noqa: E402
 import paths as P  # noqa: E402
 
 # 別名 haiku 會解析到舊模型,一律傳完整 ID
@@ -27,6 +30,11 @@ SHORT_TEXT = 400  # 正常回覆也可能提到 rate limit:沒標 is_error 時�
 # 所以 schema 也寫進 prompt、回覆文字取 JSON、schema_miss 自己驗;旗標留著(無 --agent 時有效)。
 SCHEMA_TAIL = "\n\n最後一則訊息只輸出一個 JSON 物件,不加說明、不包程式碼區塊,符合此 JSON Schema:\n"
 TYPES = {"integer": int, "string": str, "boolean": bool, "number": (int, float), "array": list, "object": dict}
+BACKENDS = ("claude", "codex")
+CODEX_WRITE = ("Write", "Edit", "Bash")  # 工具含其一 → workspace-write,否則 read-only
+CODEX_EFFORT = {"low": "low", "medium": "medium", "high": "high", "xhigh": "high", "max": "high"}
+CODEX_DEFAULT = "codex-default"  # 沒設 codex_models 時 Result.model 填這個(不傳 -m,用使用者 Codex 預設)
+AGENT_SEP = "\n\n----- 以上為代理設定,以下為任務 -----\n\n"
 
 
 @dataclass
@@ -61,14 +69,56 @@ def build_cmd(model_id, *, agent=None, effort=None, tools=DEFAULT_TOOLS, schema=
     return cmd
 
 
-def _spawn(cmd, prompt, timeout, cwd):
-    """跑 claude,prompt 走 stdin。回傳 (rc, stdout, stderr);逾時 rc=None。"""
+def backend():
+    """STUDIO_LLM 優先,其次 studio.json llm.backend;都沒有或不認得 = claude。"""
+    b = (os.environ.get("STUDIO_LLM") or "").strip().lower()
+    if not b:
+        b = str(locale_cfg.section("llm").get("backend") or "").strip().lower()
+    return b if b in BACKENDS else "claude"
+
+
+def codex_model(model):
+    """別名或 Claude 完整 ID → studio.json llm.codex_models 的對應;沒設定回 None(不傳 -m)。"""
+    alias = model if model in MODELS else next((k for k, v in MODELS.items() if v == model), None)
+    if alias is None:
+        return None if str(model).startswith("claude") else model
+    return (locale_cfg.section("llm").get("codex_models") or {}).get(alias) or None
+
+
+def codex_sandbox(tools=DEFAULT_TOOLS, allowed=None):
+    names = list(tools or ()) + list(allowed or ())
+    return "workspace-write" if any(n.split("(")[0].strip() in CODEX_WRITE for n in names) else "read-only"
+
+
+def build_codex_cmd(model_id=None, *, effort=None, tools=DEFAULT_TOOLS, allowed=None, schema_file=None, out_file):
+    cmd = [shutil.which("codex") or "codex", "exec", "--skip-git-repo-check", "--sandbox", codex_sandbox(tools, allowed)]
+    if model_id:
+        cmd += ["-m", model_id]
+    if effort:
+        cmd += ["-c", f"model_reasoning_effort={CODEX_EFFORT.get(str(effort).lower(), str(effort).lower())}"]
+    if schema_file:
+        cmd += ["--output-schema", str(schema_file)]
+    return cmd + ["-o", str(out_file), "-"]
+
+
+def agent_preamble(agent):
+    """<REPO>/.claude/agents/<agent>.md 去掉 YAML frontmatter 的內文;檔不存在回 None。"""
+    f = P.REPO / ".claude" / "agents" / f"{agent}.md"
+    try:
+        text = f.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    return re.sub(r"\A﻿?---[ \t]*\r?\n.*?\r?\n---[ \t]*(\r?\n|\Z)", "", text, count=1, flags=re.S).strip()
+
+
+def _spawn(cmd, prompt, timeout, cwd, name="claude"):
+    """跑 claude(或 codex),prompt 走 stdin。回傳 (rc, stdout, stderr);逾時 rc=None。"""
     try:
         r = subprocess.run(cmd, input=prompt.encode("utf-8"), capture_output=True, timeout=timeout, cwd=cwd)
     except subprocess.TimeoutExpired:
         return None, "", f"逾時 {timeout} 秒"
     except OSError as e:
-        return -1, "", f"無法執行 claude:{e}"
+        return -1, "", f"無法執行 {name}:{e}"
     return r.returncode, r.stdout.decode("utf-8", "replace"), r.stderr.decode("utf-8", "replace")
 
 
@@ -141,16 +191,71 @@ def _interpret(rc, out, err, model_id, schema, secs):
     elif env.get("is_error"):
         r.error = f"is_error:{r.text[:300]}"
     elif schema is not None:
-        r.data = env.get("structured_output")
-        if not isinstance(r.data, dict):
-            r.data = parse_json_text(r.text)
-        miss = schema_miss(schema, r.data) if r.data is not None else None
-        if r.data is None:
-            r.error = "取不到符合 schema 的 JSON"
-        elif miss:
-            r.error = f"JSON 不符 schema:{miss}"
+        _apply_schema(r, schema, env.get("structured_output"))
     r.ok = not r.error
     return r
+
+
+def _apply_schema(r, schema, data=None):
+    """data 不是 dict 就從 r.text 取 JSON;取不到或不符 schema 寫 r.error。"""
+    r.data = data if isinstance(data, dict) else parse_json_text(r.text)
+    miss = schema_miss(schema, r.data) if r.data is not None else None
+    if r.data is None:
+        r.error = "取不到符合 schema 的 JSON"
+    elif miss:
+        r.error = f"JSON 不符 schema:{miss}"
+
+
+def _interpret_codex(rc, out, err, last, model_label, schema, secs):
+    """last = -o 檔內容(None = 讀不到,退回 stdout)。codex 無 usage,留空。"""
+    r = Result(rc=-1 if rc is None else rc, model=model_label, secs=round(secs, 1))
+    r.text = (last if last is not None else out).strip()
+    if rc is not None:  # stderr 開頭會回顯 prompt,失敗時只比對尾段
+        r.limited = (bool(LIMIT_RE.search(f"{r.text}\n{out[-2000:]}\n{err[-2000:]}")) if rc != 0
+                     else len(r.text) <= SHORT_TEXT and bool(LIMIT_RE.search(r.text)))
+    if rc is None:
+        r.error = err
+    elif r.limited:
+        r.error = "用量上限"
+    elif rc != 0:
+        r.error = f"結束碼 {rc}:{(err or out).strip()[-300:]}"
+    elif not r.text:
+        r.error = "回覆為空"
+    elif schema is not None:
+        _apply_schema(r, schema)
+    r.ok = not r.error
+    return r
+
+
+def _call_codex(tag, fn, prompt, *, agent, model, effort, tools, schema, timeout, cwd, allowed):
+    """跑一次 codex exec;回 (Result, rc, stdout, stderr)。暫存檔放 tmp\\llm\\<tag>\\,用完刪。"""
+    if agent:
+        pre = agent_preamble(agent)
+        if pre is None:
+            r = Result(rc=-1, model=CODEX_DEFAULT, error=f"找不到代理檔 .claude/agents/{agent}.md(codex 無 --agent,需讀內文前置)")
+            return r, -1, "", r.error
+        prompt = pre + AGENT_SEP + prompt
+    d = P.TMP / "llm" / tag
+    d.mkdir(parents=True, exist_ok=True)
+    stem = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{fn}_{uuid.uuid4().hex[:8]}"
+    out_file, schema_file = d / f"{stem}_codex_last.txt", None
+    if schema is not None and locale_cfg.section("llm").get("codex_output_schema"):   # 預設不傳:嚴格模式要 additionalProperties:false 與全 required,現有 schema 多半不符;schema 已寫進 prompt
+        schema_file = d / f"{stem}_codex_schema.json"
+        schema_file.write_text(json.dumps(schema, ensure_ascii=False), encoding="utf-8")
+    model_id = codex_model(model)
+    cmd = build_codex_cmd(model_id, effort=effort, tools=tools, allowed=allowed, schema_file=schema_file, out_file=out_file)
+    t0 = time.time()
+    try:
+        rc, out, err = _spawn(cmd, prompt, timeout, str(cwd or P.ROOT), name="codex")
+        try:
+            last = out_file.read_text(encoding="utf-8")
+        except OSError:
+            last = None
+    finally:
+        for f in (out_file, schema_file):
+            if f is not None:
+                f.unlink(missing_ok=True)
+    return _interpret_codex(rc, out, err, last, model_id or CODEX_DEFAULT, schema, time.time() - t0), rc, out, err
 
 
 def _save_raw(tag, fn, rc, out, err):
@@ -171,14 +276,19 @@ def _log(tag, fn, r, agent, seg):
 def call(tag, fn, prompt, *, agent=None, model="sonnet", effort=None, tools=DEFAULT_TOOLS,
          schema=None, seg=None, timeout=1800, validate=None, cwd=None, allowed=None):
     """跑一次。validate(result) 回字串 = 失敗原因(call_escalating 下一次附進 prompt)。"""
-    model_id = MODELS.get(model, model)
-    cmd = build_cmd(model_id, agent=agent, effort=effort, tools=tools, schema=schema, allowed=allowed)
     if schema is not None:
         prompt += SCHEMA_TAIL + json.dumps(schema, ensure_ascii=False)
-    t0 = time.time()
-    rc, out, err = _spawn(cmd, prompt, timeout, str(cwd or P.ROOT))
-    r = _interpret(rc, out, err, model_id, schema, time.time() - t0)
-    _save_raw(tag, fn, rc, out, err)
+    if backend() == "codex":
+        r, rc, out, err = _call_codex(tag, fn, prompt, agent=agent, model=model, effort=effort, tools=tools,
+                                      schema=schema, timeout=timeout, cwd=cwd, allowed=allowed)
+        _save_raw(tag, fn, rc, r.text, err[-4000:])
+    else:
+        model_id = MODELS.get(model, model)
+        cmd = build_cmd(model_id, agent=agent, effort=effort, tools=tools, schema=schema, allowed=allowed)
+        t0 = time.time()
+        rc, out, err = _spawn(cmd, prompt, timeout, str(cwd or P.ROOT))
+        r = _interpret(rc, out, err, model_id, schema, time.time() - t0)
+        _save_raw(tag, fn, rc, out, err)
     if r.ok and validate:
         why = validate(r)
         if why:
@@ -188,7 +298,8 @@ def call(tag, fn, prompt, *, agent=None, model="sonnet", effort=None, tools=DEFA
 
 
 def call_escalating(tag, fn, prompt, **kw):
-    """同模型失敗 2 次 → Opus;Opus 再失敗回 ok=False;用量上限立刻回(不換模型硬跑)。"""
+    """同模型失敗 2 次 → Opus;Opus 再失敗回 ok=False;用量上限立刻回(不換模型硬跑)。
+    codex 下 "opus" 對應 codex_models["opus"];沒設定 = 同預設模型再試一次,序列有限不會無限重試。"""
     model = kw.pop("model", "sonnet")
     seq = [model, model] + ([] if MODELS.get(model, model) == MODELS["opus"] else ["opus"])
     text, r = prompt, None

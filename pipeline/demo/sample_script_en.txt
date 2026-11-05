@@ -1,0 +1,17 @@
+# Demo script (input to run_demo.py --script): same format as a production script.txt (@title, @say, @def, # sections, tag|narration ;; {json})
+# Made-up topic and numbers, for showing the pipeline only. Tags: title = title card, plain = text card, anim = bar chart (@def anim:wait).
+@title The Supermarket Queue Problem
+@def anim:wait={"type":"bars","title":"Average wait per checkout line (min)","items":[["Line 1",4.2],["Line 2",4.0],["Line 3",4.4]],"src":"Made-up demo numbers"}
+
+# Opening
+title|At the checkout, the line next to you always seems to move faster.
+
+# Numbers
+plain|Say three lines are open and the cashiers work at about the same speed.
+anim|Put the average wait of all three lines side by side. ;; anim:wait#1
+anim|The fastest and slowest differ by less than half a minute, so it is mostly luck. ;; anim:wait#2
+
+# Odds
+plain|You can only stand in one line, but two others are racing you.
+plain|So the chance that you picked the fastest line is just one in three.
+plain|Next time you feel you picked the wrong line, switching rarely helps.

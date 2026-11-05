@@ -2,6 +2,7 @@
 
   enabled(key)        -> bool   例:enabled("price_local_currency")
   get(key, default)   -> 值
+  section(name)       -> dict   studio.json 任一頂層區塊原樣(不套 DEFAULTS、不快取),例:section("llm")
 
 鍵:
   price_local_currency  bool  美金價格同句/同畫面要附本地幣(script_lint T08,預設 True)
@@ -41,3 +42,12 @@ def get(key, default=None):
 
 def enabled(key):
     return bool(_load().get(key))
+
+
+def section(name):
+    """studio.json 頂層區塊 name(dict);檔案不存在、壞掉或不是物件 = {}。不快取:改檔或測試換 CFG 立即生效。"""
+    try:
+        d = json.loads(CFG.read_text(encoding="utf-8")).get(name)
+    except (OSError, ValueError, AttributeError):
+        d = None
+    return dict(d) if isinstance(d, dict) else {}

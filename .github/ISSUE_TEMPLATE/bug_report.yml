@@ -1,0 +1,36 @@
+name: Bug report
+description: Something in the pipeline, demo or a gate does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, and what you got instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. python -X utf8 pipeline/demo/run_demo.py --tts none --out demo_out
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log output
+      description: The relevant `[stage] ...` lines or traceback. Remove anything private.
+      render: text
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Stage
+      options: [Demo, A · Research & assets, B · Script, B4 · Pronunciation, C · TTS & audio QC, D · Render, E · Delivery, Other]
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: Windows 11 / Ubuntu 24.04, Python 3.11, GPU or Colab/Kaggle

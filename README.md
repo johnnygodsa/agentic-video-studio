@@ -11,7 +11,9 @@ Nothing moves forward until its gate passes, so mistakes are caught at the stage
 
 中文說明見 [README.zh-TW.md](README.zh-TW.md).
 
-![Demo contact sheet](docs/img/demo_contact_sheet.png)
+![Animated chart templates](docs/img/motion_graphics.gif)
+
+<sub>Chart templates (bars with axis-shock, line, KPI, before/after) rendered frame by frame from JSON. Data is made up.</sub>
 
 ## What you can make with it
 
@@ -34,6 +36,8 @@ It is built for long-form (5–20 min) content. Shorts are supported through the
 | **Hard stage gates** | A → B → B4 → C → D → E. A gate checks real artifacts (files, reports, QA results), not an LLM's say-so. Blockers go to `production.json`, and any stage can be resumed. |
 | **Three factual gates** | Every script passes **audience consensus → a per-claim fact table → an adversarial domain-expert review** before a single line is voiced. |
 | **Audio QC for people who can't listen** | The operator and the LLM can't hear the narration, so every line is checked automatically: ASR round-trip, polyphone and dictionary readings, pause and run-on detectors, and duration prechecks. Audio is frozen only when every line passes. |
+| **Your look, not ours** | Backgrounds, colors, layouts, fonts, subtitle styles and chart templates are data (`pipeline/demo/themes.py`, `pipeline/templates/anim/tokens.css`). Swap a theme and the same script comes out looking like a different channel. |
+| **Drive it with Claude Code or Codex** | All agent calls go through one function (`pipeline/llm.py`). `STUDIO_LLM=codex` switches the whole pipeline to the OpenAI Codex CLI, and `AGENTS.md` gives Codex the same rules. |
 | **Agents with narrow jobs** | Researcher, planner, asset collector, script writer, editor, fact-checker, expert reviewer, pronunciation reviewer, line fixer. Each prompt lives in `.claude/agents/` and can be edited. |
 | **Remote or local GPU** | TTS and ASR run on Colab, Kaggle or your own GPU, behind a machine-wide lock with due-date priority. |
 | **Motion graphics from templates** | Bar and line charts, timelines, reader cards and title scenes, built in HTML/GSAP and rendered frame by frame with Playwright. |
@@ -47,6 +51,8 @@ No GPU, no models, no API key. The demo runs `pipeline/demo/sample_script.txt` t
 # Python 3.10+, ffmpeg on PATH; Linux: apt install fonts-noto-cjk
 pip install -r requirements-ci.txt
 python -X utf8 pipeline/demo/run_demo.py --tts none --out demo_out
+# other looks: --theme paper | neon | bold | my_theme.json
+# Chinese sample: --script pipeline/demo/sample_script.txt
 # optional CPU voice: pip install piper-tts, then --tts piper
 ```
 
@@ -54,6 +60,14 @@ You get `demo.mp4` with burned-in subtitles, `demo.srt`, `contact_sheet.png`, `p
 CI renders the same demo on every push. Download it from the run's `demo` artifact.
 
 ![Demo frame](docs/img/demo_frame.png)
+
+### Same script, four looks
+
+Every frame below comes from the same script, the same timing and the same 8-shot QA sheet. Only the theme changes: background, palette, layout, title card, chart style and subtitle treatment.
+
+![Four themes](docs/img/themes.png)
+
+To make your own theme, copy a JSON file with `"base": "paper"` (or any built-in theme) and override any color key. To change the layout, add a theme in `pipeline/demo/themes.py`. Production charts use the same idea: edit `pipeline/templates/anim/tokens.css` to restyle every animated chart at once.
 
 ## How it works
 
@@ -117,6 +131,10 @@ Two regional conventions are built in: preferred local terminology, and showing 
 This repository ships with both switches **off**. Set them to `true` to have the script lint and the line-fix agent enforce them (`pipeline/locale_cfg.py` documents every key).
 The bundled pronunciation and subtitle tools are tuned for Mandarin Chinese, and the shipped rule files and agent prompts are written in Traditional Chinese. Orchestration, gates, rendering and QA work in any language: write your own rule files and point the TTS step at your engine.
 
+### LLM backend: Claude Code or Codex
+
+Claude Code is the default. To drive the whole pipeline with the [OpenAI Codex CLI](https://github.com/openai/codex), set `STUDIO_LLM=codex`, or put `{"llm": {"backend": "codex"}}` in `studio.json`. Sub-agent role prompts are read from `.claude/agents/` and passed to `codex exec`; roles that need to write files get the `workspace-write` sandbox, and all others run read-only. `AGENTS.md` explains how Codex should read the rules. The Codex backend is new and covered by unit tests only, so please open an issue if a live run fails.
+
 ### Voice, models and assets
 
 - **TTS**: [CosyVoice 3](https://github.com/FunAudioLLM/CosyVoice) is the default engine. Point `pipeline/paths.py` (or its environment variables) at your model directory and register a reference voice you have rights to in `pipeline/cosy3_worker.py`. Piper works for CPU-only setups.
@@ -168,6 +186,10 @@ TTS engines are installed in separate virtual environments (see `pipeline/colab/
 - Media rights are your responsibility. The pipeline automates capture and editing of footage, screenshots, trailers and other third-party material, but you need to check the copyright and fair-use rules that apply to you.
 - Generated narration can still be wrong. The fact gates make errors much less likely but cannot rule them out, and you are responsible for what you publish.
 - Tests that need a GPU, models or an external backend are skipped in CI. `.github/ci_tests.txt` lists the offline suite.
+
+## Contributing
+
+Issues and pull requests are welcome, especially new chart templates, themes, language packs and engine adapters. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

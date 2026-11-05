@@ -28,6 +28,10 @@ def call_escalating(tag, fn, prompt, **kw) -> Result   # 同模型失敗 2 次 �
 - 用量上限只在失敗(rc 非 0、非 JSON、is_error、api_error_status 429)時比對文字;成功回覆只看 ≤400 字的短回覆,避免內文提到 rate limit 被誤判。
 - `validate` 在 `call` 內評,失敗原因由 `call_escalating` 附進下一次 prompt。`call` 跑一次,不重試。
 
+Codex 後端(2026-11-05,未實測):環境變數 `STUDIO_LLM=codex` 優先,其次 repo 根 `studio.json` `{"llm": {"backend": "codex", "codex_models": {"opus": .., "sonnet": .., "haiku": ..}}}`;都沒有 = claude(預設不變)。
+- 指令:`codex exec --skip-git-repo-check --sandbox <read-only|workspace-write> [-m] [-c model_reasoning_effort=] [--output-schema <檔>] -o <檔> -`(`--output-schema` 只在 `llm.codex_output_schema: true` 時傳,嚴格模式需 additionalProperties:false 與全 required);工具含 Write/Edit/Bash → workspace-write;`codex_models` 沒設就不傳 `-m`(Result.model = `codex-default`);effort max/xhigh 收斂成 high。
+- 限制:無 `--agent`,改讀 `.claude/agents/<agent>.md` 去 frontmatter 前置於 prompt(代理的 tools/model frontmatter 不生效,權限只靠 sandbox);usage 不計(log_call token 為 0);schema 仍走 prompt + 文字解析驗證。暫存檔在 `tmp\llm\<tag>\`,用完刪。
+
 ## 2. 開工資料 `projects\<tag>\brief.json`(主對話唯一要寫的檔)
 `{tag, channel, format, topic, angle, spoiler, played, one_line, publish, urls:[...], event, query, allow_short}`。`format` 取 `gates\specs.py` 的片型鍵。`director.py brief <tag> --topic --angle --channel --format [--publish ...]` 寫入。沒有 brief → A 段卡點 `待開工提問`,不動。
 
