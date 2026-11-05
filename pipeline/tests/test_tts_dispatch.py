@@ -332,3 +332,54 @@ def test_refreeze_ok_flag_sets_env(env, monkeypatch):
     td.main(["t1", "--dry-run", "--refreeze-ok"])
     assert os.environ.get("CV_REFREEZE_OK") == "1"
     monkeypatch.delenv("CV_REFREEZE_OK", raising=False)
+
+
+# ---------- Kaggle 並行已滿排隊(P6) ----------
+
+def _fake_ledger_sequence(monkeypatch, full_times):
+    """前 full_times 次 read_ledger 回 Kaggle 有一支在跑,之後回空。"""
+    calls = {"n": 0}
+
+    def fake():
+        calls["n"] += 1
+        return [start("other", "kaggle", datetime.now().isoformat(timespec="seconds"))] if calls["n"] <= full_times else []
+    monkeypatch.setattr(td, "read_ledger", fake)
+    return calls
+
+
+def test_prefer_kaggle_full_waits_then_dispatches(env, monkeypatch, capsys):
+    _fake_ledger_sequence(monkeypatch, 2)
+    sleeps = []
+    assert td.dispatch("t1", "kaggle", sleep=sleeps.append) == 0
+    assert sleeps == [td.KAGGLE_POLL_S] * 2
+    assert env.launched == [("t1", False)]
+    out = capsys.readouterr().out
+    assert out.count("排隊中") == 2 and "已等 0 分鐘" in out and "已等 1 分鐘" in out and "1/1" in out
+
+
+def test_prefer_kaggle_full_forever_times_out_with_original_error(env, monkeypatch, capsys):
+    ledger(env, start("other", "kaggle", datetime.now().isoformat(timespec="seconds")))
+    monkeypatch.setattr(td, "KAGGLE_WAIT_MAX", 300)
+    sleeps = []
+    assert td.dispatch("t1", "kaggle", sleep=sleeps.append) == 1
+    assert len(sleeps) == 5 and env.launched == [] and env.boards == []
+    out = capsys.readouterr().out
+    assert "Kaggle 並行已滿" in out and "不改走別的" in out and "不再等" in out
+
+
+def test_dry_run_kaggle_full_does_not_wait(env, monkeypatch):
+    ledger(env, start("other", "kaggle", datetime.now().isoformat(timespec="seconds")))
+    sleeps = []
+    assert td.dispatch("t1", "kaggle", dry_run=True, sleep=sleeps.append) == 1
+    assert sleeps == []
+
+
+def test_prefer_kaggle_other_failure_does_not_wait(env):
+    env.quota = None
+    sleeps = []
+    assert td.dispatch("t1", "kaggle", sleep=sleeps.append) == 1
+    assert sleeps == []
+
+
+if __name__ == "__main__":
+    sys.exit(pytest.main([__file__, "-q"]))

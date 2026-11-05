@@ -22,6 +22,7 @@ from gates import gate_a, gate_b as GB, gate_b4 as GB4, specs  # noqa: E402
 CALL = None  # 測試注入;None = llm.call_escalating
 AB_SEGS = ("A", "B", "B4")
 MAX_LINT, MAX_SPEAK, MAX_QC, MAX_PRON, MAX_PLAYER = 3, 3, 3, 3, 2
+MAX_PRERENDER = 2  # P3 預渲染檢查:補素材/換標籤最多兩輪
 SPOT_MAX = 5  # 旁白改動 ≤ 此句數:編輯審不重跑,玩家審走小範圍(§5)
 SIM_MAX, SHRINK_MIN, CLAUSE_MIN = 0.7, 0.6, 8  # 改稿回歸檢查:相鄰句相似度上限、改後字數下限比例、比對子句的最短字數
 READ = ("Read", "Grep", "Glob")
@@ -164,6 +165,15 @@ def _similar(a, b):
     return max([difflib.SequenceMatcher(None, a, b, autojunk=False).ratio()] + [overlap(x, y) for x in _clauses(a) for y in _clauses(b)])
 
 
+# P2:歸屬與確定程度詞(2_文案 §4「未經證實」);「約」排除約定/約會/約束/約翰與契約/合約/條約/預約/簽約/公約/婚約/違約等非「大概」義
+HEDGE = re.compile(r"據報|據稱|據傳|有報導指出|分析師估|玩家說|疑似|可能|(?<![契合條預簽公婚違守解])約(?![定會束翰])|估計|傳聞|目前|暫時")
+HEDGE_REASON = re.compile(r"歸屬|確定|推論")
+
+
+def _hedges(s):
+    return {m.group(0) for m in HEDGE.finditer(s)}
+
+
 def regress_why(old, new, prev="", nxt="", reason="", names=()):
     """改前 old、改後 new 逐句回歸檢查;回退回原因,過關回 None。reason = 這句為什麼要改;names = 主體名(revise 另加 hl 字串)。"""
     gone = [n for n in (*re.findall(r"《[^》]+》", old), *names) if n in old and n not in new]
@@ -179,6 +189,9 @@ def regress_why(old, new, prev="", nxt="", reason="", names=()):
     a, b = len(re.sub(r"\s", "", old)), len(re.sub(r"\s", "", new))
     if b < a * SHRINK_MIN:
         return f"字數掉太多:{a} → {b}"
+    gone = _hedges(old)
+    if gone and not _hedges(new) and not HEDGE_REASON.search(reason or ""):
+        return f"歸屬詞不見了:{'、'.join(sorted(gone))}(不得刪歸屬與確定程度詞)"
     return None
 
 
@@ -265,15 +278,15 @@ def _guard_fix(tag, items, res, raw):
             "unresolved": [*(res.get("unresolved") or []), *({"line": no, "why": bad} for no, (_old, bad) in back.items())]}
 
 
-def _fix(tag, items, mode):
+def _fix(tag, items, mode, call=None):
     """line_fix.fix_lines;回傳其結果。模組未就緒或用量上限 → Block。
-    lint/speak 改完逐句回歸檢查(_guard_fix),退回過的句不再送;qc 屬 C 段,不檢查。"""
+    lint/speak 改完逐句回歸檢查(_guard_fix),退回過的句不再送;qc 屬 C 段,不檢查。call = 覆蓋 LLM 呼叫(P4 升級 Opus 用;寫回仍走 line_fix 的機器硬驗)。"""
     lf = GB.module("line_fix")
     if lf is None:
         raise Block("line_fix.py 未就緒")
-    raw, held = (_raw_lines(tag), _locked(tag)) if mode != "qc" else (None, {})
+    raw, held = (_raw_lines(tag), _locked(tag)) if mode not in ("qc", "visual") else (None, {})  # visual 旁白不動,不查回歸
     todo = [i for i in items if i["line"] not in held]
-    res = lf.fix_lines(tag, todo, mode, call=CALL) if todo or not items else {}
+    res = lf.fix_lines(tag, todo, mode, call=call or CALL) if todo or not items else {}
     if res.get("refused"):
         raise Block(f"line_fix 拒絕:{res['refused']}")
     if res.get("limited") or any("用量上限" in str(u.get("why")) for u in res.get("unresolved") or []):
@@ -423,6 +436,7 @@ def _revise_call(tag, issues, warns, what, seg, fn="revise"):
               f"下列 {what} 要處理(line = 第幾句旁白,從 1 起算,# 段標題與 @ 指令行不算):\n"
               f"{json.dumps(list(issues), ensure_ascii=False)}\n"
               f"下列警告能改就順手改,不改的放 kept 寫理由(key 照抄):\n{keys}\n"
+              "不得刪除或弱化句中的歸屬與確定程度詞(據報、據稱、有報導指出、分析師估、疑似、可能、估計、傳聞、目前、暫時等;2_文案 §4「未經證實」),條目沒點名要改它就原樣保留。\n"
               "不要動檔案;只回 JSON:items=[{line,new_line,note}](new_line 只放旁白文字,不含標籤與行尾 json),kept=[{key,reason}]。")
     return _need(_llm(tag, fn, prompt, agent="script-writer", model="opus", effort="medium", tools=READ,
                       schema=REVISE_SCHEMA, seg=seg), "revise").data
@@ -693,6 +707,8 @@ def step_write(tag, ctx, a):
     brief = _brief(tag)
     s = specs.spec(brief.get("channel"), brief.get("format"))
     length = f"目標片長 {s['target'][0]}–{s['target'][1]} 分" if s["target"] else "不設片長"
+    if s.get("floor") is not None and not brief.get("allow_short"):
+        length += f"(下限 {s['floor']} 分,低於會被退回擴寫)"
     prompt = (f"寫稿 {tag}。輸入:{pd}\\brief.json、{pd}\\plan.json、{pd}\\facts.md、{pd}\\assets_manifest.json、{_channel_file(tag)}、"
               f"channel\\規則\\2_文案.md §1–§3 §6。{length},一分鐘約 {specs.SPEECH_CPM} 字。\n"
               f"輸出:{tag}\\script.txt 與 {pd}\\outline.md。截圖前綴寫在說明行「前綴 xx_」,img: 標籤不含前綴(images\\xx_name.png 寫 img:name)。\n\n可唸性規則:\n{sp.explain()}\n\n以前犯過的錯(不要再犯):\n{_taste_b()}")
@@ -705,6 +721,51 @@ def step_write(tag, ctx, a):
                validate=lambda r: None if out.exists() and (_pd(tag) / "outline.md").exists() else "script.txt / outline.md 沒寫"), "write")
     if v3:
         merge_writer_log(tag, since=t0)
+    _ensure_length(tag, brief, s, kw, v3)
+
+
+def _unused_facts(tag):
+    """facts.md 表格列首欄的 F 編號中,script.txt 沒引用的(依 facts 順序)。"""
+    f, sc = _pd(tag) / "facts.md", _script(tag)
+    try:
+        facts, text = f.read_text(encoding="utf-8-sig"), sc.read_text(encoding="utf-8-sig")
+    except OSError:
+        return []
+    ids = []
+    for line in facts.splitlines():
+        m = re.match(r"\s*\|\s*(F\d+)\b", line)
+        if m and m.group(1) not in ids:
+            ids.append(m.group(1))
+    return [i for i in ids if not re.search(rf"\b{i}\b", text)]
+
+
+def _ensure_length(tag, brief, s, kw, v3):
+    """P1:寫完立刻算估片長;< floor 且 brief 無 allow_short → 同一寫稿代理擴寫一次(保留已寫句、優先用未用 facts),
+    仍不足 → Block(要問使用者),發生在 speak/lint/review 之前。floor None(此片型不設下限)不檢查。"""
+    floor = s.get("floor")
+    if floor is None or brief.get("allow_short"):
+        return
+    mins = specs.est_minutes(tag)
+    if mins >= floor:
+        return
+    lo = (s.get("target") or (floor,))[0]
+    hi = (s.get("target") or (None, floor * 1.2))[1]
+    pd, unused = f"projects\\{tag}", _unused_facts(tag)
+    prompt = (f"{tag}\\script.txt 估片長只有 {mins:.1f} 分,低於下限 {floor} 分(一分鐘約 {specs.SPEECH_CPM} 字)。"
+              f"擴寫到 {math.ceil(lo * specs.SPEECH_CPM)}–{math.ceil(hi * specs.SPEECH_CPM)} 字旁白:保留已寫的句子,只在原有分段內補內容、不灌水、不重複已講過的點;"
+              f"優先用還沒用到的 facts 編號:{'、'.join(unused) or '(皆已用過,就從 plan.json 的論點補深)'}(來源 {pd}\\facts.md,"
+              f"照 {pd}\\plan.json 的 claims 與 {pd}\\assets_manifest.json 的素材);查無的事實不補。"
+              f"改完直接覆寫 {tag}\\script.txt,{pd}\\outline.md 同步更新。")
+    if v3:
+        prompt += _selfcheck_prompt(tag)
+    out, t0 = _script(tag), time.time()
+    _need(_llm(tag, "write_expand", prompt, agent="script-writer", model="opus", effort="high", seg="B", **kw,
+               validate=lambda r: None if out.exists() and (_pd(tag) / "outline.md").exists() else "script.txt / outline.md 沒寫"), "write_expand")
+    if v3:
+        merge_writer_log(tag, since=t0)
+    mins2 = specs.est_minutes(tag)
+    if mins2 < floor:
+        raise Block(f"估片長 {mins:.1f} → 擴寫一次後 {mins2:.1f} 分,仍 < 下限 {floor};要問使用者:補素材/併題/照發(allow_short)")
 
 
 def _selfcheck_prompt(tag):
@@ -815,6 +876,61 @@ def step_lint(tag, ctx=None, a=None):
     st = lint_round(tag)
     if st["sent"] or st["struct"] or st["warns"]:
         raise Block(f"lint {MAX_LINT} 輪未清:擋 {len(st['sent'])}、結構 {st['struct']}、警告未處理 {len(st['warns'])}")
+
+
+def _prerender(tag):
+    """prerender_check.check(估秒 timeline + build --check-only);測試替換。"""
+    import prerender_check as PC
+    return PC.check(tag)
+
+
+def _prerender_assets(tag, errs):
+    """asset 類預渲染錯誤交 asset-collector:重截 / 拆兩張 / 多備片段,跑 --check;旁白不可動(改了 → Block)。"""
+    pd = f"projects\\{tag}"
+    rows = script_rows(tag)
+    lst = "\n".join(f"- [{e['kind']}] 句{e['line']}(script.txt 第 {rows.get(e['line'], '?')} 行){e.get('label') or ''}:{e['msg']}" for e in errs)
+    prompt = (f"{tag} 的 B 段預渲染檢查(build --check-only,估秒時間軸)報了下列素材錯誤,請補素材:\n{lst}\n"
+              "做法:重點區過大 → 重截成兩張(各含一部分 hl),並把該句 script.txt | 前的 img 標籤改成新圖(若兩句分用兩張就各改各的);"
+              f"標籤挑不到 / 片段不足 → 依 pipeline\\docs\\assets.md 片段流程多備同標籤片段(寫進 {pd}\\clips_{tag}.json),clips_lib --check 達標;"
+              "images 不存在 → 補截該圖;cta 沒有片段 → 補 cta 標籤的片段。截圖改完跑對應 assets_*_news.py <名> --check。"
+              f"{tag}\\script.txt 只准改 | 前的畫面標籤,旁白一字不改。"
+              "回 JSON:items=[{claim,kind,path,hl,ok}](claim 填 句號,kind 填 screen 或 clip),ok 只有檢查真的過才 true。")
+    kw = {"tools": EDIT + ("Bash",), "allowed": ASSET_ALLOWED, "effort": "low"} if flow(tag) == "v3" else {"tools": EDIT + ("Bash",)}
+    if kw.get("effort"):
+        prompt += "\n" + ASSET_V3
+    before = GB.narration_hashes(tag)
+    _need(_llm(tag, "prerender_assets", prompt, agent="asset-collector", model="sonnet", schema=MANIFEST_SCHEMA, seg="B", **kw),
+          "prerender_assets")
+    if GB.narration_hashes(tag) != before:
+        raise Block("預渲染補素材時旁白被改動(只准改畫面標籤),要主對話檢查")
+
+
+def step_prerender(tag, ctx=None, a=None):
+    """P3:lint 後、review 前跑 prerender_check;asset 類 → asset-collector 補,line 類 → line_fix(visual) 換標籤/hl;≤2 輪,仍有 → Block。"""
+    import prerender_check as PC
+    for n in range(MAX_PRERENDER + 1):
+        rc, text = _txt2json(tag)
+        if rc != 0:
+            raise Block(f"script_txt2json 失敗:{D._tail(text)}")
+        res = _prerender(tag)
+        if not res["done"]:
+            raise Block(PC.summary(res))
+        errs = res["errors"]
+        if not errs:
+            return
+        if n == MAX_PRERENDER:
+            raise Block(f"預渲染檢查 {MAX_PRERENDER} 輪未清:" + PC.summary(res))
+        asset = [e for e in errs if e["fix"] == "asset"]
+        line = [e for e in errs if e["fix"] == "line"]
+        if asset:
+            _prerender_assets(tag, asset)
+        if line:
+            rows = script_rows(tag)
+            by = {}
+            for e in line:
+                if e["line"] in rows:
+                    by.setdefault(rows[e["line"]], []).append(f"{e['kind']}:{e['msg']}")
+            _fix(tag, [{"line": k, "reasons": v} for k, v in by.items()], "visual")
 
 
 def _recheck(tag):
@@ -1489,26 +1605,77 @@ def qc_issues(tag, ver, seen):
     return to_items(hard), to_items(ear), orphan
 
 
+def _qc_history(hist):
+    """前幾輪每句的失敗代碼與改前改後文字(給升級那次 Opus 看)。hist = {行號: [{round, reasons, old, new|None, why}]}。"""
+    out = []
+    for line, rows in sorted(hist.items()):
+        out.append(f"- 第 {line} 行")
+        for h in rows:
+            res = f"改成「{h['new']}」" if h.get("new") else f"沒改成({h.get('why') or '未改'})"
+            out.append(f"  第 {h['round']} 輪失敗:{';'.join(h['reasons'])[:200]}|改前「{h.get('old') or '?'}」→ {res}")
+    return "\n".join(out)
+
+
+def _escalated_call(hist):
+    """P4:第 3 輪仍未過 → line_fix 改用 Opus 一次(llm.call_escalating,model=opus),prompt 附前幾輪失敗與改前改後。
+    規則仍是 line_fix 的(意思/數字不動、不放寬別名、不動門檻);寫回走 line_fix 的硬驗,不另開後門。"""
+    note = ("\n\n【升級重改:前幾輪(Sonnet)改了仍品管未過,下面是每句的歷史;請換不同的改法,不要重蹈已失敗的寫法】\n" + _qc_history(hist)
+            + "\n硬規則不變:意思、事實、數字原樣;不放寬別名、不動品管門檻;只改字幕文字。"
+              "逗號太多就拆短或減逗號、句尾英文改接中文詞、太短的句子補足語意(不新增資訊)、避開前幾輪失敗的用字。")
+
+    def call(tag, fn, prompt, **kw):
+        return _llm(tag, "line_fix_opus", prompt + note, **{**kw, "model": "opus", "effort": "medium"})
+
+    return call
+
+
 def step_qc(tag, ctx, a):
-    """make_version --tts-review(不凍結)→ 品管/時長/E4 有句 → line_fix(qc)→ 重跑;第 3 輪品管仍未過 = 卡點。
+    """make_version --tts-review(不凍結)→ 品管/時長/E4 有句 → line_fix(qc)→ 重跑;第 3 輪品管仍未過 → 升級 Opus 改一次再驗(P4),仍未過 = 卡點。
     不放寬別名、不動品管門檻;只改句。"""
     cmd = D._sys() + [D._script("make_version.py"), "--tag", tag, "--ver", a.ver, "--tts-review"]
-    seen = set()
-    for n in range(1, MAX_QC + 1):
+    seen, hist = set(), {}
+    for n in range(1, MAX_QC + 2):   # 第 MAX_QC + 1 次 = 升級改句後的最後驗證
         rc, text, _ = D._exec(tag, a.ver, "C", f"改句r{n}", cmd)
         if rc != 0:
             raise Block(f"make_version --tts-review 結束碼 {rc}:{D._tail(text)}")
         hard, ear, orphan = qc_issues(tag, a.ver, seen)
         if not hard and not ear and not orphan:
             return
-        if n == MAX_QC:
+        if n > MAX_QC or (orphan and not hard and not ear):
             break
-        if orphan and not hard and not ear:
+        esc = n == MAX_QC
+        if esc and not hard:
             break
-        res = _fix(tag, hard + ear, "qc")
+        items = hard if esc else hard + ear
+        before = _rows_text(tag)
+        res = _fix(tag, items, "qc", call=_escalated_call(hist)) if esc else _fix(tag, items, "qc")
+        got = {f["line"]: f for f in res.get("fixed") or []}
+        un = {u["line"]: u.get("why", "") for u in res.get("unresolved") or []}
+        for it in items:
+            f = got.get(it["line"])
+            hist.setdefault(it["line"], []).append({"round": n, "reasons": it["reasons"], "old": (f or {}).get("old") or before.get(it["line"]),
+                                                    "new": (f or {}).get("new"), "why": un.get(it["line"], "")})
         seen |= {f["line"] for f in res.get("fixed") or [] if f["line"] in {i["line"] for i in ear}}
     if hard or orphan:
-        raise Block(f"品管未過到第 {MAX_QC} 輪:句 {[i['line'] for i in hard]}" + (f";時長 {orphan[:3]}" if orphan else ""))
+        raise Block(f"品管未過到第 {MAX_QC} 輪(含升級 Opus 改句一次):句 {[i['line'] for i in hard]}" + (f";時長 {orphan[:3]}" if orphan else ""))
+
+
+def step_decide(tag, ctx, a):
+    """C 段 decide 步(P5):唸法清單(decide_list ①②未定)由 director 決定並登錄,不再交主對話。
+    Sonnet pron-review 只 Read 決定 → pron_apply 只新增登錄並寫 `_verified`(decide_step.run)→ 重算,LLM ≤2 輪;仍有未定 = 卡點(主對話接手)。
+    未定 0 不叫 LLM。已決條目記 projects/<tag>/decide_<ver>.json,decide_<ver>.md 列「④ 已決定」,listen_page 列優先聽。"""
+    import decide_step as DS
+    try:
+        r = DS.run(tag, a.ver)
+    except FileNotFoundError as e:
+        raise Block(f"唸法清單讀不到 script.json:{e}")
+    print(f"decide:候選 {r['before']} → 已決並登錄 {len(r['decided'])}、未定 0({r['rounds']} 輪 LLM)")
+    return r
+
+
+def _rows_text(tag):
+    """{script.txt 行號: 旁白文字}。"""
+    return {r[0]: r[1] for r in _rows(tag)}
 
 
 # ---------- 段末 commit ----------
@@ -1594,6 +1761,9 @@ def steps(tag, seg, ctx, a):
             if v3 else "LLM opus high agent=script-writer → <tag>\\script.txt、outline.md")
         add("speak", fn=bind(step_speak), desc="speakable 硬項 → line_fix(speak),≤3 輪")
         add("lint", fn=bind(step_lint), desc="script_txt2json、script_structure、visual_check --table、facts_check、script_lint;句級 → line_fix,結構級 → revise,≤3 輪")
+        add("prerender", fn=bind(step_prerender),
+            desc="prerender_check(估秒 timeline + build --check-only,不配音不渲染):asset 類 → LLM sonnet asset-collector 補素材,"
+                 "line 類 → line_fix(visual) 換標籤/hl;≤2 輪,仍有 → 卡點")
         if v3:
             add("review", fn=memoized(tag, "B/review", hash_review, bind(step_review)), skip=lambda: review_skip(tag),
                 desc="flow v3:LLM opus editor-review(四類)與 player-review 平行 → 一次 revise(機械驗)→ 玩家審只驗改過句 ≤2 次"

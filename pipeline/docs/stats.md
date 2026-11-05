@@ -44,6 +44,7 @@ ebound.json`,失敗只警告)。任何例外只印一行警告,結束碼 0。
   - **2026-11-03 起**:逐日序列優先讀 `channel_latest.json` 每支影片的 `views_daily`(近 35 天 `[[日期,views]]`,Y 的 XREQ R1;沒有該欄位時退回上述日期副本差分,缺的日子補 0),門檻不變;另讀 Y 的 `data\own\latest_activity_<a ChannelA|b ChannelB>.json`(匯出資料夾上一層,不存在就略過):片齡 > 7 天且 `views_48h` ≥ max(500, 前 7 日日均×2×3) 也算命中(來源標「最新活動」)。
   - 核心 `topic_scout.detect_rebound(channel, activity, fallback)`,hook 與選題會議共用;命中覆寫 `channel
 ebound.json`(`generated_at` + `hits`:video_id/title/kind 自製|搬運/age_days/week_ratio/max_day_ratio/source/channel…;不寫 board.json)。測試 `tests	est_rebound.py`。
+  - **流量來源占比(Y 的 XREQ R8,2026-11-05)**:latest.json 每片若有 `traffic_7d`(發布後 7 天內各來源觀看數 dict:BROWSE/SUGGESTED/SEARCH/EXTERNAL/NOTIFICATION/OTHER + `captured_at`)或 `traffic_recent`(回溫偵測時補的近 7 天同欄),`stats.py --tag` 在「流量來源」後多印「7d 來源:瀏覽 x% 推薦 y% 搜尋 z% …(擷取日)」/「近7日來源:…」(占比、0 不列);`topic_scout` b 節命中列同樣附這行;`rebound.json` 每筆有才帶 `traffic_recent`/`traffic_7d`(原 dict,取自 latest.json 同 video_id)。沒有欄位一律照舊、不印。函式 `stats.traffic_mix/traffic_lines`;測試各在 `test_stats.py`/`test_rebound.py`/`test_topic_scout.py`。
 - c 留言訊號:該頻道最近 5 支有留言檔的自製片(`data\own\comments\<id>.json`):`summary.by_flag`(缺則用 `comment_lexicon.json` 詞表)、讚前 5 原句(≤80 字)、旁白/配音抱怨 = AI 旗標數;沒留言檔的 tag 列在首行。
 - d 競品與新聞:子行程 `intel_query.py opportunities --slot main|c --limit 10`(前 10 行)與 `trend_emerging.py --slot <slot> --top 10`(含表頭 12 行);失敗或逾時(120s)該節寫「不可用:<錯誤一行>」。ChannelC無 intel_query slot,固定不可用。
 - e Studio:`tmp\studio_<日期>.txt` 存在則附原文 ≤80 行,否則寫「未讀 Studio(手動:Chrome 讀 tab-research 與即時 48h)」。

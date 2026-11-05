@@ -4,7 +4,7 @@ r"""改句:一批句子一次呼叫 LLM 改寫,機器逐項硬驗後才寫回 sc
 python -X utf8 pipeline\line_fix.py <tag> --lines 12,15 --reason "<一句>" [--mode lint|qc|speak] [--dry-run]
 
 fix_lines(tag, items, mode, *, call=None, dry_run=False) -> {fixed:[{line,old,new}], unresolved:[{line,why}], warn_log:[...], kept:[...], refused:str}
-  items = [{line:int, reasons:[str]}](line = script.txt 行號);mode = lint | qc | speak(只影響給模型的說明)。
+  items = [{line:int, reasons:[str]}](line = script.txt 行號);mode = lint | qc | speak(只影響給模型的說明)| visual(只換標籤與 hl,見 _fix_visual)。
   call 預設 llm.call_escalating(簽名同:call(tag, fn, prompt, **kw) -> 有 ok/data/error 的結果;測試注入假的)。模型預設 sonnet,llm 與 terms_check 延遲 import。
   **不得改意思**(改意思是 revise 的事):prompt 禁止,機器只驗得到下面幾項,語意仍靠 prompt 與審稿:
     只換字幕文字(標籤、行尾 json 原樣不動;新句不可含 | 、 ;; 、換行)/ 數字集合相同 / 行尾 hl 字串(原句有的)仍在新句 /
@@ -23,11 +23,12 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import locale_cfg  # noqa: E402
 import paths as P  # noqa: E402
 import script_lint as L  # noqa: E402
 import speakable as S  # noqa: E402
 
-MODES = ("lint", "qc", "speak")
+MODES = ("lint", "qc", "speak", "visual")
 MAX_ROUNDS = 3
 MODEL = "sonnet"
 SCHEMA = {
@@ -42,6 +43,16 @@ MODE_NOTE = {
     "lint": "文案 lint 命中(AI 感、句型、判決腔、語助詞等):改成不命中的白話寫法。",
     "qc": "配音品管未過(語音辨識對不上、讀音或停頓出問題):換成更好唸的說法(拆短子句、避開易讀錯字的詞、少英文);數字照舊。",
     "speak": "可唸性預檢命中(未登錄英文、易讀錯的字、句太短或太長、數字太多等):換成更好唸的說法。",
+    "visual": "預渲染檢查命中(標籤挑不到片段、片段過長、anim 名稱不存在、重點區過大):只換畫面標籤或行尾 hl,旁白一字不改。",
+}
+VISUAL_SCHEMA = {
+    "type": "object",
+    "properties": {"fixes": {"type": "array", "items": {
+        "type": "object",
+        "properties": {"line": {"type": "integer"}, "label": {"type": "string"},
+                       "hl": {"type": ["string", "array", "null"], "items": {"type": "string"}}, "note": {"type": "string"}},
+        "required": ["line", "label", "note"]}}},
+    "required": ["fixes"],
 }
 EXTRA_SEP = " ;; "
 _ANIM_SHORT = re.compile(r"anim:[^\s#{}]+(#\S+)?")
@@ -170,7 +181,7 @@ def build_prompt(pending, mode, rejected):
         "只改字幕文字;意思、事實、立場、語氣強度都不變,不新增資訊、不刪關鍵資訊(改意思不是你的工作)。",
         "句中所有數字(阿拉伯數字與中文數字)原樣保留,不增減、不換寫法。",
         "must_keep 的字串必須原字出現在新句;say_keys(@say 鍵)出現在句中要原樣保留。",
-        "不新增英文詞(原句有的英文詞照留);不放 | 、;; 、換行;一行一句,台灣用語,白話口語。",
+        "不新增英文詞(原句有的英文詞照留);不放 | 、;; 、換行;一行一句," + (locale_cfg.get("regional_terms_name") + "," if locale_cfg.enabled("regional_terms") else "") + "白話口語。",
         "新句不可出現新的檢查命中,原本命中的要消掉(hits 逐條列出;判決腔、語助詞耶/蛤/齁/嗯、句尾啊 = 必消)。",
         "prev / next 是前後句,只供銜接,不要改它們。",
         "確定不用改(只有警告、沒有 block/err 才可以)就把 new_text 原樣照抄,note 寫保留的理由。",
@@ -218,6 +229,7 @@ def _refusal(tag):
 
 
 def fix_lines(tag, items, mode, *, call=None, dry_run=False):
+    """mode = visual 走 _fix_visual(只換標籤與 hl,旁白逐字不動);其餘 mode 只換字幕文字。"""
     if mode not in MODES:
         raise ValueError(f"mode 要是 {MODES}")
     merged = {}
@@ -229,6 +241,8 @@ def fix_lines(tag, items, mode, *, call=None, dry_run=False):
         out["refused"] = why
         out["unresolved"] = [dict(line=n, why=why) for n in sorted(merged)]
         return out
+    if mode == "visual":
+        return _fix_visual(tag, merged, out, call or _default_call(), dry_run)
     els, rows, says = load_script(tag)
     by_no = {r["no"]: i for i, r in enumerate(rows)}
     pseg = L._pseg()
@@ -314,6 +328,129 @@ def fix_lines(tag, items, mode, *, call=None, dry_run=False):
             pre, lead, _old, trail, tail, _ex = _split_raw(raw[:-1] if cr else raw)
             els2[f["line"] - 1] = pre + lead + f["new"] + trail + tail + cr
         if out["fixed"]:
+            write_atomic(script_path(tag), "\n".join(els2))
+    out["unresolved"] = [dict(line=n, why=w) for n, w in sorted(unresolved.items())]
+    return out
+
+
+# ---------------------------------------------------------------- mode visual(P3 預渲染檢查的句子類錯誤)
+def _narr_sha(els):
+    """全片旁白文字雜湊(只看 | 後、;; 前的字幕文字);visual 模式寫回前後必須相同。"""
+    import hashlib
+    texts = [_split_raw(el.rstrip("\r"))[2] for el in els if _is_spoken(el.rstrip("\r"))]
+    return hashlib.sha256("\n".join(texts).encode("utf-8")).hexdigest()
+
+
+def _visual_ctx(n, raw, reasons):
+    pre, lead, text, trail, tail, extra = _split_raw(raw)
+    return dict(no=n, raw=raw, pre=pre, lead=lead, text=text, trail=trail, tail=tail, extra=extra,
+                label=pre[:-1].strip(), hl=extra.get("hl"), reasons=reasons)
+
+
+def _visual_raw(ctx, label, hl):
+    """組新行:前綴換 label;hl 有變才重寫行尾 json(其他鍵照舊);回 (新行, 錯誤)。"""
+    if not isinstance(label, str) or not label.strip() or any(c in label for c in "|\r\n") or EXTRA_SEP.strip() in label:
+        return None, "label 不可空,不可含 | 、;; 、換行"
+    hls = [hl] if isinstance(hl, str) else hl if isinstance(hl, list) else [] if hl is None else None
+    if hls is None or not all(isinstance(h, str) and h for h in hls):
+        return None, "hl 要是字串、字串陣列或 null"
+    miss = [h for h in hls if h not in ctx["text"]]
+    if miss:
+        return None, f"hl 必須是旁白的子字串:{miss}"
+    pre = ctx["pre"][:len(ctx["pre"]) - len(ctx["pre"].lstrip())] + label.strip() + "|"
+    tail = ctx["tail"]
+    if hl != ctx["hl"]:
+        if tail and not tail.strip()[len(EXTRA_SEP.strip()):].strip().startswith("{"):
+            return None, "行尾是 anim 簡寫,不改 hl"
+        extra = {k: v for k, v in ctx["extra"].items() if k != "hl"}
+        if hls:
+            extra["hl"] = hl
+        tail = (EXTRA_SEP + json.dumps(extra, ensure_ascii=False)) if extra else ""
+    return pre + ctx["lead"] + ctx["text"] + ctx["trail"] + tail, None
+
+
+def build_visual_prompt(pending, tag, rejected):
+    items = []
+    for c in pending:
+        it = dict(line=c["no"], text=c["text"], label=c["label"], hl=c["hl"], reasons=c["reasons"])
+        if c["no"] in rejected:
+            it["上一版被退回"] = rejected[c["no"]]
+        items.append(it)
+    return "\n".join([
+        "你是遊戲影片的畫面標籤員。以下句子在預渲染檢查出錯,只能改畫面標籤(| 前)或行尾 hl,旁白一個字都不能動。",
+        f"可用片段標籤看 projects\\{tag}\\clips_{tag}.json 各片段的 tags;截圖用 img:<名>(images\\ 下要有 <名>.png 或 *_<名>.png);"
+        "cta、anim 與字卡種類照原寫法。標籤挑不到/片段過長 → 換同主題、片段夠多的標籤;重點區過大 → 縮短 hl 到單一重點。",
+        "hl 必須是該句旁白的原字子字串;不需要 hl 填 null。", "",
+        "輸入(JSON 清單,line = script.txt 行號):", json.dumps(items, ensure_ascii=False, indent=1), "",
+        '輸出 JSON:{"fixes":[{"line":行號,"label":"新標籤","hl":"字串|字串陣列|null","note":"一句話:換了什麼、為什麼"}]},每個 line 都要有一筆。',
+    ])
+
+
+def _fix_visual(tag, merged, out, call, dry_run):
+    """mode visual:LLM 回 {line, label, hl, note};機器驗 label 格式、hl 是旁白子字串、旁白逐字不變,寫回前後全片旁白雜湊相同才寫。"""
+    els, _rows, _says = load_script(tag)
+    ctxs, unresolved = {}, {}
+    for n, reasons in sorted(merged.items()):
+        raw = els[n - 1].rstrip("\r") if 0 < n <= len(els) else ""
+        if not _is_spoken(raw):
+            unresolved[n] = f"L{n} 不是旁白行"
+            continue
+        ctxs[n] = _visual_ctx(n, raw, reasons)
+    pending, rejected, good = dict(ctxs), {}, {}
+    for _round in range(MAX_ROUNDS):
+        if not pending:
+            break
+        res = call(tag, "line_fix", build_visual_prompt(list(pending.values()), tag, rejected), agent="line-fix", model=MODEL,
+                   effort="low", tools=("Read", "Grep", "Glob"), schema=VISUAL_SCHEMA, seg="B")
+        fixes, err = _payload(res)
+        if fixes is None:
+            for n in pending:
+                rejected[n] = err
+            if getattr(res, "limited", False):
+                break
+            continue
+        seen = set()
+        for f in fixes:
+            try:
+                n = int(f.get("line"))
+            except (TypeError, ValueError):
+                continue
+            if n not in pending or n in seen:
+                continue
+            seen.add(n)
+            c = pending[n]
+            new, bad = _visual_raw(c, f.get("label"), f.get("hl", c["hl"]))
+            if bad is None and new == c["raw"]:
+                bad = "標籤與 hl 都沒變"
+            if bad is None and _split_raw(new)[2] != c["text"]:
+                bad = "旁白文字變了"
+            if bad:
+                rejected[n] = f"label={f.get('label')!r} hl={f.get('hl')!r} 被退回:{bad}"
+                continue
+            good[n] = (new, (f.get("note") or "").strip())
+            del pending[n]
+        for n in pending:
+            if n not in seen:
+                rejected[n] = "這一輪沒有回這句"
+    for n in pending:
+        unresolved[n] = rejected.get(n, "未改好")
+    for n, (new, note) in sorted(good.items()):
+        c = ctxs[n]
+        out["fixed"].append(dict(line=n, old=c["text"], new=c["text"], old_raw=c["raw"], new_raw=new, note=note))
+    if out["fixed"] and not dry_run:
+        els2, _r, _s = load_script(tag)
+        for f in list(out["fixed"]):
+            if els2[f["line"] - 1].rstrip("\r") != f["old_raw"]:
+                out["fixed"].remove(f)
+                unresolved[f["line"]] = "script.txt 在改句期間被改動,未覆蓋"
+        before = _narr_sha(els2)
+        for f in out["fixed"]:
+            cr = "\r" if els2[f["line"] - 1].endswith("\r") else ""
+            els2[f["line"] - 1] = f["new_raw"] + cr
+        if _narr_sha(els2) != before:   # 硬驗:旁白雜湊不變,否則整批拒寫
+            unresolved.update({f["line"]: "旁白雜湊改變,拒寫" for f in out["fixed"]})
+            out["fixed"] = []
+        elif out["fixed"]:
             write_atomic(script_path(tag), "\n".join(els2))
     out["unresolved"] = [dict(line=n, why=w) for n, w in sorted(unresolved.items())]
     return out

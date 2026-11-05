@@ -53,9 +53,10 @@ def call_escalating(tag, fn, prompt, **kw) -> Result   # 同模型失敗 2 次 �
 ## 5. B 段步驟
 | 步 | 種類 | 做什麼 |
 |---|---|---|
-| write | LLM Opus high,agent `script-writer` | 輸入路徑:plan.json、facts.md、assets_manifest、頻道檔、2_文案 §1–§3 §6、`speakable.py --explain` 輸出、taste B 段案例摘要;寫 `<tag>\script.txt` 與 `projects\<tag>\outline.md` |
+| write | LLM Opus high,agent `script-writer` | 輸入路徑:plan.json、facts.md、assets_manifest、頻道檔、2_文案 §1–§3 §6、`speakable.py --explain` 輸出、taste B 段案例摘要;寫 `<tag>\script.txt` 與 `projects\<tag>\outline.md`。寫完立刻算 `specs.est_minutes`(P1 `_ensure_length`):< floor 且 brief 無 `allow_short` → 同代理 `write_expand` 再派一次(保留已寫句、列未用 facts 編號),最多 1 次;仍不足 → Block「要問使用者:補素材/併題/照發」,早於 speak/lint/review;floor 為 None 不檢查 |
 | speak | cmd + 改句 | `speakable.check_tag` 硬項 → `line_fix` |
 | lint | cmd + 改句 | `script_lint` / `script_structure` / `facts_check` / `visual_check --table`;句級命中 → `line_fix`;結構級 → `revise`;≤3 輪 |
+| prerender | cmd + 補素材/換標籤 | P3(2026-11-05):txt2json → `prerender_check.check`(估秒 timeline + `build --check-only`,不配音、不渲染、不吃 GPU 鎖;docs/build.md §2.6)只收五類錯;`fix=asset` → LLM Sonnet `asset-collector`(重截/拆兩張/多備片段,跑 --check,script.txt 只准改畫面標籤,旁白雜湊變了就 Block),`fix=line` → `line_fix(mode="visual")` 換標籤/hl;≤2 輪(`MAX_PRERENDER`),仍有 → Block 列前 5 筆。v2/v3 都在 lint 後、editor/review 前;D 段正式檢查照舊 |
 | editor | LLM Opus,agent `editor-review` | `editor_review_r<n>.md` + 結構化報告;連貫斷點 >0 → `revise`;一輪 |
 | player | LLM Opus,agent `player-review` | `player_review_r<n>.md` + 結構化報告;≤2 輪;第 2 輪仍有 誇大/可疑/相反 → 進 `ask_user`,卡點 `要問使用者`,不開第三輪 |
 **B4**:`tts_script.py <tag>` → `sub_scan`(ckip)接縫 0 → LLM Sonnet `pron-review` → LLM Sonnet `pron-apply`(只新增 `pron_rules.json`/`cosy_pron.json` 條目)→ 重跑到未決 0 → `pron_backlog.md` 本片前 3 條 → gate。
@@ -69,7 +70,7 @@ def call_escalating(tag, fn, prompt, **kw) -> Result   # 同模型失敗 2 次 �
 - **warn_log 鍵(2026-11-01)**:`<檢查>:<sha8>:<代碼>`,sha8 = 該句旁白文字雜湊(`gate_b.sha8`),加句不失效;structure 警告對不到句時用所在段標題雜湊。`warnings()` 同時帶 `legacy`(舊行號鍵),`unrecorded` 新鍵優先、舊鍵也認,舊片不用重記。line_fix 仍回行號鍵,`_record_fix` 用改前句文字換算;line_fix/revise 改過的句,舊句上的 `kept` 跟到新句(`_carry_kept`),其他手改句子 = 新句,警告要重新處理。
 - **審稿有效性(2026-11-01)**:`editor/player_review_r<n>.json` 多 `narration`(審稿當時每句旁白 sha8,不含標籤與行尾 json),`_review_state` 比對目前旁白:沒變 = 報告有效(改 @say、hl、畫面標籤不開新輪);改動 >5 句 = 下一輪(玩家審滿 2 輪照舊 Block);≤5 句 = 編輯審不重跑,玩家審走 `_spot_review`,含滿 2 輪後。舊報告沒有 `narration` 退回 mtime。editor 報告 revise 後更新 `narration`;player r1 revise 完中斷 = 照走 r2。
 - **小範圍玩家審**:prompt 列改動句與前後各一句,結果寫 `player_spot_<k>.json`(檔名不入 `latest_review`,不佔 MAX_PLAYER);審完更新最新報告的 `narration`;命中 PLAYER_MUST 不自動 revise,併進 `ask_user.json`,卡點 `要問使用者`。
-- **改稿回歸檢查(2026-11-01)**:`regress_why(old, new, prev, nxt, reason, names)` 任一成立退回該句原文:a. 改前的《…》、主體名(`speakable.subject_names`)改後不見,revise 另看行尾 hl 字串;b. 改前的數字不見且 reason 沒提到數字;c. 新句與相鄰句相似度 ≥0.7(整句,或 ≥8 字的子句間);d. 改後字數 < 改前 60%。line_fix(lint/speak)改完逐條查,revise 留快照後逐句比(句數變動時對不到的句子保留 revise 結果);C 段 qc 不查。退回記 `regress:<舊句 sha8>` 鎖與該句警告 `kept` + 原因,鎖住的句不再送 line_fix/revise(不花 LLM);退回的句不算進 `revised`,審稿條目 gate 照算未處理。
+- **改稿回歸檢查(2026-11-01)**:`regress_why(old, new, prev, nxt, reason, names)` 任一成立退回該句原文:a. 改前的《…》、主體名(`speakable.subject_names`)改後不見,revise 另看行尾 hl 字串;b. 改前的數字不見且 reason 沒提到數字;c. 新句與相鄰句相似度 ≥0.7(整句,或 ≥8 字的子句間);d. 改後字數 < 改前 60%。e.(P2)改前含歸屬/確定程度詞(`HEDGE`:據報、據稱、據傳、有報導指出、分析師估、玩家說、疑似、可能、約(排除約定/約會/簽約等)、估計、傳聞、目前、暫時)任一,改後全部消失且 reason 沒提「歸屬/確定/推論」→ 退「歸屬詞不見了」;revise prompt 與 `editor-review.md` 也明寫不得刪。line_fix(lint/speak)改完逐條查,revise 留快照後逐句比(句數變動時對不到的句子保留 revise 結果);C 段 qc 不查。退回記 `regress:<舊句 sha8>` 鎖與該句警告 `kept` + 原因,鎖住的句不再送 line_fix/revise(不花 LLM);退回的句不算進 `revised`,審稿條目 gate 照算未處理。
 - 編輯審「一輪」:r1 有連貫斷點 → revise → 報告寫 `revised:[句號]`,不重審;gate 不計已 revise 的條目。
 - 玩家審:r1 必處理 = 錯/誇大/推論/相反/矛盾/關掉/可疑;r2 仍有 錯/關掉/誇大/可疑/相反 → `ask_user.json`,卡點 `要問使用者`(規格只列後三者,錯/關掉 r2 仍在 gate 必不過,一起問)。使用者回覆後由主對話清空 `ask_user.json`。
 - 每次 revise 後重跑 speak + lint(`_recheck`),沒命中不花 LLM。
@@ -114,6 +115,12 @@ def call_escalating(tag, fn, prompt, **kw) -> Result   # 同模型失敗 2 次 �
 
 實作差異(2026-10-31):C 段新步 `改句迴圈`(`director_ab.step_qc`)排在 `配音凍結` 前,已凍結同樣略過。第 3 次 `--tts-review` 後不再改句:品管未過或無句號的時長錯誤 = 卡點;只剩 E4 → 進凍結。改過的 E4 行不再送改。`timing_errors` 從字串抓「句 N」換行號。
 
+P4 升級(2026-11-05,PLAN_全流程優化 §2 P4):第 3 輪 `--tts-review` 後品管仍有句 → **不直接卡點**,`step_qc` 呼叫 `line_fix(mode="qc")` 一次,但 LLM 改走 Opus(`_escalated_call`:`llm.call_escalating(model="opus", effort="medium")`,fn 名 `line_fix_opus`),prompt 在 line_fix 原 prompt 後附「前兩輪每句失敗代碼與改前改後文字」(`_qc_history`,由每輪 `_fix` 結果累積);規則同 line_fix(意思/數字不動、不放寬別名、不動門檻),寫回走 line_fix 既有硬驗與原子寫入,沒有別的寫檔路徑。之後第 4 次 `--tts-review` 再驗,仍未過或有無句號的時長錯誤 = 卡點(訊息「品管未過到第 3 輪(含升級 Opus 改句一次)」)。只剩 E4 旗標或第 3 輪只剩時長錯誤時不升級。測試 `tests/test_qc_escalate.py`。
+
+P4 失敗型態回饋 B 段:`pipeline	ools\qc_fail_stats.py`(只讀,掃 `build\*	ts_qc.json` 嘗試紀錄與 `projects\*\production.json` 卡點句)統計出的型態做成 `script_lint.qc_prone_hits` 警告(SHORT_LINE 短句、COMMA_MANY 句內逗號 >= 4、EN_TAIL 句尾英文;門檻 `T["short_chars"|"comma_warn"|"en_tail"]`;`block=False`)。它們併在 `sentence_hits` 裡,所以 B 段 `step_lint` 的 `line_warns` 本來就會吃(警告 → `_fix(mode="lint")` → 改好或 kept+理由記 warn_log),不另開流程;不進 `script_lint.py` main 的超標與 `--strict` 判定。
+
+P5 唸法決定(2026-11-05,PLAN_全流程優化 §2 P5):C 段新步 `唸法決定`(`director_ab.step_decide` → `decide_step.run`),排在 `c0` 之後、`後端`/`改句迴圈` 之前(c0 仍照未驗證規則試配;新增條目在配音前,不讓已錄句作廢),已凍結略過。流程:`refresh_tables`(依 `_pron_path` 重讀詞表進 `tts_cosy_text` 全域)→ `decide_list.en_undecided/pron_undecided` 算未定候選(① cosy_terms 英文詞、② cosy_pron 詞 / pron_rules 規則鍵)→ **0 條不叫 LLM**;否則 Sonnet(agent `pron-review` decide 模式,tools 只給 Read;prompt 附現有登錄、`tts_moe.lookup`、`pron_memory.json` 該字條目、已驗證示範)回 `items:[{src,key,status(已決|未決),decision,basis}]` → 只處理「已決」:`decision`(可選,補缺的互補條目)走 `pron_apply.apply`(只新增),鍵走 **`pron_apply.verify`** 寫各檔 `_verified`(cosy_terms 另記 `_log`;pron_rules 對應規則/預設的 `unverified`/`default_unverified` true→false,因為 decide_list 對標 unverified 的規則一律照列,清旗標才算定案,與主對話手動定案同動作;同鍵「字→標注」的 re 規則一併清)。`verify` 只做這兩件事,鍵必須是現有登錄,寫後 `_verified_only` 自驗(其餘既有值不得變,pron_rules 的 CRLF 維持),不符整檔還原。重算候選:仍在 = 未定(被拒、回未決、沒回覆);LLM 最多 2 輪,第 2 輪 prompt 附被拒原因並叮嚀證據沒變就維持未決;仍有未定 → `Block`「唸法未定 N(英文 a、讀音 b):…」(主對話接手,看 `decide_<ver>.md`)。已決記 `projects\<tag>\decide_<ver>.json`(`decide_list.load_decided`),`DL.run(with_polyphone=False)` 重產 md(第 ④ 節「已決定」;之後 `make_version --tts-review` 再產完整版)。gate C 的「唸法未定 0」門檻與讀取方式(`count_undecided` 讀摘要行)不變,只是改由 director 自己清。`say_terms.json` 是 ChatTTS 舊表(無 `_verified`),不在範圍。測試 `tests/test_decide_step.py`(假 LLM、詞表放 `tmp	est_decide_step\`);實資料 dry-run:詞表副本放 tmp,`AB._pron_path`/`P.PROJECTS`/`P.output_dir` 指過去。
+
 ## 8. 介面(平行實作時彼此依賴這些,不可改名)
 ```python
 # speakable.py
@@ -122,7 +129,7 @@ def check_tag(tag: str) -> dict           # {lines:[{line, hits:[...]}], errors:
 def explain() -> str                      # 給寫稿 prompt 的短規則,≤40 行
 # line_fix.py
 def fix_lines(tag, items, mode, *, call=None, dry_run=False) -> dict
-    # items=[{line:int, reasons:[str]}];mode="lint"|"qc"|"speak";call 預設 llm.call_escalating(測試注入)
+    # items=[{line:int, reasons:[str]}];mode="lint"|"qc"|"speak"|"visual"(visual:只換 | 前標籤與行尾 hl,hl 須為旁白子字串,寫回前後全片旁白雜湊相同才寫,fixed 多 old_raw/new_raw);call 預設 llm.call_escalating(測試注入)
     # 回 {fixed:[{line,old,new}], unresolved:[{line,why}], warn_log:[...]}
 # script_lint.py
 def check_sentences(tag, line_nos=None) -> list[dict]  # 句級子集:{line, code, block:bool, why}

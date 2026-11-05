@@ -246,7 +246,9 @@ def review_items_v3(tag):
 
 def run(tag, ver=None, ctx=None):
     """lint 擋 0;warn_log 齊;facts_check 未連結/狀態不符/錯誤 0;visual_check 錯誤 0;每句標籤對到實檔;speakable 硬項 0;
-    編輯審連貫斷點 0(已交 revise 的不算);玩家審 錯/關掉 0;ask_user 空;估片長 ≥ 下限(allow_short 放行,低於目標只 note)。"""
+    編輯審連貫斷點 0(已交 revise 的不算);玩家審 錯/關掉 0;ask_user 空;估片長 ≥ 下限(allow_short 放行,低於目標只 note)。
+    另:write 步驟寫完即先查估片長 < 下限且無 allow_short → 擴寫一次,仍不足 → Block(問使用者),早於 speak/lint/review。
+    另:lint 後、review 前 prerender 步(prerender_check:估秒 timeline + build --check-only)重點區過大/標籤挑不到/片段 >8 秒/images 不存在/cta、anim 無素材 → asset-collector 補或 line_fix(visual) 換標籤,≤2 輪,仍有 → Block。"""
     pd = P.PROJECTS / tag
     sc = P.REPO / tag / "script.txt"
     if not sc.exists():

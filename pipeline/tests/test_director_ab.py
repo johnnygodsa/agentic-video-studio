@@ -542,6 +542,7 @@ def test_write_step_prompt_has_speakable_and_taste(env, monkeypatch):
     _brief(env)
     _w(env / "channel" / "taste" / "README.md", "| T01 | B | 開場摘要 | x |\n| T99 | C | 別段 | x |\n")
     monkeypatch.setattr(gate_b, "module", lambda n: SimpleNamespace(explain=lambda: "可唸規則"))
+    monkeypatch.setattr(specs, "est_minutes", lambda tag: 99.0)  # 本測試只看 prompt,不測 P1 長度(見 test_write_length)
     seen = {}
 
     def fake(tag, fn, prompt, **kw):
@@ -621,7 +622,7 @@ def _qc_env(env, monkeypatch, reviews, ear=None):
         return 0, "", "m"
 
     monkeypatch.setattr(D, "_exec", fake_exec)
-    monkeypatch.setattr(AB, "_fix", lambda tag, items, mode: fixes.append((items, mode)) or {"fixed": [{"line": i["line"]} for i in items]})
+    monkeypatch.setattr(AB, "_fix", lambda tag, items, mode, call=None: fixes.append((items, mode)) or {"fixed": [{"line": i["line"]} for i in items]})
     if ear:
         _j(_pd(env) / "ear_e4_v1.json", ear)
     return fixes
@@ -643,10 +644,10 @@ def test_qc_fix_then_pass_idx_to_file_line(env, monkeypatch):
 
 
 def test_qc_third_round_blocks_and_no_alias_loosening(env, monkeypatch):
-    fixes = _qc_env(env, monkeypatch, [BAD, BAD, BAD])
+    fixes = _qc_env(env, monkeypatch, [BAD, BAD, BAD, BAD])
     with pytest.raises(AB.Block, match="品管未過到第 3 輪"):
         AB.step_qc(TAG, {}, A_VER)
-    assert len(fixes) == 2
+    assert len(fixes) == 3  # 第 3 輪那次是升級 Opus 改句(P4,見 test_qc_escalate.py),之後再驗仍未過才卡點
 
 
 def test_qc_e4_garble_ignored_and_changed_line_not_blocked(env, monkeypatch):

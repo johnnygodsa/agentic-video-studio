@@ -1,50 +1,65 @@
 # agentic-video-studio
 
 [![CI](https://github.com/johnnygodsa/agentic-video-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/johnnygodsa/agentic-video-studio/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
 
-An agent-orchestrated production pipeline for long-form, fact-checked commentary videos (Traditional Chinese narration, gaming / pop-science topics).
-A lead "director" process drives each video through gated stages; Claude Code sub-agents do research, writing and review; a local Python toolchain does TTS, pronunciation QA, animation, subtitles and rendering.
+**Turn a topic into a finished, fact-checked, narrated video with a team of AI agents.**
 
-This repository is the **framework** extracted from a working private studio: pipeline code, stage gates, agent prompts and production rules.
-It deliberately contains **no models, voices, footage, per-video data, channel analytics or credentials** (see [What is not included](#what-is-not-included)).
+You pick the topic. A director process takes the video through research, script, voice-over, animation, subtitles and render. Each stage has a gate. Claude Code sub-agents do the research, writing and adversarial review. A local Python toolchain handles TTS, pronunciation QA, motion graphics and the final render.
+Nothing moves forward until its gate passes, so mistakes are caught at the stage where they happen instead of in the comments after you publish.
 
-> Language note: code comments, rule files (`channel/規則/`) and agent prompts (`.claude/agents/`) are written in Traditional Chinese, as they are used in production. This README and `docs/ARCHITECTURE.md` are in English. 中文說明見 [README.zh-TW.md](README.zh-TW.md).
+中文說明見 [README.zh-TW.md](README.zh-TW.md).
 
-## Quickstart: offline demo (no GPU, no models, no Claude)
-
-Renders a ~28-second sample video from `pipeline/demo/sample_script.txt` by running it through the real pipeline modules:
-script parser (`script_txt2json`), script lint (`script_lint`), pronunciation annotation (`tts_cosy_text.apply_pron`),
-subtitle splitting with no punctuation and no broken words (`build.split_phrases`, `text_wrap`), a stage-gate check (`director._item`, as in `pipeline/gates/`),
-Pillow-drawn title card / bar chart / text cards, ffmpeg encoding and a QA contact sheet (`qa_sheet.grab`).
-
-```bash
-# Python 3.10+, ffmpeg on PATH; Linux: apt install fonts-noto-cjk (Windows uses Microsoft JhengHei)
-pip install -r requirements-ci.txt
-python -X utf8 pipeline/demo/run_demo.py --tts none --out demo_out
-# optional CPU voice: pip install piper-tts, then --tts piper (voice downloads to demo_out/cache; falls back to silence on failure)
-```
-
-Output in `demo_out/`: `demo.mp4` (burned-in subtitles), `demo.srt`, `contact_sheet.png`, plus `pron.txt` (annotated readings) and `script.json`.
-Each step logs a short `[stage] ...` line; the gate stops before rendering if any check fails.
-CI runs the same demo on every push (download it from the run's `demo` artifact) together with the offline test list in `.github/ci_tests.txt`.
-
-![Demo frame](docs/img/demo_frame.png)
 ![Demo contact sheet](docs/img/demo_contact_sheet.png)
 
-## What it does
+## What you can make with it
 
-- **Topic → brief → research → script → voice → render → delivery**, one director process per video, resumable from any stage.
-- **Hard stage gates** (`pipeline/gates/gate_*.py`): a stage cannot start until the previous gate passes; blockers are written to `production.json`.
-- **Three factual gates** before any narration is recorded: player-consensus check → per-claim fact table → adversarial "veteran player" review.
-- **Pronunciation & TTS QC as the only audio gate**: the operator (and the LLM) cannot listen, so every line is checked by ASR round-trip, polyphone rules, a Ministry-of-Education reading dictionary, pause/run-on detectors and duration prechecks before audio is frozen.
-- **Remote GPU scheduling**: TTS/ASR runs on Colab, Kaggle or the local GPU behind a machine-wide GPU lock with due-date priority.
-- **Templated motion graphics** (HTML/GSAP rendered through Playwright) for charts, timelines, reader cards and brand scenes.
+The pipeline suits any **narration-driven video** where accuracy matters and visuals come from charts, screenshots, clips and text cards:
 
-## Architecture
+- **Explainers and video essays**: science, history, technology, economics, law, health literacy
+- **News recaps and analysis**: industry news, product launches, policy changes, weekly roundups
+- **Reviews and comparisons**: games, apps, gadgets, books, films, services, with prices and specs checked
+- **Education and training**: course modules, onboarding videos, internal knowledge bases, tutorials
+- **Data stories**: market trends, sports statistics, survey results, turned into animated charts
+- **Faceless channels and series**: consistent format, voice and style across dozens of episodes
+- **Repurposing**: long articles, reports, newsletters and threads into scripted videos
+
+It is built for long-form (5–20 min) content. Shorts are supported through the same timeline.
+
+## Why it is different
+
+| | |
+|---|---|
+| **Hard stage gates** | A → B → B4 → C → D → E. A gate checks real artifacts (files, reports, QA results), not an LLM's say-so. Blockers go to `production.json`, and any stage can be resumed. |
+| **Three factual gates** | Every script passes **audience consensus → a per-claim fact table → an adversarial domain-expert review** before a single line is voiced. |
+| **Audio QC for people who can't listen** | The operator and the LLM can't hear the narration, so every line is checked automatically: ASR round-trip, polyphone and dictionary readings, pause and run-on detectors, and duration prechecks. Audio is frozen only when every line passes. |
+| **Agents with narrow jobs** | Researcher, planner, asset collector, script writer, editor, fact-checker, expert reviewer, pronunciation reviewer, line fixer. Each prompt lives in `.claude/agents/` and can be edited. |
+| **Remote or local GPU** | TTS and ASR run on Colab, Kaggle or your own GPU, behind a machine-wide lock with due-date priority. |
+| **Motion graphics from templates** | Bar and line charts, timelines, reader cards and title scenes, built in HTML/GSAP and rendered frame by frame with Playwright. |
+| **Rules as files** | Production rules are Markdown in `channel/規則/`, and `CLAUDE.md` routes the agents to them. Change your house style once and every agent follows it. |
+
+## Try it in 1 minute: offline demo
+
+No GPU, no models, no API key. The demo runs `pipeline/demo/sample_script.txt` through the real pipeline modules: script parser, script lint, pronunciation annotation, subtitle splitting (no punctuation, no broken words), a stage-gate check, chart and title-card drawing, ffmpeg encoding, and a QA contact sheet.
+
+```bash
+# Python 3.10+, ffmpeg on PATH; Linux: apt install fonts-noto-cjk
+pip install -r requirements-ci.txt
+python -X utf8 pipeline/demo/run_demo.py --tts none --out demo_out
+# optional CPU voice: pip install piper-tts, then --tts piper
+```
+
+You get `demo.mp4` with burned-in subtitles, `demo.srt`, `contact_sheet.png`, `pron.txt` and `script.json`. Each step prints a `[stage] ...` line, and if any gate check fails the run stops before rendering.
+CI renders the same demo on every push. Download it from the run's `demo` artifact.
+
+![Demo frame](docs/img/demo_frame.png)
+
+## How it works
 
 ```mermaid
 flowchart LR
-    subgraph Lead["Lead session (Claude Code, main conversation)"]
+    subgraph Lead["Lead session (Claude Code)"]
         T[Topic scouting<br/>+ topic-critic] --> BR[director.py brief]
     end
 
@@ -60,56 +75,68 @@ flowchart LR
     end
 
     subgraph Facts["Three factual gates (stage A–B)"]
-        F1[1 · Player consensus] --> F2[2 · Fact table<br/>facts.md + fact-check] --> F3[3 · player-review<br/>adversarial veteran]
+        F1[1 · Audience consensus] --> F2[2 · Fact table<br/>facts.md + fact-check] --> F3[3 · Adversarial<br/>expert review]
     end
     B -.-> Facts
 
     subgraph GPU["GPU backends (stage C)"]
         L[Local GPU] --- LOCK{{gpu_lock<br/>due-date priority}}
-        CO[Colab] 
+        CO[Colab]
         KA[Kaggle]
     end
     C -.->|backend chosen by operator| GPU
 
     subgraph QC["Audio QC (stage C)"]
-        Q1[ASR round-trip] --> Q2[Polyphone / MOE readings] --> Q3[Pause, run-on, tail checks] --> Q4[Duration precheck] --> FR[Freeze]
+        Q1[ASR round-trip] --> Q2[Polyphone / dictionary readings] --> Q3[Pause, run-on, tail checks] --> Q4[Duration precheck] --> FR[Freeze]
     end
     C -.-> QC
 
-    E -.->|optional| EXT[(External publishing /<br/>analytics backend<br/>not included)]
+    E -.->|optional| EXT[(Your publishing /<br/>analytics backend)]
 ```
 
-Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Deep dive: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Repository layout
+## Make it yours
 
-| Path | What |
-|---|---|
-| `CLAUDE.md` | Project rules loaded by Claude Code every turn (routing table to the rule files) |
-| `channel/規則/` | Production rules: `0_流程` workflow, `1_選題` topic selection, `2_文案` scripting & fact gates, `3_製作` production/TTS/QA, `4_交付發片` delivery; `頻道_模板.md` per-channel template |
-| `.claude/agents/` | Sub-agent prompts (researcher, script-writer, fact-check, player-review, editor-review, pron-review, …) |
-| `pipeline/director.py`, `director_ab.py` | Director: `brief`, `run --from A --to E`, `--explain <stage>`, `production.json` state |
-| `pipeline/gates/` | Stage gates A, B, B4, C, D, E and their specs |
-| `pipeline/tts_*.py`, `cosy3_worker.py`, `asr_worker.py` | TTS dispatch, CosyVoice3 worker, ASR verification, pronunciation and QC tools |
-| `pipeline/colab/`, `pipeline/remote/` | Colab notebook/packer and Kaggle runner for remote GPU |
-| `pipeline/gpu_lock.py`, `gpu_lock_local.py` | GPU lock shim + standalone single-machine lock |
-| `pipeline/build.py`, `make_version.py`, `anim_*.py`, `templates/`, `sci/` | Timeline build, rendering, animation templates |
-| `pipeline/facts_*.py`, `script_lint.py`, `script_structure.py`, `speakable.py` | Script lint and fact checking |
-| `pipeline/stats.py`, `yt_queue.py`, `feedback*.py`, `context_pack.py` | Analytics / publishing clients for an optional external backend |
-| `pipeline/tests/` | pytest suite (with synthetic fixtures) |
-| `pipeline/docs/` | Module docs (`README.md` in `pipeline/` is the entry) |
-| `projects/_templates/`, `projects/framework/` | Brief / handoff / visual-table templates and format specs |
+### Language and regional conventions
 
-Channel names in rules and code were replaced with neutral placeholders (`ChannelA`, `ChannelB`, `ChannelC`); paths to private machines with `<REPO_ROOT>`, `<EXTERNAL_BACKEND>`, `<HOME>`, `<LOCAL_PATH>`.
+Two regional conventions are built in: preferred local terminology, and showing prices in a local currency next to USD. Both are **optional**. You switch them in `studio.json` at the repo root:
+
+```json
+{
+  "locale": {
+    "regional_terms": false,
+    "regional_terms_name": "Taiwan Mandarin usage",
+    "price_local_currency": false,
+    "local_currency_regex": "€|EUR|euro",
+    "local_currency_name": "EUR"
+  }
+}
+```
+
+This repository ships with both switches **off**. Set them to `true` to have the script lint and the line-fix agent enforce them (`pipeline/locale_cfg.py` documents every key).
+The bundled pronunciation and subtitle tools are tuned for Mandarin Chinese, and the shipped rule files and agent prompts are written in Traditional Chinese. Orchestration, gates, rendering and QA work in any language: write your own rule files and point the TTS step at your engine.
+
+### Voice, models and assets
+
+- **TTS**: [CosyVoice 3](https://github.com/FunAudioLLM/CosyVoice) is the default engine. Point `pipeline/paths.py` (or its environment variables) at your model directory and register a reference voice you have rights to in `pipeline/cosy3_worker.py`. Piper works for CPU-only setups.
+- **ASR verification**: [faster-whisper](https://github.com/SYSTRAN/faster-whisper). Other engines are in `pipeline/tts_bakeoff/`.
+- **Pronunciation dictionary**: `pipeline/moe/README.md` rebuilds it from the Ministry of Education dictionary (CC BY-ND 3.0 TW), or you can plug in your own lexicon.
+- **Fonts**: put CJK or Latin fonts in `fonts/` (e.g. Noto Sans TC).
+- **GSAP**: download `gsap.min.js` (v3) from <https://gsap.com> or run `npm i gsap`, then place it at `pipeline/static/vendor/gsap.min.js`.
+- **Publishing and analytics**: `yt_queue.py`, `stats.py` and `feedback*.py` talk to an external backend through files and a CLI. Without one they say the backend is missing, and the rest of the pipeline keeps working.
+
+### Channels and house style
+
+Copy `channel/規則/頻道_模板.md` once per channel or series to set tone, length, pacing and audience persona. Rules that apply to every channel go in the numbered rule files.
 
 ## Requirements
 
-- Windows 10/11 (several helpers use Windows APIs / PowerShell OCR; most code is portable Python)
-- Python 3.10+
-- FFmpeg on `PATH`
-- Node-free: animations render via Playwright Chromium (`python -m playwright install chromium`)
+- Python 3.10+, FFmpeg on `PATH`
+- Playwright Chromium for animations (`python -m playwright install chromium`)
 - NVIDIA GPU (≥ 8 GB) for local TTS/ASR, or a Colab / Kaggle account
 - [Claude Code](https://docs.claude.com/en/docs/claude-code) for the agent layer
+- Windows 10/11 is the main target (some helpers use PowerShell OCR). Most of the code is portable Python, and CI runs on Ubuntu.
 
 ```bash
 python -m pip install -r requirements.txt
@@ -117,38 +144,30 @@ python -m pip install -r requirements.txt
 
 TTS engines are installed in separate virtual environments (see `pipeline/colab/req_*.txt`).
 
-## Bring your own TTS model and voice
+## Repository layout
 
-No model weights, voice prompts or reference audio are shipped.
+| Path | What |
+|---|---|
+| `CLAUDE.md` | Rules Claude Code loads every turn; a routing table to the rule files |
+| `channel/規則/` | Production rules: `0_流程` workflow, `1_選題` topic selection, `2_文案` scripting & fact gates, `3_製作` production/TTS/QA, `4_交付發片` delivery; `頻道_模板.md` channel template |
+| `.claude/agents/` | Sub-agent prompts |
+| `pipeline/director.py`, `director_ab.py` | Director: `brief`, `run --from A --to E`, `--explain <stage>`, state in `production.json` |
+| `pipeline/gates/` | Stage gates A, B, B4, C, D, E and their specs |
+| `pipeline/tts_*.py`, `cosy3_worker.py`, `asr_worker.py` | TTS dispatch, workers, ASR verification, pronunciation and QC tools |
+| `pipeline/colab/`, `pipeline/remote/` | Colab notebook/packer and Kaggle runner |
+| `pipeline/build.py`, `make_version.py`, `anim_*.py`, `templates/` | Timeline build, rendering, animation templates |
+| `pipeline/facts_*.py`, `script_lint.py`, `script_structure.py`, `speakable.py` | Script lint and fact checking |
+| `pipeline/locale_cfg.py` | Regional-convention switches (`studio.json`) |
+| `pipeline/demo/` | The offline demo |
+| `pipeline/tests/` | pytest suite with synthetic fixtures |
+| `pipeline/docs/` | Module docs (start at `pipeline/README.md`) |
+| `projects/_templates/`, `projects/framework/` | Brief / handoff / visual-table templates and format specs |
 
-1. Get CosyVoice 3 from the official source: <https://github.com/FunAudioLLM/CosyVoice> (weights on Hugging Face / ModelScope under their own licenses).
-2. Create a venv for it and point `pipeline/paths.py` (or its environment variables) at the model directory.
-3. Record or license a reference voice you have rights to, and register it as the speaker prompt used by `pipeline/cosy3_worker.py`.
-4. ASR verification uses [faster-whisper](https://github.com/SYSTRAN/faster-whisper) (other engines in `pipeline/tts_bakeoff/` are optional).
-5. The pronunciation dictionary data (`pipeline/moe/`) is derived from the Ministry of Education *Revised Mandarin Chinese Dictionary* (CC BY-ND 3.0 TW) and is **not redistributed**; rebuild it with the command in `pipeline/moe/README.md`.
+## Good to know
 
-Fonts are not included either; put your own CJK fonts in `fonts/` (e.g. Noto Sans TC).
-
-## What is not included
-
-- TTS / ASR models, virtual environments, voice files and reference audio
-- Raw footage, screenshots, animation renders, BGM, builds and finished videos
-- Per-video folders, scripts, research notes and per-video asset scripts
-- Audience comments, performance metrics, A/B test results and channel strategy files
-- The external publishing / analytics backend (`yt_queue.py`, `stats.py`, `feedback*.py` talk to it through files and CLI; without it those commands report that the backend is missing)
-- Any secrets, tokens, cookies or OAuth files
-
-## GPU lock
-
-`pipeline/gpu_lock.py` first looks for a shared cross-project lock under `<EXTERNAL_BACKEND>/_shared/` (env `YT_SHARED_DIR`). When it is absent it falls back to `pipeline/gpu_lock_local.py`, a self-contained single-machine mutex (`tmp/.gpu_lock/`, PID liveness check, optional VRAM threshold via `nvidia-smi`). No extra setup is needed.
-
-## Limitations and disclaimer
-
-- This is a production tool for one studio, published as reference; expect hard-coded conventions (Traditional Chinese, Taiwan terminology, NTD prices).
-- Tests that depend on the excluded backend, models or data may be skipped or fail.
-- **Copyright of game footage, screenshots, trailers and third-party media is the user's responsibility.** The pipeline only automates capture and editing; check the rights and fair-use rules that apply to you.
-- Generated narration may be wrong; the fact gates reduce but do not eliminate errors. You are responsible for what you publish.
-- GSAP is **not** bundled. Download `gsap.min.js` (v3) from https://gsap.com or `npm i gsap` and place it at `pipeline/static/vendor/gsap.min.js`.
+- Media rights are your responsibility. The pipeline automates capture and editing of footage, screenshots, trailers and other third-party material, but you need to check the copyright and fair-use rules that apply to you.
+- Generated narration can still be wrong. The fact gates make errors much less likely but cannot rule them out, and you are responsible for what you publish.
+- Tests that need a GPU, models or an external backend are skipped in CI. `.github/ci_tests.txt` lists the offline suite.
 
 ## License
 

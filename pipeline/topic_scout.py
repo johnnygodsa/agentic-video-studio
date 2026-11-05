@@ -125,6 +125,13 @@ def load_series(export_dir, slot, upto=None):
     return out
 
 
+def _video_of(latest, vid):
+    for v in (latest or {}).get("videos") or []:
+        if v.get("video_id") == vid:
+            return v
+    return None
+
+
 def _top_sources(latest, vid, n=3):
     for v in (latest or {}).get("videos") or []:
         if v.get("video_id") == vid:
@@ -306,7 +313,16 @@ def scan_slot(export_dir, slot, upto=None, today=None):
     channel = S.channel_of(S.load_channel(d), slot)
     if not channel:
         return []
-    return detect_rebound(channel, load_activity(d, slot), load_series(d, slot, upto), upto, today)
+    hits = detect_rebound(channel, load_activity(d, slot), load_series(d, slot, upto), upto, today)
+    try:   # latest.json 每片的 traffic_7d / traffic_recent(Y 的 XREQ R8);有才帶,沒有照舊
+        by = {v.get("video_id"): v for v in (S.load_latest(d) or {}).get("videos") or []}
+    except (AttributeError, TypeError):
+        by = {}
+    for h in hits:
+        for k in ("traffic_recent", "traffic_7d"):
+            if isinstance((by.get(h["video_id"]) or {}).get(k), dict):
+                h[k] = by[h["video_id"]][k]
+    return hits
 
 
 def _clean(o):
@@ -376,7 +392,7 @@ def section_b(export_dir, slot, latest, upto=None):
         return (f"  {h['video_id']} [{kind}] 觸發類型:{typ} tag={h.get('tag') or '-'} 發布 {h['published']} {h['title'][:30]}\n"
                 f"    最新日 {h['day']}{'(均)' if h['spread'] else ''} 觀看 {S.fv(h['latest'])} / 前{BASE_DAYS}日中位 {S.fv(h['median'])} = "
                 f"{'∞' if h['ratio'] == float('inf') else format(h['ratio'], '.2f')}×;{wk}{'  含補值' if h['filled'] else ''}  [資料:{h['source']}]\n"
-                f"    流量來源前3:{src or '無來源資料'}")
+                f"    流量來源前3:{src or '無來源資料'}" + "".join("\n  " + t for t in S.traffic_lines(_video_of(latest, h["video_id"]))))
 
     acts = _activity_hits(channel, activity, smap, _d(upto) if upto else None, series)
     act_ids = {a["video_id"] for a in acts}

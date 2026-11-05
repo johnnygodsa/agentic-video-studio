@@ -44,6 +44,8 @@ def env(monkeypatch):
     monkeypatch.setenv("CV_BOARD_DIR", str(root / "channel"))
     monkeypatch.setenv("UPLOAD_V_DIR", str(root / "V"))
     monkeypatch.setattr(freeze, "check", lambda tag: None)
+    import director_ab as _AB
+    monkeypatch.setattr(_AB, "step_decide", lambda *a, **k: None)   # P5 唸法決定步另測(test_decide_step);這裡假環境沒有 script.json
     monkeypatch.setattr(gate_d, "probe_secs", lambda p: 600.0)
     (root / "channel").mkdir()
     (root / "repo" / TAG).mkdir(parents=True)

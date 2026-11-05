@@ -15,6 +15,8 @@ emote\<tag>
 un.log;--foreground 前景跑(主對話用 run_in_background 等通知)。
     本機:印 make_version --tts-review --freeze 指令(不寫帳本,本機有 gpu_lock)。
     --prefer 指定的 Colab/Kaggle 不可用就報錯(結束碼 1),不改走別的。
+    --prefer kaggle 且並行已滿:不報錯,每 KAGGLE_POLL_S(60)秒查帳本直到空出,最多 KAGGLE_WAIT_MAX(預設 3 小時,環境變數 KAGGLE_WAIT_MAX 秒可覆寫),
+      逾時才回原本的「並行已滿」錯誤(結束碼 1);等待中每次印一行(已等分鐘、目前進行中數)。--dry-run 不等待。
     --dry-run(有 --prefer)只印選擇與理由,不打包、不推送、不寫帳本、不寫 board。
     --skip 已無自動選擇,僅相容(接受但不作用)。
 python -X utf8 pipeline\tts_dispatch.py --colab-done <tag> <tts_<tag>.zip>   pack_for_colab.py --import,成功寫帳本 end
@@ -29,6 +31,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -47,6 +50,8 @@ QUOTA_BUFFER_H = 2.0         # Kaggle 剩餘需 >= 預估 + 緩衝
 COLAB_WAIT_MIN = 60          # 使用者多久沒回就 cancel 並問使用者改 Kaggle/本機
 PUBLISH_MIN_H = 6            # 發布時間剩不到幾小時不走 Colab(也是主對話的退路門檻)
 PUBLISH_DEFAULT_HOUR = 18    # board 只有日期時當天幾點
+KAGGLE_WAIT_MAX = int(os.environ.get("KAGGLE_WAIT_MAX", 3 * 3600))   # --prefer kaggle 並行已滿時最多排隊幾秒(P6)
+KAGGLE_POLL_S = 60           # 排隊時每幾秒查一次帳本
 KAGGLE_STALE_H = 14          # 超過 kaggle_run 逾時上限(12.5h)仍沒 end = 殘留
 WEEK_DAYS = 7
 BACKENDS = ("colab", "kaggle", "local")
@@ -342,9 +347,30 @@ def verify_ok(tag):
     return False
 
 
-def dispatch(tag, prefer=None, dry_run=False, foreground=False, skip_c0=False):
+def wait_kaggle_slot(tag, sleep=None, poll_s=None, max_s=None, now=None):
+    """--prefer kaggle 且 Kaggle 並行已滿 -> 每 poll_s 秒重讀帳本直到空出;回 True = 不必再等(空出、或根本不是並行已滿)、
+    False = 等滿 max_s 仍滿(呼叫端接著照原本流程回「並行已滿」錯誤)。sleep 可注入(測試用),已等秒數以 poll_s 累計。"""
+    sleep = sleep or time.sleep
+    poll_s = KAGGLE_POLL_S if poll_s is None else poll_s
+    max_s = KAGGLE_WAIT_MAX if max_s is None else max_s
+    waited = 0
+    while True:
+        running = open_jobs(read_ledger(), "kaggle", now)
+        if tag in running or len(running) < KAGGLE_MAX or not KR.token_file().is_file():
+            return True   # 空出,或屬其他錯誤(同 tag 進行中、無 token)交給 choose 回報
+        if waited >= max_s:
+            log(f"Kaggle 並行仍滿({len(running)}/{KAGGLE_MAX}:{'、'.join(running)}),已等 {waited // 60} 分鐘達上限 {max_s // 60} 分鐘,不再等")
+            return False
+        log(f"Kaggle 並行已滿({len(running)}/{KAGGLE_MAX}:{'、'.join(running)}),排隊中,已等 {waited // 60} 分鐘,{poll_s} 秒後再查")
+        sleep(poll_s)
+        waited += poll_s
+
+
+def dispatch(tag, prefer=None, dry_run=False, foreground=False, skip_c0=False, sleep=None):
     if prefer is None:
         return advise(tag)
+    if prefer == "kaggle" and not dry_run:
+        wait_kaggle_slot(tag, sleep=sleep)
     backend, why, need = choose(tag, prefer)
     log(f"== 配音後端調度 {tag}" + (" (dry-run)" if dry_run else ""))
     for w in why:

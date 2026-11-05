@@ -425,6 +425,31 @@ def find_video(latest, key):
     return None
 
 
+TRAFFIC_LABELS = (("BROWSE", "瀏覽"), ("SUGGESTED", "推薦"), ("SEARCH", "搜尋"), ("EXTERNAL", "外部"), ("NOTIFICATION", "通知"), ("OTHER", "其他"))
+
+
+def traffic_mix(d):
+    """traffic_7d / traffic_recent dict(各來源觀看數 + captured_at)-> '瀏覽 x% 推薦 y% …'(占比,>0 才列);欄位缺/壞/總量 0 回 None。"""
+    if not isinstance(d, dict):
+        return None
+    vals = {k: num(d.get(k)) for k, _ in TRAFFIC_LABELS}
+    tot = sum(x for x in vals.values() if x and x > 0)
+    if tot <= 0:
+        return None
+    return " ".join(f"{lb} {vals[k] / tot * 100:.0f}%" for k, lb in TRAFFIC_LABELS if vals[k] and vals[k] > 0)
+
+
+def traffic_lines(v):
+    """片 dict 的 traffic_7d / traffic_recent -> 顯示行(沒欄位回 [])。"""
+    out = []
+    for key, label in (("traffic_7d", "7d 來源"), ("traffic_recent", "近7日來源")):
+        s = traffic_mix((v or {}).get(key))
+        if s:
+            cap = ((v or {}).get(key) or {}).get("captured_at")
+            out.append(f"  {label}:{s}" + (f"(擷取 {str(cap)[:10]})" if cap else ""))
+    return out
+
+
 def cmd_tag(latest, key, chdata=None, now=None, note=None):
     lines = [head_line(latest, now, note)]
     v = find_video(latest, key)
@@ -450,6 +475,7 @@ def cmd_tag(latest, key, chdata=None, now=None, note=None):
     if ts:
         top = sorted(ts.items(), key=lambda kv: -kv[1])[:4]
         lines.append("  流量來源:" + " ".join(f"{k} {p:.0f}%" for k, p in top))
+    lines += traffic_lines(v)
     h = v.get("health") or {}
     lines.append(f"  抓取健康:最後成功 {h.get('last_ok')} 連續失敗 {h.get('consecutive_fails')}" + (f" 原因 {h.get('fail_reason')}" if h.get("fail_reason") else ""))
     return lines

@@ -117,6 +117,19 @@ def test_tag_and_unknown(exp, capsys):
     assert "tagA" in out(["--export-dir", str(exp), "--tag", "vidA"], capsys)
 
 
+def test_tag_traffic_7d_line_only_when_field_present(exp, capsys):
+    assert "7d 來源" not in out(["--export-dir", str(exp), "--tag", "tagA"], capsys)
+    lt = make_latest()
+    lt["videos"][0]["traffic_7d"] = {"BROWSE": 600, "SUGGESTED": 300, "SEARCH": 100, "EXTERNAL": 0, "NOTIFICATION": 0, "OTHER": 0,
+                                     "captured_at": "2026-10-27T04:00:00"}
+    lt["videos"][0]["traffic_recent"] = {"BROWSE": 1, "SEARCH": 1}
+    (exp / "latest.json").write_text(json.dumps(lt, ensure_ascii=False), encoding="utf-8")
+    t = out(["--export-dir", str(exp), "--tag", "tagA"], capsys)
+    assert "7d 來源:瀏覽 60% 推薦 30% 搜尋 10%(擷取 2026-10-27)" in t and "近7日來源:瀏覽 50% 搜尋 50%" in t and "外部" not in t
+    assert "來源:" not in out(["--export-dir", str(exp), "--tag", "tagB"], capsys).replace("流量來源:", "")
+    assert S.traffic_mix({"BROWSE": 0}) is None and S.traffic_mix("x") is None
+
+
 def test_stale_only(exp, capsys):
     ok = out(["--export-dir", str(exp), "--stale"], capsys)
     assert ok.splitlines()[-1] == "無其他異常"

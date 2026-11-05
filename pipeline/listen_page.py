@@ -54,7 +54,7 @@ E4_MUST_KINDS = ("poly", "particle", "runon")
 CAT_LABEL = {"spk_thr": "聲紋貼近門檻", "spk_med": "聲紋偏低", "rate": "語速", "tail_rise": "句尾上揚", "cosy_pron": "讀音標注未聽審",
              "cosy_en": "英文唸法未聽審", "term_listen": "英文詞辨識不像", "g2p_disagree": "g2p 不一致", "mem_pending": "讀音記憶待聽",
              "comma_insert": "逗號靠插入", "steam": "含 Steam", "en_tail": "句尾英文", "book_colon": "書名號冒號", "e4_other": "E4 其他旗標",
-             "qc_fail": "品管未過", "tail": "句尾未過", "hard_cut": "句尾硬切", "asr2": "副辨識不一致", "retry": "重錄多次", "e4": "E4 耳朵"}
+             "director_decided": "唸法 director 已決(抽聽)", "qc_fail": "品管未過", "tail": "句尾未過", "hard_cut": "句尾硬切", "asr2": "副辨識不一致", "retry": "重錄多次", "e4": "E4 耳朵"}
 
 
 def mmss(t):
@@ -126,10 +126,22 @@ def e4_flags(tag, ver):
     return {i: ";".join(t for _, t in its) for i, its in e4_items(tag, ver).items()}
 
 
+def _decided_lines(tag, ver):
+    """{句號: [鍵(來源)]}:projects/<tag>/decide_<ver>.json 的 director 已決定唸法;沒有檔或讀不出 = {}(不影響舊片)。"""
+    if not (tag and ver):
+        return {}
+    try:
+        import decide_list as DL
+        return DL.decided_lines(tag, ver)
+    except Exception:  # noqa: BLE001
+        return {}
+
+
 def pick_reasons(recs, tag=None, ver=None):
     """回傳 {單位idx: [(類別, 說明)…]};沒命中任何門檻或例外的單位不在結果裡。tag/ver 給了才併入 E4 耳朵旗標。"""
     out = {}
     e4 = e4_items(tag, ver)
+    dec = _decided_lines(tag, ver)
     sims =[r["spk_sim"] for r in recs if r.get("spk_sim") is not None]
     med = statistics.median(sims) if sims else None
     thrs = [r["spk_thr"] for r in recs if r.get("spk_thr") is not None]
@@ -185,6 +197,9 @@ def pick_reasons(recs, tag=None, ver=None):
         e4t = e4.get(int(str(r["idx"]).split(".")[0]))
         if e4t:   # poly/particle/runon = 必聽(類別 e4);只有 garble 等其他旗標 = 其他(e4_other)
             why.append(("e4" if any(k in E4_MUST_KINDS for k, _ in e4t) else "e4_other", "E4耳朵:" + ";".join(t for _, t in e4t)))
+        dl = dec.get(int(str(r["idx"]).split(".")[0]))
+        if dl:   # P5:唸法清單由 director 決定並登錄,這些句列進優先聽(其他待聽)給使用者想抽聽用
+            why.append(("director_decided", "唸法由 director 決定(抽聽):" + "、".join(dl)))
         if why:
             out[r["idx"]] = why
     return out

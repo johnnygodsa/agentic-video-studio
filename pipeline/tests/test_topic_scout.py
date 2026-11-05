@@ -80,6 +80,19 @@ def test_section_b_self_traffic_sources(tmp_path):
     assert "SUBSCRIBER 60.0% / YT_SEARCH 30.0% / YT_RELATED 8.0%" in "\n".join(lines)
 
 
+def test_section_b_traffic_mix_line_only_when_field_present(tmp_path):
+    d = make_export(tmp_path, {"selfA": [100] * 9 + [500]})
+    for p in tmp_path.glob("*.json"):
+        j = json.loads(p.read_text(encoding="utf-8"))
+        j["channels"][0]["videos"][0]["age_days"] = 30.0
+        p.write_text(json.dumps(j, ensure_ascii=False), encoding="utf-8")
+    latest = {"videos": [{"video_id": "selfA", "traffic_source": {"YT_SEARCH": 30.0}}]}
+    assert "7d 來源" not in "\n".join(T.section_b(d, "", latest)[0])
+    latest["videos"][0]["traffic_7d"] = {"BROWSE": 80, "SEARCH": 20, "captured_at": "2026-11-03T04:00:00"}
+    lines, n = T.section_b(d, "", latest)
+    assert n == 1 and "7d 來源:瀏覽 80% 搜尋 20%" in "\n".join(lines)
+
+
 def test_section_b_no_data_degrades(tmp_path):
     lines, n = T.section_b(tmp_path, "", None)
     assert n == 0 and lines[0].startswith("不可用")

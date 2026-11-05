@@ -11,6 +11,7 @@ import statistics
 import sys
 import warnings
 
+import locale_cfg
 import pace
 import paths as P
 
@@ -53,6 +54,10 @@ T = dict(
     # 2026-10-31 口味回歸補洞(channel/taste T01):開場前 open_sents 句裡「只講一次、之後才再出現」的名詞 > open_defer_max 警告
     # (pbz_review v1 = 19、v2 = 10;近 10 支 0~19,只當警告)
     open_sents=9, open_defer_max=17,
+    # 2026-11-05 PLAN_全流程優化 P4:配音品管失敗型態回饋 B 段(只在句級警告 sentence_hits,block=False;不進 main 的超標與 --strict 判定)。
+    # 依 pipeline/tools/qc_fail_stats.py(1698 句 tts_qc 嘗試紀錄):句內逗號 0/1/2/3 個 → comma_short 曾失敗 1%/47%/62%/72%(>=3 時 72% vs <=2 時 54%,但最近 10 支稿 28% 行命中太吵,11-05 調到 4:命中 1.5%、n=15 曾失敗 comma_short 67%);
+    # 短句(CTA「留言告訴我」類)n=5 全部要 >=4 次嘗試、失敗碼 tail_abrupt/speaker/pitch;句尾英文 n=6 平均 3.4 次嘗試(speaker/tail_rise)。
+    short_chars=8, comma_warn=4, en_tail=True,   # 去標點後 < short_chars 字;句內逗號(,,)>= comma_warn;句尾(去標點後)是英文字母
 )
 
 # 報幕句:像簡報在唸大綱(第一個論點、接下來聽、先講…)
@@ -698,7 +703,7 @@ def pronoun_before_name(lines, names=()):
 
 
 PRICE_USD = re.compile(r"(?:US)?\$\s?\d|\d\s*(?:美金|美元)|美金|美元|USD", re.I)
-PRICE_TWD = re.compile(r"NT\s?\$|NT\s?\d|台幣|新台幣|臺幣|NTD|TWD", re.I)
+PRICE_TWD = re.compile(locale_cfg.get("local_currency_regex"), re.I)   # 本地幣辨識,studio.json locale 可改(預設台幣)
 PRICE_EXEMPT = re.compile(r"[億萬]\s?(?:美金|美元)|價值|營收|財報|營業|收入|銷售額|市值|估值|罰款|賠償|投資|募資|資金|獲利|利潤|虧損|成本|預算|薪資|年薪|薪水|身價|資產|股價|裁員|收購|併購|和解|訴訟|開發費|製作費|籌")   # 財報/企業金額維持美金(price-twd-primary)
 
 
@@ -709,7 +714,7 @@ def price_twd_missing(lines, vlines=()):
     for ln, t in lines:
         blob = t + " " + vmap.get(ln, "")
         if PRICE_USD.search(blob) and not PRICE_TWD.search(blob) and not PRICE_EXEMPT.search(t):
-            out.append((ln, f"美金價格沒有台幣(PRICE_TWD,2_文案「價格」):{t[:44]}"))
+            out.append((ln, f"美金價格沒有{locale_cfg.get('local_currency_name')}(PRICE_TWD,2_文案「價格」):{t[:44]}"))
     return out
 
 
@@ -744,7 +749,8 @@ def taste_warnings(lines, tag):
     w = []
     for name, hit in (("開場塞太多留給後面塊的名詞(OPEN_LOAD)", opening_load(lines)),
                       ("「她/他」先於人名(PRONOUN_FIRST)", pronoun_before_name(lines, spec_names(tag))),
-                      ("美金價格沒有台幣(PRICE_TWD)", price_twd_missing(lines, visual_lines(tag, lines)))):
+                      ("美金價格沒有台幣(PRICE_TWD)", price_twd_missing(lines, visual_lines(tag, lines))
+                       if locale_cfg.enabled("price_local_currency") else [])):
         if hit:
             w.append((name, hit, True))
     return w
@@ -802,6 +808,25 @@ def sentence_hits(ln, text, nxt=None, pseg=None):
         add("CLAUSE_LONG", False, f"子句 >= {T['clause_chars']} 字:{longc[0][:20]}")
     if len(num_groups(text)) > T["nums_max"]:
         add("NUMS", False, f"一句數字群 > {T['nums_max']}")
+    out += qc_prone_hits(ln, text)
+    return out
+
+
+# P4:配音品管易失敗句型(警告,B 段 line_fix 先改;不動意思、數字)
+_QC_STRIP = re.compile(r"[\s,，。.?？!！、;；:：「」『』()（）《》\"'…—-]")
+
+
+def qc_prone_hits(ln, text):
+    """-> [{line, code, block=False, why}]:SHORT_LINE 短句、COMMA_MANY 句內逗號過多、EN_TAIL 句尾英文;門檻見 T(short_chars/comma_warn/en_tail)。"""
+    core = _QC_STRIP.sub("", text)
+    out = []
+    if core and len(core) < T["short_chars"]:
+        out.append(dict(line=ln, code="SHORT_LINE", block=False, why=f"短句(< {T['short_chars']} 字):配音易尾音突兀、聲線飄;併進前後句或補足語意"))
+    n = len(re.findall("[,，]", text))
+    if n >= T["comma_warn"]:
+        out.append(dict(line=ln, code="COMMA_MANY", block=False, why=f"句內 {n} 個逗號(>= {T['comma_warn']}):配音逗號停頓過短/連讀;拆短或減逗號"))
+    if T["en_tail"] and re.search(r"[A-Za-z]$", core):
+        out.append(dict(line=ln, code="EN_TAIL", block=False, why="句尾是英文詞:配音易聲線漂移、尾音升調;句尾改接中文詞(如「…的 PvP 玩法」)"))
     return out
 
 

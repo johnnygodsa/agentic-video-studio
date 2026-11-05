@@ -366,12 +366,16 @@ def plan_steps(tag, seg, ctx, a):
 
     if seg == "C":
         frozen0 = "已凍結且品管未過 0" if _voice_frozen(tag) else None
+        import director_ab as AB
         add("預檢", _py() + [_script("tts_precheck.py"), tag],   # 配音前預檢:error>0(會吞字)結束碼 1 -> 卡點;已凍結片不跑
             skip=frozen0 or ("CV_SKIP_PRECHECK=1" if os.environ.get("CV_SKIP_PRECHECK") else None))
         c0 = P.PROJECTS / tag / "c0_report.json"
         add("c0", _py() + [_script("tts_c0.py"), tag],
             skip="c0_report.json 比 script.txt 新" if _newer(c0, P.REPO / tag / "script.txt") else None)
         frozen = "已凍結且品管未過 0" if _voice_frozen(tag) else None
+        # P5:唸法清單由 director 決定並登錄(排在 c0 之後,c0 仍照未驗證規則試配;在配音前,新增條目才不會讓已錄句作廢)
+        add("唸法決定", None, skip=frozen, fn=lambda: AB.step_decide(tag, ctx, a),
+            desc="decide_list 未定(英文詞/讀音標注)→ Sonnet pron-review(只 Read)決定 → pron_apply 只新增登錄 + 寫 _verified,≤2 輪;仍有未定 → 卡點;已決列 decide_<ver>.md「已決定」與優先聽")
         disp = _sys() + [_script("tts_dispatch.py"), tag]
         if a.backend is None:
             add("後端", disp, skip=frozen, status_only=True)
@@ -379,9 +383,8 @@ def plan_steps(tag, seg, ctx, a):
             add("後端", disp + ["--prefer", "kaggle", "--foreground"], skip=frozen)
         elif a.backend == "colab":
             add("後端", None, skip=frozen, block="Colab 要使用者上傳")
-        import director_ab as AB
         add("改句迴圈", None, skip=frozen, fn=lambda: AB.step_qc(tag, ctx, a),
-            desc="make_version --tts-review → 品管/時長/E4 有句 → line_fix(qc) → 重跑,≤3 輪")
+            desc="make_version --tts-review → 品管/時長/E4 有句 → line_fix(qc) → 重跑,≤3 輪;第 3 輪仍未過 → Opus 改一次再驗")
         add("配音凍結", _sys() + [_script("make_version.py"), "--tag", tag, "--ver", ver, "--tts-review", "--freeze"],
             skip=frozen)
     elif seg == "D":
@@ -594,6 +597,9 @@ def explain(seg):
     mod = _gate_mod(seg)
     print(f"{SEG_NAME[seg]} gate 項目:{'、'.join(mod.IDS)}")
     print((mod.run.__doc__ or "").strip())
+    if seg == "C":   # 步驟順序(含 P5 唸法決定步),用占位 tag 排出來只印名稱與說明
+        for st in plan_steps("<tag>", "C", {}, argparse.Namespace(ver="<ver>", backend=None)):
+            print(f"  步驟 {st['step']}" + (f":{st['desc']}" if st.get("desc") else ""))
 
 
 def write_brief(a):

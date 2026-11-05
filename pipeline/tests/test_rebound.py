@@ -146,6 +146,17 @@ def test_hook_line_hits_both_channels_and_json(tmp_path):
     assert [h for h in hits if h["video_id"] == "b"][0]["source"] == "views_daily+最新活動"
 
 
+def test_rebound_json_carries_traffic_fields_only_when_present(tmp_path):
+    exp = write_export(tmp_path, [row("a", [100] * 7 + [200] * 7, is_self=True), row("c", [100] * 7 + [200] * 7, is_self=True)])
+    tr = {"BROWSE": 70, "SUGGESTED": 30, "captured_at": "2026-11-03T04:00:00"}
+    (exp / "latest.json").write_text(json.dumps({"videos": [{"video_id": "a", "traffic_recent": tr, "traffic_7d": tr}, {"video_id": "c"}]}), encoding="utf-8")
+    out = tmp_path / "rebound.json"
+    T.hook_line(exp, datetime(2026, 11, 3, 9), out)
+    hits = {h["video_id"]: h for h in json.loads(out.read_text(encoding="utf-8"))["hits"]}
+    assert hits["a"]["traffic_recent"] == tr and hits["a"]["traffic_7d"] == tr
+    assert "traffic_recent" not in hits["c"] and "traffic_7d" not in hits["c"]
+
+
 def test_hook_line_missing_channel_data_is_wu(tmp_path):
     exp = tmp_path / "export"
     exp.mkdir()

@@ -8,7 +8,9 @@ python -X utf8 pipeline\decide_list.py <tag> <ver>        (讀 <tag>\script.json
        cosy_pron.json 的詞 -> 不在 cosy_pron._verified;
        pron_rules.json 的規則 -> 不在 pron_rules._verified(鍵 = 命中鍵「詞→標注」「字→標注」;新增規則預設未驗),或規則/預設標了 unverified。
   ③ 疑似誤讀:tts_polyphone.py(tts_env_chattts)前 15 筆;沒跑成記一行「未跑:原因」。
-使用者定案後:英文詞加進 cosy_terms.json 的 _verified;讀音詞加進 cosy_pron.json 的 _verified;規則鍵加進 pron_rules.json 的 _verified(皆主對話寫入,附日期說明)。
+定案:C 段 director 的 `decide` 步(decide_step.py,P5)讀本清單、Sonnet 決定、pron_apply 只新增登錄並把英文詞/詞/規則鍵加進各自 `_verified`;
+director 卡住時才由主對話手動定案(同樣寫 `_verified`,附日期說明)。director 已決定的條目記在 projects\<tag>\decide_<ver>.json,
+本檔重產時列成「④ 已決定」一節,listen_page 把這些句列進優先聽(類別 director_decided)。
 """
 import json
 import re
@@ -76,15 +78,37 @@ def polyphone(tag):
         return [], f"未跑:{type(e).__name__}: {str(e)[:160]}"
 
 
+def decided_path(tag, ver):
+    return P.project_file(tag, f"decide_{ver}.json")
+
+
+def load_decided(tag, ver):
+    """director decide 步已決定的條目 [{src, key, lines, sample, current, basis, at}];檔不存在或壞 = []。"""
+    try:
+        return list(json.loads(decided_path(tag, ver).read_text(encoding="utf-8")).get("items") or [])
+    except (OSError, ValueError, AttributeError):
+        return []
+
+
+def decided_lines(tag, ver):
+    """{句號(int): [說明]}:已決定條目所在的句(listen_page 優先聽用)。"""
+    out = {}
+    for it in load_decided(tag, ver):
+        for i in it.get("lines") or []:
+            out.setdefault(int(i), []).append(f"{it.get('key')}({it.get('src')})")
+    return out
+
+
 def _ln(lines):
     return "、".join(str(x) for x in lines[:8]) + (f"…(共 {len(lines)} 句)" if len(lines) > 8 else "")
 
 
-def render(tag, ver, en, pron, poly, poly_note):
+def render(tag, ver, en, pron, poly, poly_note, decided=None):
     n = len(en) + len(pron)
     L = [f"# 要你決定的唸法|{tag} {ver}", "",
          f"英文唸法 {len(en)} 筆|讀音標注 {len(pron)} 筆|疑似誤讀 {len(poly)} 筆(前 {TOP_N};{poly_note})", "",
-         "定案後:英文詞 -> cosy_terms.json `_verified`;讀音詞 -> cosy_pron.json `_verified`;規則鍵 -> pron_rules.json `_verified`;再重跑 --tts-review(只重錄受影響句)。", ""]
+         "定案:director 的 decide 步自動處理(英文詞 -> cosy_terms.json `_verified`;讀音詞 -> cosy_pron.json `_verified`;規則鍵 -> pron_rules.json `_verified`);"
+         "卡點時主對話手動定案後重跑 --tts-review(只重錄受影響句)。", ""]
     L += [f"## ① 英文唸法(cosy_terms 未驗證){len(en)} 筆", ""]
     L += [f"- {w}:{'直接唸英文' if e['say'] is None else '寫法 ' + e['say']}|句 {_ln(e['lines'])}|{e['sample'][:40]}" for w, e in en.items()] or ["(無)"]
     L += ["", f"## ② 讀音標注(未驗證)共 {len(pron)} 筆", ""]
@@ -92,6 +116,9 @@ def render(tag, ver, en, pron, poly, poly_note):
     L += ["", f"## ③ 疑似誤讀(tts_polyphone)", "", poly_note, ""]
     L += [f"- {x.get('time') or '--:--'} 單位{x['idx']} 「{x['char']}」預期 {x['expect']} 辨識 {x['heard']}({x['heard_char']}) {x['kind']}/{x['evidence']}|{x['text'][:20]}"
           for x in poly]
+    if decided:
+        L += ["", f"## ④ 已決定(director 登錄,請優先抽聽)共 {len(decided)} 筆", ""]
+        L += [f"- [{d.get('src')}] {d.get('key')}|現況 {d.get('current')}|句 {_ln(d.get('lines') or [])}|{d.get('basis') or ''}" for d in decided]
     return "\n".join(L) + "\n", n
 
 
@@ -111,7 +138,7 @@ def run(tag, ver, texts=None, with_polyphone=True):
     texts = tts_terms.script_texts(tag) if texts is None else texts
     en, pron = en_undecided(texts), pron_undecided(texts)
     poly, note = polyphone(tag) if with_polyphone else ([], "未跑:略過")
-    body, n = render(tag, ver, en, pron, poly, note)
+    body, n = render(tag, ver, en, pron, poly, note, load_decided(tag, ver))
     out = P.output_dir(tag) / f"decide_{ver}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(body, encoding="utf-8")

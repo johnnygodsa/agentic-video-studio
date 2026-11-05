@@ -100,10 +100,10 @@ def _lines():
 def test_flow_and_steps_v2_unchanged(env):
     a = SimpleNamespace(ver=None)
     assert AB.flow(TAG) == "v3"
-    assert [s["step"] for s in AB.steps(TAG, "B", {}, a)] == ["write", "speak", "lint", "review"]
+    assert [s["step"] for s in AB.steps(TAG, "B", {}, a)] == ["write", "speak", "lint", "prerender", "review"]
     _w(_pd(env) / "brief.json", json.dumps({"tag": TAG, "channel": "ChannelA"}))
     assert specs.flow(TAG) == "v2"
-    assert [s["step"] for s in AB.steps(TAG, "B", {}, a)] == ["write", "speak", "lint", "editor", "player"]
+    assert [s["step"] for s in AB.steps(TAG, "B", {}, a)] == ["write", "speak", "lint", "prerender", "editor", "player"]
 
 
 def test_build_cmd_allowed_patterns():
@@ -128,6 +128,7 @@ def test_write_skip_when_script_exists(env, monkeypatch):
 
 def test_write_v3_bash_whitelist_and_writer_log(env, monkeypatch):
     monkeypatch.setattr(gate_b, "module", lambda n: SimpleNamespace(explain=lambda: "可唸規則"))
+    monkeypatch.setattr(AB.specs, "est_minutes", lambda tag: 99.0)  # 只測自檢白名單,長度前置見 test_write_length
     log = []
 
     def write(prompt):

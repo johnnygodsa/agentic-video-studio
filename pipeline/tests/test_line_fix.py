@@ -255,3 +255,62 @@ def test_cli_dry_run(env, monkeypatch, capsys):
     assert "(dry-run)" in out and FIXED_B in out and "未寫檔" in out
     monkeypatch.setattr(LF, "_default_call", lambda: Fake(R([])))
     assert LF.main(["t", "--lines", "5", "--reason", "x"]) == 1
+
+
+# ---------------------------------------------------------------- mode visual(P3)
+def vb(label, hl="__keep__", line=5, note="換標籤"):
+    d = dict(line=line, label=label, note=note)
+    if hl != "__keep__":
+        d["hl"] = hl
+    return R([d])
+
+
+def test_visual_changes_label_and_hl_only(env):
+    before = env.read_bytes().decode("utf-8").split("\n")
+    fk = Fake(vb("img:x", ["2024 年"]))
+    r = fix([dict(line=5, reasons=["clip_tag_miss 標籤「b」clips 沒有"])], "visual", call=fk)
+    assert r["unresolved"] == [] and [(f["line"], f["old"], f["new"]) for f in r["fixed"]] == [(5, OLD_B, OLD_B)]
+    after = env.read_bytes().decode("utf-8").split("\n")
+    assert [i for i, (a, b) in enumerate(zip(before, after)) if a != b] == [4]
+    assert after[4] == "img:x|" + OLD_B + ' ;; {"f": ["F1"], "hl": ["2024 年"]}'
+    tag, fn, kw = fk.kw[0]
+    assert kw["schema"] is LF.VISUAL_SCHEMA and kw["seg"] == "B" and "旁白一個字都不能動" in fk.prompts[0]
+
+
+def test_visual_label_only_keeps_tail(env):
+    r = fix([dict(line=5, reasons=["x"])], "visual", call=Fake(vb("door_hd")))
+    assert r["fixed"] and env.read_bytes().decode("utf-8").split("\n")[4] == "door_hd|" + OLD_B + TAIL_B
+
+
+@pytest.mark.parametrize("reply,key", [
+    (vb("img:x", ["不在旁白裡"]), "子字串"),
+    (vb("a|b"), "label 不可空"),
+    (vb("b"), "都沒變"),
+    (vb("b", 5), "hl 要是"),
+])
+def test_visual_rejects(env, reply, key):
+    before = env.read_bytes()
+    fk = Fake(reply)
+    r = fix([dict(line=5, reasons=["x"])], "visual", call=fk)
+    assert r["fixed"] == [] and key in r["unresolved"][0]["why"] and env.read_bytes() == before and len(fk.prompts) == LF.MAX_ROUNDS
+
+
+def test_visual_narration_hash_guard(env, monkeypatch):
+    before = env.read_bytes()
+    vals = iter(["a", "b"])
+    monkeypatch.setattr(LF, "_narr_sha", lambda els: next(vals))
+    r = fix([dict(line=5, reasons=["x"])], "visual", call=Fake(vb("img:x")))
+    assert r["fixed"] == [] and "旁白雜湊" in r["unresolved"][0]["why"] and env.read_bytes() == before
+
+
+def test_visual_frozen_refused(env):
+    d = env.parent.parent / "projects" / "t"
+    d.mkdir(parents=True)
+    (d / "freeze.json").write_text(json.dumps(dict(narration_sha="x", frozen_at="2026-10-30T00:00:00")), encoding="utf-8")
+    fk = Fake(vb("img:x"))
+    r = fix([dict(line=5, reasons=["x"])], "visual", call=fk)
+    assert r["refused"] and fk.prompts == [] and r["fixed"] == []
+
+
+if __name__ == "__main__":
+    sys.exit(pytest.main([__file__, "-q", "-p", "no:cacheprovider"]))

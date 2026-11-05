@@ -54,7 +54,7 @@ def test_line_nos_filter(tmp_path, monkeypatch):
 
 
 def test_neighbor_checks_use_full_script(tmp_path, monkeypatch):
-    mk(tmp_path, monkeypatch, "# 一\na|這裡不是故障\nb|是設計好的樣子。\n")
+    mk(tmp_path, monkeypatch, "# 一\na|這裡根本不是故障\nb|是刻意設計好的樣子。\n")
     assert [x["code"] for x in L.check_sentences("t", [2])] == ["NOT_BUT"]   # 只問第 2 行,下一行仍讀得到
     mk(tmp_path, monkeypatch, "# 一\na|一邊說他很認真地做\nb|另一邊說他很認真地做。\n")
     assert "PARALLEL" in [x["code"] for x in L.check_sentences("t", [2])]

@@ -11,6 +11,10 @@ apply(decisions, tag=None) -> {"added": [...], "errors": [...]}:decisions = pron
 錯的條目進 errors 不寫。整檔原子寫(同目錄暫存檔 + os.replace),寫後用 director_ab._only_added 自驗,不符就還原。
 讀音檔路徑走 director_ab._pron_path(測試 monkeypatch 它,不動真檔)。
 record_seen(tag, items):把 pron-review 本輪看過的條目記進 pron_apply.json 的 decided 帳本(pron_pre 之後不再列)。
+verify(entries, tag=None) -> {"verified": [...], "errors": [...]}:C 段 decide 步(P5)把「已決」的鍵寫進 `_verified`:
+  entries = [{file: cosy_terms|cosy_pron|pron_rules, key, note?}];鍵必須是該檔現有登錄(英文詞/詞/規則命中鍵「詞→標注」「字→標注」「字→預設」);
+  只做兩件事:`_verified` 加鍵(cosy_terms 另在 `_log` 記一句);pron_rules 對應規則/預設的 unverified(default_unverified)true -> false
+  (decide_list 對標 unverified 的規則一律照列,所以要清掉旗標才算定案,與主對話手動「定案」同動作)。其餘任何既有值都不動,寫後 `_verified_only` 自驗,不符整檔還原。
 """
 import json
 import os
@@ -201,17 +205,19 @@ def apply(decisions, tag=None):
     return {"added": added, "errors": errors, "backlog": backlog}
 
 
-def _write_all(DA, files, added, errors):
-    """逐檔原子寫;寫後重讀自驗(json 用 _only_added、sub_words 驗原文是前綴),不符就還原該檔並把該檔的 added 挪進 errors。"""
+def _write_all(DA, files, added, errors, check=None):
+    """逐檔原子寫;寫後重讀自驗(json 用 _only_added(或 check)、sub_words 驗原文是前綴),不符就還原該檔並把該檔的 added 挪進 errors。"""
     for name, r in files.items():
         f = _path(name)
         new = _dump(r["data"], r["nl"]) if name.endswith(".json") else r["text"]
+        if name.endswith(".json") and CRLF in r["old"]:      # 原檔是 CRLF(pron_rules.json)就維持,免得整檔換行變成 diff
+            new = new.replace(NL, CRLF)
         if new == r["old"]:
             continue
         _atomic(f, new)
         try:
             back = _rd(f)
-            ok = DA._only_added(json.loads(r["old"]), json.loads(back)) if name.endswith(".json") else back.startswith(r["old"])
+            ok = (check or DA._only_added)(json.loads(r["old"]), json.loads(back)) if name.endswith(".json") else back.startswith(r["old"])
         except (OSError, ValueError):
             ok = False
         if not ok:
@@ -220,6 +226,91 @@ def _write_all(DA, files, added, errors):
             for a in lost:
                 added.remove(a)
             errors.append(f"{name} 寫後自驗不是「只新增」,已還原({len(lost)} 條作廢)")
+
+
+VERIFY_FILES = {"cosy_terms": "cosy_terms.json", "cosy_pron": "cosy_pron.json", "pron_rules": "pron_rules.json"}
+FLAG_KEYS = ("unverified", "default_unverified")
+
+
+def _verified_only(old, new, path=()):
+    """verify 的自驗:new 與 old 只差 ①頂層 `_verified` 多鍵(`_log` 多條)②規則/預設的 unverified、default_unverified 由 true 變 false。"""
+    if isinstance(old, dict):
+        if not isinstance(new, dict) or not all(k in new and _verified_only(v, new[k], path + (k,)) for k, v in old.items()):
+            return False
+        extra = set(new) - set(old)
+        return all((path == () and k in ("_verified", "_log")) or path == ("_log",) for k in extra)
+    if isinstance(old, list):
+        if path and path[-1] == "_verified":
+            return isinstance(new, list) and all(x in new for x in old)
+        if path and path[-1] == "rules":
+            return isinstance(new, list) and len(new) == len(old) and all(_verified_only(a, b, path + ("#",)) for a, b in zip(old, new))
+        return old == new
+    if old is True and new is False and path and path[-1] in FLAG_KEYS:
+        return True
+    return old == new
+
+
+def _rule_key_locs(rules, key):
+    """pron_rules 命中鍵 -> [(帶旗標的 dict, 旗標名)];鍵格式同 tts_cosy_text(「詞→標注」「字→標注」re 規則、「字→預設」)。"""
+    locs = []
+    for ch, e in rules.items():
+        if ch.startswith("_") or not isinstance(e, dict):
+            continue
+        for r in e.get("rules") or []:
+            py = r.get("py")
+            if r.get("keep") or not py:
+                continue
+            ks = [f"{w}→{py}" for w in r.get("words") or []] + ([f"{ch}→{py}"] if "re" in r else [])
+            if key in ks:
+                locs.append((r, "unverified"))
+        if e.get("model_default") and key == f"{ch}→{e['model_default']}":
+            locs.append((e, "default_unverified"))
+    return locs
+
+
+def verify(entries, tag=None):
+    """見檔頭。回傳 {"verified": [{file, key}], "errors": [str]}(已在 `_verified` 且沒有旗標要清的不算 verified)。"""
+    DA = _DA()
+    done, errors, files = [], [], {}
+    for e in entries or []:
+        kind, key = (e or {}).get("file"), (e or {}).get("key")
+        name = VERIFY_FILES.get(kind)
+        if not name or not isinstance(key, str) or not key or key.startswith("_"):
+            errors.append(f"verify 項目不合:{e}")
+            continue
+        try:
+            if name not in files:
+                f = _path(name)
+                t = _rd(f)
+                files[name] = {"old": t, "text": t, "data": json.loads(t), "nl": t.endswith(NL)}
+            data = files[name]["data"]
+            locs = _rule_key_locs(data, key) if kind == "pron_rules" else []
+            if kind == "pron_rules":
+                known = bool(locs)
+            elif kind == "cosy_terms":
+                known = key in data or key in (data.get("_direct") or [])
+            else:
+                known = key in data
+            if not known:
+                errors.append(f"{kind} {key}:沒有這個登錄,不能標已驗")
+                continue
+            changed = False
+            lst = data.setdefault("_verified", [])
+            if key not in lst:
+                lst.append(key)
+                changed = True
+            for obj, flag in locs:
+                if obj.get(flag):
+                    obj[flag] = False
+                    changed = True
+            if kind == "cosy_terms" and changed:
+                data.setdefault("_log", {}).setdefault(key, f"{date.today().isoformat()} 唸法清單 director 定案 {tag or ''} {(e.get('note') or '').strip()}".strip())
+            if changed:
+                done.append({"file": "pipeline\\" + name, "entry": key})
+        except Exception as ex:  # noqa: BLE001
+            errors.append(f"{kind} {key}:{type(ex).__name__} {ex}")
+    _write_all(DA, files, done, errors, check=_verified_only)
+    return {"verified": [{"file": d["file"], "key": d["entry"]} for d in done], "errors": errors}
 
 
 def _read(path):

@@ -1,0 +1,10 @@
+{
+  "_comment": "Regional conventions. Both checks are off by default; set to true to enforce. Keys: pipeline/locale_cfg.py",
+  "locale": {
+    "regional_terms": false,
+    "regional_terms_name": "台灣用語",
+    "price_local_currency": false,
+    "local_currency_regex": "NT\s?\$|NT\s?\d|台幣|新台幣|臺幣|NTD|TWD",
+    "local_currency_name": "台幣"
+  }
+}

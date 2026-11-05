@@ -7,6 +7,7 @@
 共用:
 - `director.py` 每支片的 production.json(init/status/log/intervene/feedback/brief)與 `run`(A→E 串接、每段評 gate、卡點記 blocks);`director_ab.py` A→B4 步驟與 C 段改句(B 段 `brief.flow:"v3"` 走寫稿員自檢 + 合併審稿 review 步,見 `docs\director_ab.md` §5「flow v3」);`llm.py` `claude -p` 函式層(call/call_escalating);`gates\` 各段 gate 與 `specs.py` 片型規格、SPEECH_CPM;規格 `docs\director.md`、`docs\director_ab.md`
 - `video_cost.py <tag> [--json]` / `--all [--since YYYY-MM-DD]` 每支片 token 與占上限 %(director llm_calls + Claude Code 主對話/子代理逐則歸屬,依 `director.MODEL_W` 加權;有快照時以「占週上限 %」為主、顯示「中文短名(tag)」);`--snap --h5 N --h5-reset ISO --week N --week-reset ISO [--fable N]` 由主對話把 get_usage 讀到的官方百分比寫進 `channel\usage_snapshots.jsonl`(校準:每 1% = 多少 w);`--now` 一行印最新快照與自快照後估計用量;`--all` 寫 `channel\token_ledger.md/.json`;中文名 `channel\tag_names.json`(director brief 有 topic 且無此 tag 時自動補);規格 docs\director.md「session」列、video_cost.py 檔頭
+- `prerender_check.py <tag> [--json]` B 段預渲染檢查:估秒 timeline + `build --check-only`,只收五類素材錯(重點區過大/標籤挑不到/片段 >8 秒/images 不存在/cta、anim 無素材),每筆附 fix asset|line(docs/build.md §2.6)
 - `paths.py` 所有路徑(ROOT/RAW/IMAGES/ANIM/BGM/BUILD/OUTPUT/TMP/TTS_ENV…)、`build_dir(tag)`、`output_dir(tag)`、`clips_file(tag)`、`speaker(name)`、`find()`、`downloads()`
 - `senses\` 感官層(耳朵 E1/E2/E3 等;E3 = `ear_e3_gemini.py` Gemini 逐句審聽):做法、指令、官方文件查證見 `docs\senses.md`
 - `run.py` 啟動器;`build.py` 主程式(配音→鏡頭→渲染→合成);`script_txt2json.py` script.txt→script.json

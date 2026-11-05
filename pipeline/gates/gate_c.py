@@ -35,7 +35,7 @@ def status(tag, ctx):
 
 
 def run(tag, ver, ctx=None):
-    """硬擋:C0 唸錯 0;品管未過 0、時長預檢 0、新合成 0;freeze 與現配音文本一致;listen_<ver>.txt;ear_e4_<ver>.json;唸法未定 0(decide_<ver>.md,沒有檔 = 舊片相容,視為沒有待定)。"""
+    """硬擋:C0 唸錯 0;品管未過 0、時長預檢 0、新合成 0;freeze 與現配音文本一致;listen_<ver>.txt;ear_e4_<ver>.json;唸法未定 0(decide_<ver>.md,沒有檔 = 舊片相容,視為沒有待定;P5 起由 director `唸法決定` 步清,門檻不變)。"""
     pd = P.PROJECTS / tag
     out = []
     c0 = pd / "c0_report.json"
