@@ -604,6 +604,7 @@ def explain(seg):
 
 def write_brief(a):
     from gates import specs
+    a.format = specs.FORMAT_ALIAS.get(a.format, a.format)
     if not specs.known(a.channel, a.format):
         print(f"片型不在 specs.FORMATS:{a.channel}/{a.format}", file=sys.stderr)
         return 2

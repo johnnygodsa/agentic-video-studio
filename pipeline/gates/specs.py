@@ -23,6 +23,7 @@ FORMATS = {
     ("ChannelC", None): UNSET,
     ("ChannelC", None): UNSET,
 }
+FORMAT_ALIAS = {"commentary": "評論片", "feature": "主場片", "longform": "長篇", "repost": "搬運", "research": "考據片"}  # 英文片型別名(公開庫 / brief --format)
 DEFAULT_FORMAT = {"ChannelA": "評論片", "ChannelB": "考據片"}  # 舊片沒有 brief.json 時的片型
 FALLBACK = {"target": (7, 10), "floor": 6}  # 頻道不明(舊片 board 沒填)比照ChannelA評論片
 # 2026-10-31 量:最近 6 支(ea_me5 322.2、wow_return 306.0、ally_ai 307.2、fog_still 305.8、bioware_dei 333.1、horror_sound 305.8)

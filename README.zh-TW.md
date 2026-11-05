@@ -47,6 +47,23 @@ English: [README.md](README.md)
 
 不需要 GPU、模型或 API 金鑰。示範會把 `pipeline/demo/sample_script.txt` 走過正式產線模組:文案解析、文案檢查、讀音標注、字幕切段(無標點、不拆詞)、關卡檢查、圖表與標題卡繪製、ffmpeg 合成、QA 總覽圖。
 
+**Docker**(其他什麼都不用裝):
+
+```bash
+git clone https://github.com/johnnygodsa/agentic-video-studio && cd agentic-video-studio
+docker build -t avs .
+docker run --rm -v "$PWD/out:/out" avs --theme neon --script pipeline/demo/sample_script.txt   # -> out/demo.mp4
+```
+
+**一鍵安裝**(建立 `.venv`、裝好套件、順便渲染示範片;需要 Python 3.10 以上與 ffmpeg):
+
+```bash
+./scripts/install.sh            # Linux / macOS / WSL(加 --full 裝完整產線)
+.\scripts\install.ps1           # Windows PowerShell(加 -Full 裝完整產線)
+```
+
+**手動安裝**:
+
 ```bash
 # Python 3.10 以上、ffmpeg 在 PATH;Linux 需 apt install fonts-noto-cjk
 pip install -r requirements-ci.txt

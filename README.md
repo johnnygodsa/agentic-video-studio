@@ -11,6 +11,10 @@ Nothing moves forward until its gate passes, so mistakes are caught at the stage
 
 中文說明見 [README.zh-TW.md](README.zh-TW.md).
 
+![What you type, what you get](docs/img/intro.gif)
+
+<sub>23 seconds: the commands you type, and what comes out. ([MP4](docs/img/intro.mp4))</sub>
+
 ![Animated chart templates](docs/img/motion_graphics.gif)
 
 <sub>Chart templates (bars with axis-shock, line, KPI, before/after) rendered frame by frame from JSON. Data is made up.</sub>
@@ -46,6 +50,23 @@ It is built for long-form (5–20 min) content. Shorts are supported through the
 ## Try it in 1 minute: offline demo
 
 No GPU, no models, no API key. The demo runs `pipeline/demo/sample_script.txt` through the real pipeline modules: script parser, script lint, pronunciation annotation, subtitle splitting (no punctuation, no broken words), a stage-gate check, chart and title-card drawing, ffmpeg encoding, and a QA contact sheet.
+
+**Docker** (nothing else to install):
+
+```bash
+git clone https://github.com/johnnygodsa/agentic-video-studio && cd agentic-video-studio
+docker build -t avs .
+docker run --rm -v "$PWD/out:/out" avs --theme neon      # -> out/demo.mp4
+```
+
+**One-step install** (creates `.venv`, installs dependencies, then renders the demo; needs Python 3.10+ and ffmpeg):
+
+```bash
+./scripts/install.sh            # Linux / macOS / WSL   (add --full for the whole pipeline)
+.\scripts\install.ps1           # Windows PowerShell   (add -Full for the whole pipeline)
+```
+
+**Manual**:
 
 ```bash
 # Python 3.10+, ffmpeg on PATH; Linux: apt install fonts-noto-cjk

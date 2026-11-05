@@ -45,3 +45,30 @@ jobs:
             demo_out/contact_sheet.png
             demo_*/contact_sheet.png
           if-no-files-found: warn
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t avs .
+      - name: Run demo in container
+        run: |
+          mkdir -p out
+          docker run --rm -v "$PWD/out:/out" avs --theme neon
+          test -s out/demo.mp4
+      - name: Install script (demo mode)
+        run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-noto-cjk
+          bash scripts/install.sh
+          test -s demo_out/demo.mp4
+      - name: Push to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker tag avs ghcr.io/johnnygodsa/agentic-video-studio:latest
+          docker push ghcr.io/johnnygodsa/agentic-video-studio:latest
