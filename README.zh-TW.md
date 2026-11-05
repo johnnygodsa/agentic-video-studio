@@ -16,7 +16,13 @@ English: [README.md](README.md)
 
 示範不需要 GPU、模型或 API 金鑰。它會把一份短文案送進正式流程用的同一套解析、文案檢查、字幕切段和關卡檢查,產出一支 40 秒內的 MP4。
 
-用 Docker:
+用 Docker,一行指令(映像檔公開在 GitHub Container Registry):
+
+```bash
+docker run --rm -v "$PWD/out:/out" ghcr.io/johnnygodsa/agentic-video-studio --theme neon --script pipeline/demo/sample_script.txt   # 產出 out/demo.mp4
+```
+
+或自己建映像檔:
 
 ```bash
 git clone https://github.com/johnnygodsa/agentic-video-studio && cd agentic-video-studio

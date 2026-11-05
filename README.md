@@ -14,7 +14,13 @@ I built this to run a real narrated video channel. The hard part was keeping mis
 
 The demo needs no GPU, no model and no API key. It runs a short sample script through the same parser, lint, subtitle splitter and gate check the full pipeline uses, and renders an MP4 of under 40 seconds.
 
-With Docker:
+With Docker, one command (the image is public on GitHub Container Registry):
+
+```bash
+docker run --rm -v "$PWD/out:/out" ghcr.io/johnnygodsa/agentic-video-studio --theme neon   # writes out/demo.mp4
+```
+
+Or build the image yourself:
 
 ```bash
 git clone https://github.com/johnnygodsa/agentic-video-studio && cd agentic-video-studio
